@@ -63,7 +63,7 @@ export function NavFooter({ prismaUser }: { prismaUser: User }) {
 
               <div className="w-full bg-vivid-gradient p-[1px] rounded-full">
                 <Button
-                  className="w-full border-vivid bg-background-80 hover:bg-background-90 text-primary rounded-full font-bold "
+                  className="w-full border-vivid bg-primary-10 hover:bg-transparent text-primary rounded-full font-bold "
                   variant={"default"}
                   size={"lg"}
                   onClick={handleUpgrading}
