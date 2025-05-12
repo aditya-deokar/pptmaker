@@ -27,7 +27,7 @@ export function AppSidebar({
     <Sidebar
       collapsible="icon"
       {...props}
-      className="max-w-[212px] bg-background-90"
+      className="bg-background-90"
     >
       <SidebarHeader className="pt-6 px-3 pb-0">
         <SidebarMenuButton
@@ -36,13 +36,13 @@ export function AppSidebar({
         >
           <div className="flex aspect-square size-8 items-center justify-center rounded-lg text-sidebar-primary-foreground">
             <Avatar className="h-10 w-10 rounded-full">
-              <AvatarImage src={"/vivid.png"} alt={`vivid-logo`} />
+              <AvatarImage src={"/vivid.png"} alt={`logo`} />
               <AvatarFallback className="rounded-lg">VI</AvatarFallback>
             </Avatar>
           </div>
 
           <span className="truncate text-primary text-3xl font-semibold">
-            Vivid
+            PPT Gen
           </span>
         </SidebarMenuButton>
       </SidebarHeader>

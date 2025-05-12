@@ -9,13 +9,14 @@ import {
 } from "@/components/ui/sidebar";
 import { Project } from "@/generated/prisma";
 import { useToast } from "@/hooks/use-toast";
+import { useSlideStore } from "@/store/useSlideStore";
 import { JsonValue } from "@prisma/client/runtime/library";
 import { useRouter } from "next/navigation";
 
 export function RecentOpen({ recentProjects }: { recentProjects: Project[] }) {
   const router = useRouter();
   const { toast } = useToast();
-  // const { setSlides } = useSlideStore();
+  const { setSlides } = useSlideStore();
 
   const handleClick = (projectId: string, slides: JsonValue) => {
     // console.log("Clicked");
@@ -27,7 +28,7 @@ export function RecentOpen({ recentProjects }: { recentProjects: Project[] }) {
       });
       return;
     }
-    // setSlides(JSON.parse(JSON.stringify(slides)));
+    setSlides(JSON.parse(JSON.stringify(slides)));
     router.push(`/presentation/${projectId}`);
   };
 
