@@ -1,6 +1,7 @@
 import React from "react";
 import { getAllProjects } from "@/actions/projects";
 import { NotFound } from "@/components/global/not-found";
+import Projects from "@/components/global/projects";
 
 
 const page = async () => {
@@ -21,8 +22,7 @@ const page = async () => {
       {/* Projects */}
 
       {allProjects.data && allProjects?.data?.length  > 0 ? (
-        // <Projects projects={allProjects.data} />
-        <></>
+        <Projects projects={allProjects.data} />
       ) : (
         <NotFound />
       )}
