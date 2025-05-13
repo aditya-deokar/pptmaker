@@ -59,3 +59,19 @@ export type ContentType =
   | "customButton"
   | "table"
   | "tableOfContents";
+
+
+
+export interface Theme{
+  name:string;
+  fontFamily:string;
+  fontColor:string;
+  accentColor:string;
+  backgroundColor:string;
+  slideBackgroundColor:string;
+  sidebarColor:string;
+  gradientBackground?:string;
+  navbarColor:string;
+  type:'light' | 'dark';
+
+}
