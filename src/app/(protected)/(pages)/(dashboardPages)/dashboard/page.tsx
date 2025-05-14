@@ -2,6 +2,7 @@ import React from "react";
 import { getAllProjects } from "@/actions/projects";
 import { NotFound } from "@/components/global/not-found";
 import Projects from "@/components/global/projects";
+import ProjectCard from "@/components/global/projects/ProjectCard";
 
 
 const page = async () => {

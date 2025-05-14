@@ -23,9 +23,10 @@ const Projects = ({ projects }: Props) => {
                 projectId={project.id}
                 title={project.title}
                 createdAt={project.createdAt.toString()}
-                isDeleted={project.isDeleted}
+                isDelete={project.isDeleted}
                 slideData={project.slides}
-                src={project.thumbnail || ''}
+                themeName={project.themeName}
+                
                  />
             ))
         }
