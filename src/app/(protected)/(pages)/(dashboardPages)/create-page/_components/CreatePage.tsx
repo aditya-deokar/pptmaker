@@ -3,14 +3,20 @@ import { Button } from '@/components/ui/button'
 import { containerVariants, CreatePageCard, itemVariants } from '@/lib/constants'
 import usePromptStore from '@/store/usePromptStore'
 import { motion } from 'framer-motion'
-import React from 'react'
+import React, { useEffect } from 'react'
+import RecentPrompts from './RecentPrompts'
+
 
 type Props ={
     onSelectOption: ( option:string )=> void
 }
 const CreatePage = ({ onSelectOption }:Props) => {
 
-    const { }= usePromptStore()
+    const { prompts, setPage }= usePromptStore();
+
+    useEffect(()=>{
+        setPage('create')
+    },[])
   return (
     <motion.div
     initial='hidden'
@@ -85,6 +91,9 @@ const CreatePage = ({ onSelectOption }:Props) => {
                 </motion.div>
             ))}
         </motion.div>
+
+        {prompts.length >0 && <RecentPrompts/>}
+
 
     </motion.div>
   )
