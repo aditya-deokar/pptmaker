@@ -9,10 +9,20 @@ const RenderPage = () => {
 
     const router= useRouter()
     const { page, setPage }= usePromptStore();
+
+    const handleSelectOption=(option:string)=>{
+        if(option==='template'){
+            router.push('/templates');
+        }else if(option === 'create-scratch'){
+            setPage('create-scratch')
+        }else{
+            setPage('creative-ai')
+        }
+    }
     const renderStep =()=>{
         switch(page){
             case "create":
-                return <CreatePage />
+                return <CreatePage onSelectOption={handleSelectOption} />
             case "create-scratch":
                 break
             case "creative-ai":

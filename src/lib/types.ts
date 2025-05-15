@@ -75,3 +75,9 @@ export interface Theme{
   type:'light' | 'dark';
 
 }
+
+export interface OutlineCard{
+  title:string 
+  id:string 
+  order: number
+}
