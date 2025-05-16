@@ -4,11 +4,16 @@ import React from 'react'
 import { AnimatePresence, motion } from "framer-motion"
 import usePromptStore from '@/store/usePromptStore'
 import CreatePage from './CreatePage'
+import CreativeAI from './CreativeAI'
 
 const RenderPage = () => {
 
     const router= useRouter()
     const { page, setPage }= usePromptStore();
+
+    const handleBack =()=>{
+        setPage("create");
+    }
 
     const handleSelectOption=(option:string)=>{
         if(option==='template'){
@@ -23,10 +28,11 @@ const RenderPage = () => {
         switch(page){
             case "create":
                 return <CreatePage onSelectOption={handleSelectOption} />
+            case "creative-ai":
+                return <CreativeAI onBack={handleBack} />
             case "create-scratch":
                 break
-            case "creative-ai":
-                break
+            
             
             default:
                 break
