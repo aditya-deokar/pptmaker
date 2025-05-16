@@ -68,10 +68,10 @@ export interface Theme{
   fontColor:string;
   accentColor:string;
   backgroundColor:string;
-  slideBackgroundColor:string;
-  sidebarColor:string;
+  slideBackgroundColor?:string;
+  sidebarColor?:string;
   gradientBackground?:string;
-  navbarColor:string;
+  navbarColor?:string;
   type:'light' | 'dark';
 
 }

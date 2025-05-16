@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {motion} from 'framer-motion'
 import { containerVariants, itemVariants } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,14 @@ import { ChevronLeft, Loader2, RotateCcw } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import useCreativeAIStore from '@/store/useCreativeAiStore'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { CardList } from './CardList'
+
+import { toast } from '@/hooks/use-toast'
+import { createProject } from '@/actions/projects'
+import { useSlideStore } from '@/store/useSlideStore'
+import { v4 as uuidv4 } from "uuid";
+import { OutlineCard } from '@/lib/types'
+import { generateCreativePrompt } from '@/actions/genai'
+import { CardList } from './common/CardList'
 type Props ={
     onBack: ()=> void
 }
@@ -17,6 +24,7 @@ const CreativeAI = ( {onBack}:Props ) => {
     const router= useRouter();
 
     const { currentAiPrompt,setCurrentAiPrompt, outlines, resetOutlines,addOutline,addMultipleOutlines } = useCreativeAIStore();
+    const { setProject } = useSlideStore();
 
   const [editText, setEditText] = useState("");
 
@@ -25,21 +33,114 @@ const CreativeAI = ( {onBack}:Props ) => {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [noOfCards, setNoOfCards] = useState(0);
 
-    const handleBack=()=>{
-        onBack();
-    }
-    const resetCards=()=>{
+    const generateOutline = async () => {
+        if (currentAiPrompt === "") {
+            toast({
+                title: "Error",
+                description: "Please enter a prompt to generate an outline.",
+                variant: "destructive",
+            });
+            console.log("Please enter a prompt to generate an outline.");
+            return;
+        }
+        setIsGenerating(true);
+
+        const res = await generateCreativePrompt(currentAiPrompt);
+        // console.log(res);
+        if (res.status === 200 && res?.data?.outlines) {
+            // console.log(res?.data?.outlines);
+            const cardsData: OutlineCard[] = [];
+            res?.data?.outlines.map((outline: string, idx: number) => {
+                const newCard = {
+                    id: uuidv4(),
+                    title: outline,
+                    order: idx + 1,
+                };
+                cardsData.push(newCard);
+            });
+            addMultipleOutlines(cardsData);
+            setNoOfCards(cardsData.length);
+            toast({
+                title: "Success",
+                description: "Outline generated successfully!",
+            });
+        } else {
+            toast({
+                title: "Error",
+                description: "Failed to generate outline. Please try again.",
+                variant: "destructive",
+            });
+        }
+        setIsGenerating(false);
+    };
+
+    const resetCards = () => {
         setEditingCard(null);
         setSelectedCard(null);
-        setEditText('')
+        setEditText("");
+        //Zustand
+        setCurrentAiPrompt("");
+        resetOutlines();
+    };
 
-        setCurrentAiPrompt('');
-        resetOutlines()
-    }
+    const handleGenerate = async () => {
+        setIsGenerating(true);
+        if (outlines.length === 0) {
+            toast({
+                title: "Error",
+                description: "Please add at least one card to generate PPT",
+                variant: "destructive",
+            });
+            return;
+        }
+        try {
+            const res = await createProject(currentAiPrompt, outlines.slice(0, noOfCards));
+            if (res.status !== 200 || !res.data) {
+                throw new Error("Unable to create project");
+            }
 
-    const generateOutline=()=>{
+            router.push(`/presentation/${res.data.id}/select-theme`);
+            setProject(res.data);
 
-    }
+            addPrompt({
+                id: uuidv4(),
+                title: currentAiPrompt || outlines?.[0]?.title,
+                outlines: outlines,
+                createdAt: new Date().toISOString(),
+            });
+
+            toast({
+                title: "Success",
+                description: "Project created successfully!",
+            });
+            setCurrentAiPrompt("");
+            resetOutlines();
+
+        } catch (e) {
+            console.log(e);
+            toast({
+                title: "Error",
+                description: "Failed to create project",
+                variant: "destructive",
+            });
+        }
+        finally {
+            setIsGenerating(false);
+        }
+
+        // console.log(res);
+
+    };
+
+    const handleBack = () => {
+        onBack();
+    };
+
+    useEffect(() => {
+        setNoOfCards(outlines.length);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [outlines.length])
+
 
   return (
     <motion.div 
