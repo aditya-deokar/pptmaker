@@ -1,8 +1,10 @@
 import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Card } from "./Card";
+
 import { OutlineCard } from "@/lib/types";
+import { Card } from "./Card";
 import { AddCardButton } from "./AddCardButton";
+
 
 interface CardListProps {
   outlines: OutlineCard[];

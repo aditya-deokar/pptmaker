@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import usePromptStore from '@/store/usePromptStore'
 import CreatePage from './CreatePage'
 import CreativeAI from './CreativeAI'
+import ScratchPage from './ScratchPage/ScratchPage'
 
 const RenderPage = () => {
 
@@ -31,9 +32,7 @@ const RenderPage = () => {
             case "creative-ai":
                 return <CreativeAI onBack={handleBack} />
             case "create-scratch":
-                break
-            
-            
+                return <ScratchPage onBack={handleBack}/>
             default:
                 break
         }
