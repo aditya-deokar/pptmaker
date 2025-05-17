@@ -16,7 +16,7 @@ const page = async() => {
   //  }
 
   return (
-    <main className="w-full h-full pt-6">
+    <main className="w-full h-full pt-6 overflow-hidden min-h-screen">
       <Suspense fallback={<CreatePageSkeleton />}>
         <RenderPage />
       </Suspense>
