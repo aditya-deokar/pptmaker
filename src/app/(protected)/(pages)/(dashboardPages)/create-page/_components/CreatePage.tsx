@@ -33,13 +33,13 @@ const CreatePage = ({ onSelectOption }:Props) => {
             </p>
         </motion.div>
 
-        <motion.div variants={containerVariants} className="grid gap-6 md:grid-cols-3">
+        <motion.div variants={containerVariants} className="grid gap-6 md:grid-cols-3 p-4">
             {CreatePageCard.map((option)=>(
                 <motion.div
                     key={option.type}
                     variants={itemVariants}
                     whileHover={{
-                        scale: 1.05,
+                        scale: 1.03,
                         rotate: 1,
                         transition: { duration: 0.01 },
                     }}

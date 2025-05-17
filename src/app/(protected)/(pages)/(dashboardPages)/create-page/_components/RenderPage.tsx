@@ -41,7 +41,7 @@ const RenderPage = () => {
   return (
     <AnimatePresence mode='wait'>
 
-            <motion.div 
+            <motion.div
                 key={page}
                 initial={
                     {
