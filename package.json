@@ -55,6 +55,8 @@
     "pptxgenjs": "^4.0.0",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-day-picker": "8.10.1",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "19.0.0-rc-66855b96-20241106",
     "react-hook-form": "^7.56.3",
     "react-resizable-panels": "^3.0.1",

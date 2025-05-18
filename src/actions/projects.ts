@@ -265,3 +265,39 @@ export const createProject = async (title: string, outlines: OutlineCard[]) => {
     return { status: 500, error: "Internal server error" };
   }
 };
+
+
+export const getProjectById=async( presentationId:string )=>{
+
+  try {
+    const checkUser= await onAuthenticateUser();
+
+    if(checkUser.status!==200 || !checkUser.user ){
+      return {
+        status:403,
+        error:'User not authenticated'
+      }
+    }
+
+
+    const project = await prisma.project.findFirst({
+      where:{
+        id:presentationId
+      },
+
+    });
+
+    if(!project){
+      return{
+        status:404,
+        error:"Project Not Found"
+      }
+    }
+
+    return { status: 200, data: project };
+
+  } catch (error) {
+    console.error("🔴 ERROR", error);
+    return { status: 500, error: "Internal server error" };
+  }
+}
