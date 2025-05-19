@@ -5,12 +5,13 @@ import { motion } from 'framer-motion'
 import { itemVariants, themes } from '@/lib/constants'
 import { useSlideStore } from '@/store/useSlideStore'
 import { useRouter } from 'next/navigation'
-import ThumnailPreview from './ThumnailPreview'
+
 import { timeAgo } from '@/lib/utils'
 import { AlertDialogBox } from '../alert-dialog'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { deleteProject, recoverProject } from '@/actions/projects'
+import ThumnailPreview from './ThumnailPreview'
 
 
 type Props = {
@@ -116,14 +117,14 @@ const ProjectCard = ({
 
   return (
     <motion.div
-    className={`group w-full flex-col flex gap-y-3 rounded-xl p-3 transition-colors ${!isDeleted && 'hover:bg-muted/50'}`}
+    className={`group w-full flex-col flex gap-y-3 rounded-xl p-3 transition-colors ${!isDelete && 'hover:bg-muted/50'}`}
     variants={itemVariants}
     >
         <div className='relative aspect-[16/10] overflow-hidden rounded-lg cursor-pointer'
         onClick={HandleNavigation}>
             <ThumnailPreview 
             theme={theme} 
-            // slide={JSON.parse(JSON.stringify(slideData))?.[0]}
+            slide={JSON.parse(JSON.stringify(slideData))?.[0]}
               />
         </div>
 
