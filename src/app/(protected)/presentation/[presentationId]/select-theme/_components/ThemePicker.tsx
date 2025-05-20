@@ -1,9 +1,11 @@
+import { generateLayouts } from '@/actions/genai'
 import { Button } from '@/components/ui/button'
 import { Theme } from '@/lib/types'
 import { useSlideStore } from '@/store/useSlideStore'
 import { Loader2, Wand2 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useState } from 'react'
+import { toast } from 'sonner'
 
 type Props = {
     selectedTheme:Theme
@@ -21,8 +23,28 @@ const ThemePicker = ({onThemeSelect, selectedTheme, themes}: Props) => {
     const {project, setSlides, currentTheme} = useSlideStore();
     const [loading, setLoading] = useState(false);
 
-    const handleGenerateLayouts =()=>{
-      
+    const handleGenerateLayouts =async()=>{
+       setLoading(true);
+       if(!selectedTheme){
+        toast.error('Error', {
+          description:'Please select a theme',
+        })
+        return
+       }
+
+       if(project?.id===''){
+           toast.error('Error', {
+          description:'Please create a Project',
+        })
+        router.push('/create-page');
+        return 
+       }
+
+       try {
+         const res= await generateLayouts()
+       } catch (error) {
+        
+       }
     }
 
 
