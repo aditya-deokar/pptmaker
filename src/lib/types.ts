@@ -3,7 +3,7 @@ export interface Slide {
   slideName: string;
   type: string;
   content: ContentItem;
-  slideOrder: number;
+  slideOrder?: number;
   className?: string;
 }
 
