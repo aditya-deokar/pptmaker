@@ -1,11 +1,14 @@
-import { generateLayouts } from '@/actions/genai'
+'use client'
 import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Theme } from '@/lib/types'
 import { useSlideStore } from '@/store/useSlideStore'
 import { Loader2, Wand2 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
+import {motion } from 'framer-motion'
+import { generateLayouts } from '@/actions/genai'
 
 type Props = {
     selectedTheme:Theme
@@ -23,29 +26,50 @@ const ThemePicker = ({onThemeSelect, selectedTheme, themes}: Props) => {
     const {project, setSlides, currentTheme} = useSlideStore();
     const [loading, setLoading] = useState(false);
 
-    const handleGenerateLayouts =async()=>{
-       setLoading(true);
-       if(!selectedTheme){
-        toast.error('Error', {
-          description:'Please select a theme',
-        })
-        return
-       }
-
-       if(project?.id===''){
-           toast.error('Error', {
-          description:'Please create a Project',
-        })
-        router.push('/create-page');
-        return 
-       }
-
-       try {
-         const res= await generateLayouts()
-       } catch (error) {
-        
-       }
+    const handleGenerateLayouts = async () => {
+    setLoading(true);
+    if (!selectedTheme) {
+      toast.error("Error", {
+        description: "Please select a theme",
+      });
+      return;
     }
+    if (project?.id === "") {
+      toast.error("Error", {
+        description: "Please create a project first",
+      });
+      router.push("/create-page");
+      return;
+    }
+
+    try {
+      const res = await generateLayouts(
+        params.presentationId as string,
+        currentTheme.name
+      );
+
+      if (!res) {
+        throw new Error("Failed to generate layouts");
+      }
+
+      toast.success("Success", {
+        description: "Generated Successfully",
+      });
+
+      // console.log(res);
+
+      router.push(`/presentation/${project?.id}`);
+      setSlides(res);
+
+
+    } catch (err) {
+      toast.error("Error", {
+        description: "Failed to generate layoutssss",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   return (
@@ -91,6 +115,55 @@ const ThemePicker = ({onThemeSelect, selectedTheme, themes}: Props) => {
           )}
         </Button>
       </div>
+
+      <ScrollArea className='flex-grow px-8 pb-8 '>
+          <div className='grid grid-cols-1 gap-4 px-2'>
+            {
+              themes.map((theme)=>(
+                <motion.div
+                key={theme.name}
+                whileHover={{ scale:1.02 }}
+                whileTap={{ scale:0.98 }}
+                >
+                  <Button 
+                  onClick={()=>{
+                    onThemeSelect(theme)
+                  }}
+                  className='flex flex-col items-center justify-start p-6 w-full h-auto'
+                  style={{
+                    fontFamily:theme.fontFamily,
+                    color:theme.fontColor,
+                    background:theme.gradientBackground || theme.backgroundColor,
+                  }}
+
+                  >
+                    <div className='w-full flex items-center justify-between'>
+                      <span className='text-xl font-bold'>{theme.name}</span>
+                      <div className='w-3 h-3 rounded-full'
+                      style={{ backgroundColor:theme.accentColor}}
+                      />
+                    </div>
+
+                    <div className='space-y-1 w-full'>
+                      <div className='text-2xl font-bold' 
+                      style={{
+                        color:theme.accentColor
+                      }}>Title</div>
+
+                      <div className='text-base opacity-80'>
+                        Body & {' '}
+                        <span className=''
+                        style={{
+                          color:theme.accentColor
+                        }}>link</span>
+                      </div>
+                    </div>
+                  </Button>
+                </motion.div>
+              ))
+            }
+          </div>
+      </ScrollArea>
     </div>
   )
 }

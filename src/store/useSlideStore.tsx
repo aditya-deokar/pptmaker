@@ -9,7 +9,7 @@ interface SlideState {
   project: Project | null;
   setProject: (id: Project | null) => void;
   slides: Slide[];
-  setSlides: (slides: Slide[]) => void;
+  setSlides: (slides:any) => void;
   currentSlide: number;
   currentTheme: Theme;
   addSlide: (slide: Slide) => void;
@@ -50,7 +50,7 @@ export const useSlideStore = create(
       project: null,
       setProject: (project) => set({ project }),
       slides: [],
-      setSlides: (slides: Slide[]) => set({ slides }),
+      setSlides: (slides: any) => set({ slides }),
       currentSlide: 0,
       currentTheme: defaultTheme,
       addSlide: (slide: Slide) =>
@@ -111,7 +111,9 @@ export const useSlideStore = create(
 
       getOrderedSlides: () => {
         const state = get();
-        return [...state.slides].sort((a, b) => a.slideOrder - b.slideOrder);
+        return Array.isArray(state.slides)
+          ? [...state.slides].sort((a, b) => a.slideOrder! - b.slideOrder!)
+          : [];
       },
       setCurrentTheme: (theme: Theme) => set({ currentTheme: theme }),
       reorderSlides: (fromIndex: number, toIndex: number) =>
@@ -188,8 +190,7 @@ export const useSlideStore = create(
           currentSlide: 0,
           currentTheme: defaultTheme,
         });
-        console.log("🟢 Resetting slide store");
-        // Clear persisted data from storage
+        localStorage.removeItem("slides-storage"); // 👈 Clears persisted data too
       },
     }),
     {
