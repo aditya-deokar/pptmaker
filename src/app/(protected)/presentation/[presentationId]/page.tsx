@@ -9,6 +9,9 @@ import { redirect, useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
+import Navbar from './_components/Navbar'
+import LayoutPreview from './_components/editor-sidebar/leftsidebar/LayoutPreview'
 
 type Props = {}
 
@@ -66,7 +69,21 @@ const page = (props: Props) => {
     }
     
   return (
-    <DndProvider >
+    <DndProvider backend={HTML5Backend}>
+
+      <div className='flex flex-col min-h-screen'>
+        <Navbar presentationId={params.presentationId as string}/>
+        <div className='flex-1 flex overflow-hidden pt-16'
+        style={{
+                backgroundColor:currentTheme.backgroundColor,
+                color:currentTheme.accentColor,
+                fontFamily:currentTheme.fontFamily,
+                }}
+          >
+            <LayoutPreview />
+
+        </div>
+      </div>
         
     </DndProvider>
   )

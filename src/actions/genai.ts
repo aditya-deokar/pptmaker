@@ -7,6 +7,7 @@ import prisma from '@/lib/prisma';
 import { v4 as uuidv4 } from "uuid";
 import { ContentItem, ContentType, Slide } from '@/lib/types';
 import { GeneratedOutputSchema, outlineSchema } from '@/lib/zodSchema';
+import { ReferedLayoutsSchema } from '@/lib/zod';
 
 
 
@@ -62,6 +63,10 @@ export const generateCreativePrompt=async (userPrompt:string)=>{
     return { status: 500, error: "Internal server error" };
   }
 }
+
+
+
+
 
 
 const referedLayouts = [
@@ -521,7 +526,7 @@ export const generateLayoutsJSON =async (outlineArray: string[])=>{
       model: google("gemini-2.0-flash", {
         structuredOutputs: false,
       }),
-      schema: GeneratedOutputSchema,
+      schema: ReferedLayoutsSchema,
       system:`You are a highly creative AI that generates JSON-based layouts for presentations.`,
       prompt: prompt
     
@@ -531,7 +536,7 @@ export const generateLayoutsJSON =async (outlineArray: string[])=>{
       return { status: 400, error: "No content generated" };
     }
 
-    await Promise.all(object.map(replaceImagePlaceholders));
+    // await Promise.all(object.map(replaceImagePlaceholders));
 
     console.log("🟢 Layouts Generated successfully 🟢");
     return { status: 200, data: object };
@@ -545,91 +550,58 @@ export const generateLayoutsJSON =async (outlineArray: string[])=>{
 
 }
 
-export const generateLayouts= async( projectId:string , theme:string)=>{
-
+export const generateLayouts = async (projectId: string, theme: string) => {
   try {
-    
-    if(!projectId){
-      return {
-        status:400,
-        error:'Project ID is Required'
-      }
+    if (!projectId) {
+      return { status: 400, error: "Project ID is required" };
     }
-
-    const user= await currentUser();
-
-    if(!user){
-      return{
-        status:403,
-        error:'User not Authenticated'
-      }
+    const user = await currentUser();
+    if (!user) {
+      return { status: 403, error: "User not authenticated" };
     }
 
     const userExist = await prisma.user.findUnique({
-      where: {
-        clerkId: user.id,
-      },
+      where: { clerkId: user.id },
     });
 
-    if(!userExist || !userExist?.subscription){
-      return{
-        status:403,
-        error:!userExist?.subscription ? 'User does not have an active subscription' : 'User not found in the database', 
-      }
+    if (!userExist || !userExist.subscription) {
+      return {
+        status: 403,
+        error: !userExist?.subscription
+          ? "User does not have an active subscription"
+          : "User not found in the database",
+      };
     }
 
     const project = await prisma.project.findUnique({
-      where:{
-        id:projectId,
-        isDeleted:false,
-      }
-    })
+      where: { id: projectId, isDeleted: false },
+    });
 
-    if(!project){
-      return{
-        status:404,
-        error:'Project not Found'
-      }
+    if (!project) {
+      return { status: 404, error: "Project not found" };
     }
 
-    if(!project.outlines || project.outlines.length ===0){
-      return{
-        status:400,
-        error:'Project does not have any outline'
-      }
+    if (!project.outlines || project.outlines.length === 0) {
+      return { status: 400, error: "Project does not have any outlines" };
     }
 
-    const layouts= await generateLayoutsJSON(project?.outlines);
+    const layouts = await generateLayoutsJSON(project.outlines);
 
-    if(layouts.status!==200){
-      return layouts
+    if (layouts.status !== 200) {
+      return layouts;
     }
 
     await prisma.project.update({
-      where:{
-        id:projectId,
-      },
-      data:{
-        slides:layouts.data,
-        themeName:theme
-      },
+      where: { id: projectId },
+      data: { slides: layouts, themeName: theme },
+    });
 
-    })
-
-    return {
-      status:200,
-      data:layouts.data
-    }
-
-
-
+    return { status: 200, data: layouts };
   } catch (error) {
-    
-    console.error("🔴 ERROR", error);
-    return { status: 500, error: "Internal server error", data:[] };
+    console.error("🔴 ERROR:", error);
+    return { status: 500, error: "Internal server error", data: [] };
   }
-
-} 
+};
 
 
 
