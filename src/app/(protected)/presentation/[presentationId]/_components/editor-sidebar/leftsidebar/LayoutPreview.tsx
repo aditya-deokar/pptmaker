@@ -37,6 +37,17 @@ const LayoutPreview = (props: Props) => {
                             {slides?.length} slides
                         </span>
                     </div>
+
+                    {/* 
+                    {slides?.map((slide, index)=>(
+                        <DraggableSlidePreview
+                        key={slide.id || index}
+                        slide={slide}
+                        index={index}
+                        moveSlide={moveSlide}
+                        />
+                    ))} 
+                     */}
                 </div>
             )}
         </ScrollArea>
