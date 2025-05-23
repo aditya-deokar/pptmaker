@@ -1,11 +1,12 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
-import { LayoutSlides } from '@/lib/types'
+import { LayoutSlides, Slide } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useSlideStore } from '@/store/useSlideStore'
 import React, { useEffect, useRef, useState } from 'react'
-import { useDrop } from 'react-dnd'
+import { useDrag, useDrop } from 'react-dnd'
 import { v4 as uuid4 } from "uuid"
+import MasterRecursiveComponent from './MasterRecursiveComponent'
 
 type Props = {
     isEditable:boolean
@@ -66,6 +67,61 @@ export const DropZone:React.FC<DropZoneProps> = ({index, isEditable, onDrop})=>{
   </div>
 }
 
+
+interface DraggableSlideProps {
+  slide:Slide
+  index:number 
+  moveSlide: (dragIndex:number, hoverIndex:number)=> void
+  handleDelete: (id:string)=> void
+  isEditable: boolean 
+}
+
+export const DraggableSlide: React.FC<DraggableSlideProps>=({
+  slide,
+  handleDelete, 
+  index, 
+  isEditable, 
+  moveSlide
+})=>{
+
+  const ref= useRef(null)
+  const { currentSlide, setCurrentSlide, currentTheme, updateContentItem } = useSlideStore()
+
+  const[{ isDragging }, drag]= useDrag({
+    type:"SLIDE",
+    item:{
+      index,
+      type:"SLIDE",
+    },
+    collect: (monitor)=>(
+      { isDragging:monitor.isDragging(), }
+    ),
+    canDrag: isEditable,
+  })
+
+  return <div 
+  ref={ref}
+  className={
+    cn(
+      'w-full rounded-lg shadow-lg relative p-0 min-h-[400px] max-h-[800px] ',
+      'shadow-xl transition-shadow duration-300',
+      'flex flex-col',
+      index === currentSlide ? 'ring-2 ring-blue-500 ring-offset-2' : '',
+      slide.className,
+      isDragging ? 'opacity-50 ' : 'opacity-100'
+    )
+  }
+  style={{
+    backgroundImage: currentTheme.gradientBackground,
+  }}
+  onClick={()=>setCurrentSlide(index)}
+  >
+    <div className='h-full w-full flex-grow overflow-hidden'>
+      <MasterRecursiveComponent />
+    </div>
+  </div>
+}
+
 const Editor = ({isEditable}: Props) => {
 
   const [loading, setLoading] = useState(true);
@@ -73,6 +129,7 @@ const Editor = ({isEditable}: Props) => {
 
   const { getOrderedSlides, currentSlide, removeSlide, addSlideAtIndex, reorderSlides, slides, project,} = useSlideStore();
 
+  const orderedSlides = getOrderedSlides();
   const moveSlide=( dragIndex:number , hoverIndex:number)=>{
     if(isEditable){
       reorderSlides(dragIndex, hoverIndex);
@@ -123,6 +180,14 @@ const Editor = ({isEditable}: Props) => {
             {isEditable && <DropZone index={0} 
             onDrop={handleDrop}
             isEditable={isEditable}/>}
+
+            {
+              orderedSlides.map((slide, index)=>(
+                <React.Fragment key={slide.id || index}>
+                  <DraggableSlide  />
+                </React.Fragment>
+              ))
+            }
           </div>
         </ScrollArea>
       )} 
