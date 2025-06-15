@@ -6,7 +6,8 @@ import { useSlideStore } from '@/store/useSlideStore'
 import React, { useEffect, useRef, useState } from 'react'
 import { useDrag, useDrop } from 'react-dnd'
 import { v4 as uuid4 } from "uuid"
-import MasterRecursiveComponent from './MasterRecursiveComponent'
+import { MasterRecursiveComponent } from './MasterRecursiveComponent'
+
 
 type Props = {
     isEditable:boolean
@@ -181,12 +182,17 @@ const Editor = ({isEditable}: Props) => {
             onDrop={handleDrop}
             isEditable={isEditable}/>}
 
-            {
-              orderedSlides.map((slide, index)=>(
+            {orderedSlides.map((slide, index) => (
                 <React.Fragment key={slide.id || index}>
-                  <DraggableSlide  />
+                    <DraggableSlide
+                    slide={slide}
+                    index={index}
+                    moveSlide={moveSlide}
+                    handleDelete={handleDelete}
+                    isEditable={isEditable}
+                    />
                 </React.Fragment>
-              ))
+            ))
             }
           </div>
         </ScrollArea>
