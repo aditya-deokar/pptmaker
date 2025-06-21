@@ -43,6 +43,7 @@ const page = (props: Props) => {
             setTheme(findTheme?.type === "dark" ? 'dark' : 'light');
 
             setProject(res.data);
+            console.log(res.data)
 
             setSlides(JSON.parse(JSON.stringify(res.data.slides)))
 

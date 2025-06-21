@@ -7,6 +7,10 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useDrag, useDrop } from 'react-dnd'
 import { v4 as uuid4 } from "uuid"
 import { MasterRecursiveComponent } from './MasterRecursiveComponent'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
+import { EllipsisVertical, Trash2 } from 'lucide-react'
+
 
 
 type Props = {
@@ -100,6 +104,14 @@ export const DraggableSlide: React.FC<DraggableSlideProps>=({
     canDrag: isEditable,
   })
 
+  const handleContentChange =(contentId:string, newContent:string | string[] | string[][])=>{
+    console.log("Content changed", slide, contentId, newContent);
+
+    if(isEditable){
+      updateContentItem(slide.id, contentId, newContent);
+    }
+  }
+
   return <div 
   ref={ref}
   className={
@@ -118,8 +130,35 @@ export const DraggableSlide: React.FC<DraggableSlideProps>=({
   onClick={()=>setCurrentSlide(index)}
   >
     <div className='h-full w-full flex-grow overflow-hidden'>
-      <MasterRecursiveComponent />
+      <MasterRecursiveComponent 
+      content={slide.content}
+      isPreview={false}
+      slideId={slide.id}
+      isEditable={isEditable}
+      onContentChange={handleContentChange} />
     </div>
+
+    {isEditable &&  (
+      <Popover>
+          <PopoverTrigger asChild className='absolute top-2 left-2'>
+            <Button size={"sm"} variant={'outline'}>
+              <EllipsisVertical className='w-5 h-5'/>
+              <span className='sr-only'>Slide options</span>
+            </Button>
+          </PopoverTrigger>
+
+          <PopoverContent className='w-fit p-0'>
+            <div className='flex space-x-2'>
+              <Button 
+              variant={'ghost'} 
+              onClick={ ()=>handleDelete(slide.id) }>
+                <Trash2 className='w-5 h-5 text-red-500'/>
+                <span className='sr-only'>Delete Slide</span>
+              </Button>
+            </div>
+          </PopoverContent>
+      </Popover>
+    )}
   </div>
 }
 
@@ -156,6 +195,12 @@ const Editor = ({isEditable}: Props) => {
     }
   }
 
+  const handleDelete = (id:string)=>{
+    if(isEditable){
+      console.log('Deleting', id);
+      removeSlide(id);
+    }
+  }
 
   useEffect(() => {
     if(slideRefs.current[currentSlide]){
@@ -164,7 +209,12 @@ const Editor = ({isEditable}: Props) => {
         block:'center',
       })
     }
-  }, [currentSlide])
+  }, [currentSlide]);
+
+  useEffect(() => {
+    if(typeof window !== 'undefined') setLoading(false);
+  }, [])
+  
   
 
   return (
