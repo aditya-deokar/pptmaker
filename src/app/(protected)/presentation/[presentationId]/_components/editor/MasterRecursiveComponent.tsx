@@ -8,6 +8,7 @@ import React, { useCallback } from 'react'
 import DropZone from './DropZone'
 import Paragraph from '@/components/global/editor/compontents/Paragraph'
 import TableComponent from '@/components/global/editor/compontents/TableComponent'
+import ColumnComponent from '@/components/global/editor/compontents/ColumnComponent'
 
 
 type MasterRecursiveComponentProps = {
@@ -92,9 +93,40 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
       case 'table':
         return (
           <motion.div {...animationProps} className='w-full h-full'>
-            <TableComponent {...commonProps} />
+            <TableComponent 
+            content={content.content as string[][] } 
+            onChange={(newContent)=> (
+              onContentChange(
+                content.id,
+                newContent !== null ? newContent : ''
+              )
+            )}
+            initialColSize={content.initialRows}
+            initialRowSize={content.initialColumns}
+            isPreview={isPreview}
+            isEditable={isEditable}
+            />
           </motion.div>
         )
+
+      case 'resizable-column':
+        if(Array.isArray(content.content)){
+          return (
+            <motion.div {...animationProps} className='w-full h-full'>
+              <ColumnComponent 
+              content={content.content as ContentItem[] }
+              className={content.className}
+              onContentChange={onContentChange}
+              slideId={slideId}
+              isPreview={isPreview}
+              isEditable={isEditable}
+
+              />
+            </motion.div>
+          )
+        }
+        return null;
+        
 
       case 'column':
         if (Array.isArray(content.content)) {
