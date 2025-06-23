@@ -9,10 +9,15 @@ import DropZone from './DropZone'
 import Paragraph from '@/components/global/editor/compontents/Paragraph'
 import TableComponent from '@/components/global/editor/compontents/TableComponent'
 import ColumnComponent from '@/components/global/editor/compontents/ColumnComponent'
+import ImageComponent from '@/components/global/editor/compontents/ImageComponent'
+import BlockQuote from '@/components/global/editor/compontents/BlockQuote'
+import ListComponents, { BulletList, TodoList } from '@/components/global/editor/compontents/ListComponents'
+
 
 
 type MasterRecursiveComponentProps = {
   content: ContentItem
+  id:string
   onContentChange: (
     contentId: string,
     newContent: string | string[] | string[][]
@@ -33,8 +38,9 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
     const commonProps = {
       placeholder: content.placeholder,
       value: content.content as string,
-      onchange: handleChange,
+      onChange: handleChange,
       isPreview: isPreview,
+      id: content.id
     }
 
     const animationProps = {
@@ -74,7 +80,6 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
           </motion.div>
         )
 
-
       case 'title':
         return (
           <motion.div {...animationProps} className='w-full h-full'>
@@ -85,53 +90,116 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
       case 'paragraph':
         return (
           <motion.div {...animationProps} className='w-full h-full'>
-            <Paragraph {...commonProps} />
+            <Paragraph {...commonProps}  />
           </motion.div>
         )
 
+      case 'image':
+        return (
+          <motion.div {...animationProps} className='w-full h-full'>
+            <ImageComponent
+              alt={content.alt || 'image'}
+              src={content.content as string}
+              className={content.className}
+              contentId={content.id}
+              onContentChange={onContentChange}
+              isEditable={isEditable}
+              isPreview={isPreview}
+            />
+          </motion.div>
+        )
+
+      case 'blockquote':
+        return (
+          <motion.div {...animationProps} className={cn('w-full h-full flex flex-col', content.className)}>
+            <BlockQuote>
+              <Paragraph {...commonProps} />
+            </BlockQuote>
+          </motion.div>
+        )
+
+      case 'numberedList':
+        return (
+          <motion.div {...animationProps} className={'w-full h-full'}>
+            <ListComponents
+              items={content.content as string[]}
+              onChange={(newItems) => onContentChange(content.id, newItems)}
+              className={content.className}
+            />
+          </motion.div>
+        )
+
+      case 'bulletList':
+        return (
+          <motion.div
+            {...animationProps}
+            className="w-full h-full"
+          >
+            <BulletList
+              items={content.content as string[]}
+              onChange={(newItems) => onContentChange(content.
+                id, newItems)}
+              className={content.className}
+            />
+          </motion.div>
+        )
+
+      case 'todoList':
+        return (
+          <motion.div
+            {...animationProps}
+            className="w-full h-full"
+          >
+            <TodoList
+              items={content.content as string[]}
+              onChange={(newItems) => onContentChange(content.
+                id, newItems)}
+              className={content.className}
+            />
+          </motion.div>
+        )
 
       case 'table':
         return (
           <motion.div {...animationProps} className='w-full h-full'>
-            <TableComponent 
-            content={content.content as string[][] } 
-            onChange={(newContent)=> (
-              onContentChange(
-                content.id,
-                newContent !== null ? newContent : ''
-              )
-            )}
-            initialColSize={content.initialRows}
-            initialRowSize={content.initialColumns}
-            isPreview={isPreview}
-            isEditable={isEditable}
+            <TableComponent
+              content={content.content as string[][]}
+              onChange={(newContent) => (
+                onContentChange(
+                  content.id,
+                  newContent !== null ? newContent : ''
+                )
+              )}
+              initialColSize={content.initialRows}
+              initialRowSize={content.initialColumns}
+              isPreview={isPreview}
+              isEditable={isEditable}
             />
           </motion.div>
         )
 
       case 'resizable-column':
-        if(Array.isArray(content.content)){
+        if (Array.isArray(content.content)) {
           return (
             <motion.div {...animationProps} className='w-full h-full'>
-              <ColumnComponent 
-              content={content.content as ContentItem[] }
-              className={content.className}
-              onContentChange={onContentChange}
-              slideId={slideId}
-              isPreview={isPreview}
-              isEditable={isEditable}
+              <ColumnComponent
+                content={content.content as ContentItem[]}
+                className={content.className}
+                onContentChange={onContentChange}
+                slideId={slideId}
+                isPreview={isPreview}
+                isEditable={isEditable}
 
               />
             </motion.div>
           )
         }
         return null;
-        
 
       case 'column':
         if (Array.isArray(content.content)) {
           return (
-            <motion.div {...animationProps} className={cn('w-full h-full', content.className)}>
+            <motion.div {...animationProps} className={cn('w-full h-full flex flex-col', content.className)}>
               {content.content.length > 0 ? (
                 content.content as ContentItem[]).map((subItem: ContentItem, subIndex: number) => (
 
@@ -139,6 +207,7 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
                     {!isPreview && !subItem.restrictToDrop && subIndex === 0 && isEditable && <DropZone index={0} parentId={content.id} slideId={slideId} />}
 
                     <MasterRecursiveComponent
+                      id={subItem.id}
                       index={subIndex}
                       content={subItem}
                       isPreview={isPreview}
@@ -161,7 +230,6 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
                     slideId={slideId}
                   />
                 ) : null}
-              <Heading1 {...commonProps} />
             </motion.div>
           )
 
@@ -183,6 +251,7 @@ ContentRenderer.displayName = 'ContentRenderer'
 export const MasterRecursiveComponent: React.FC<MasterRecursiveComponentProps> = React.memo(
   ({
     content,
+    id,
     onContentChange,
     slideId,
     index,
@@ -192,6 +261,7 @@ export const MasterRecursiveComponent: React.FC<MasterRecursiveComponentProps> =
     if (isPreview) {
       return (
         <ContentRenderer
+          id={id}
           content={content}
           onContentChange={onContentChange}
           isPreview={isPreview}
@@ -205,6 +275,7 @@ export const MasterRecursiveComponent: React.FC<MasterRecursiveComponentProps> =
     return (
       <React.Fragment>
         <ContentRenderer
+          id={id}
           content={content}
           onContentChange={onContentChange}
           isPreview={isPreview}

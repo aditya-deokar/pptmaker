@@ -131,6 +131,7 @@ export const DraggableSlide: React.FC<DraggableSlideProps>=({
   >
     <div className='h-full w-full flex-grow overflow-hidden'>
       <MasterRecursiveComponent 
+      id={slide.id}
       content={slide.content}
       isPreview={false}
       slideId={slide.id}
