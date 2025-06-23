@@ -1,6 +1,7 @@
 'use client'
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { useSlideStore } from '@/store/useSlideStore'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 interface TableComponentProps {
     content:string[][]
@@ -23,6 +24,33 @@ const TableComponent = ({content, onChange, initialColSize, initialRowSize, isEd
         return content
     });
 
+    const handleResizeCol=(index:number, newSize:number)=>{
+        if(!isEditable) return
+
+        const newSizes =[...colSizes]
+        newSizes[index]= newSize
+        setColSizes(newSizes)
+    }
+
+    const updateCell=(rowIndex:number , cellIndex:number, value:string )=>{
+        if(!isEditable) return
+
+        const newData= tableData.map((row, rIndex)=>(
+            rIndex === rowIndex ? row.map((cell, cIndex) => (cIndex === cellIndex ? value : cell)) : row
+        ))
+
+        setTableData(newData)
+        onChange(newData)
+    }
+
+
+    useEffect(() => {
+      setRowSizes(new Array(tableData.length).fill(100/ tableData.length))
+      setRowSizes(new Array(tableData[0].length).fill(100/ tableData[0].length))
+    }, [tableData])
+
+    
+    
     if(isPreview){
         return(
             <div className='w-full overflow-auto text-xs'>
@@ -66,7 +94,57 @@ const TableComponent = ({content, onChange, initialColSize, initialRowSize, isEd
             borderRadius:'8px',
         }}
         >
+          <ResizablePanelGroup
+          direction='vertical'
+          className={`h-full w-full rounded-lg border ${
+            initialColSize === 2
+                ? 'min-h-[100px]' :
+            initialColSize === 3
+                ? 'min-h-[150px]' :
+            initialColSize === 4
+                ? 'min-h-[200px]' :
+                'min-h-[100px]'
+
+          }`}
+
+          onLayout={(sizes)=> setRowSizes(sizes)}
+          >
             
+            {tableData.map((row, rowIndex)=>(
+                <React.Fragment key={rowIndex}>
+                    {rowIndex > 0 && <ResizableHandle></ResizableHandle>}
+
+                    <ResizablePanelGroup direction='horizontal'
+                    className='w-full h-full'
+                    onLayout={(sizes)=> setRowSizes(sizes)}
+                    >
+                        {row.map((cell , cellIndex)=>(
+                            <React.Fragment key={cellIndex}>
+                                {cellIndex > 0 && <ResizableHandle></ResizableHandle>}
+
+                                <ResizablePanel
+                                 defaultSize={colSizes[cellIndex]}
+                                 onResize={(size)=>handleResizeCol(cellIndex,size)}
+                                 className='w-full h-full min-h-9'
+                                >
+                                    <div className='relative w-full h-full min-h-3'>
+                                        <input type="text" value={cell} 
+                                        onChange={(e)=>updateCell(rowIndex, cellIndex, e.target.value)}
+                                        className='w-full h-full p-4 bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md'
+                                        style={{
+                                            color:currentTheme.fontColor
+                                        }}
+                                        placeholder='Type here'
+                                        readOnly={!isEditable}
+                                        />
+                                    </div>
+                                </ResizablePanel>
+                            </React.Fragment>
+                        ))}
+                    </ResizablePanelGroup>
+                </React.Fragment>
+            ))}
+            </ResizablePanelGroup>  
         </div>
     )
   
