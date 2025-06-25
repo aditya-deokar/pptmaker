@@ -12,6 +12,10 @@ import ColumnComponent from '@/components/global/editor/compontents/ColumnCompon
 import ImageComponent from '@/components/global/editor/compontents/ImageComponent'
 import BlockQuote from '@/components/global/editor/compontents/BlockQuote'
 import ListComponents, { BulletList, TodoList } from '@/components/global/editor/compontents/ListComponents'
+import CalloutBox from '@/components/global/editor/compontents/CalloutBox'
+import CodeBlock from '@/components/global/editor/compontents/CodeBlock'
+import TableOfContents from '@/components/global/editor/compontents/TableOfContents'
+import Divider from '@/components/global/editor/compontents/Divider'
 
 
 
@@ -159,6 +163,62 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
           </motion.div>
         )
 
+        case 'calloutBox':
+        return (
+          <motion.div
+            {...animationProps}
+            className="w-full h-full"
+          >
+            <CalloutBox
+            type={content.callOutType || 'info'}
+            className={content.className}
+          >
+            <Paragraph {...commonProps} />
+          </CalloutBox>
+          </motion.div>
+        )
+
+      case 'codeBlock':
+        return (
+          <motion.div
+            {...animationProps}
+            className="w-full h-full"
+          >
+            <CodeBlock
+              code={content.code}
+              language={content.language}
+              onChange={() => { }}
+              className={content.className}
+            />
+          </motion.div>
+        )
+
+      case 'tableOfContents':
+        return (
+          <motion.div
+            {...animationProps}
+            className="w-full h-full"
+          >
+            <TableOfContents
+              items={content.content as string[]}
+              onItemClick={(id) => {
+                console.log(`Navigate to section: ${id}`)
+              }}
+              className={content.className}
+            />
+          </motion.div>
+        )
+
+      case 'divider':
+        return (
+          <motion.div
+            {...animationProps}
+            className="w-full h-full"
+          >
+            <Divider className={content.className as string} />
+          </motion.div>
+        )
+
       case 'table':
         return (
           <motion.div {...animationProps} className='w-full h-full'>
@@ -181,7 +241,7 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
       case 'resizable-column':
         if (Array.isArray(content.content)) {
           return (
-            <motion.div {...animationProps} className='w-full h-full'>
+            <motion.div {...animationProps} className='!w-full h-full'>
               <ColumnComponent
                 content={content.content as ContentItem[]}
                 className={content.className}
@@ -199,7 +259,7 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
       case 'column':
         if (Array.isArray(content.content)) {
           return (
-            <motion.div {...animationProps} className={cn('w-full h-full flex flex-col', content.className)}>
+            <motion.div {...animationProps} className={cn('!w-full h-full flex flex-col', content.className)}>
               {content.content.length > 0 ? (
                 content.content as ContentItem[]).map((subItem: ContentItem, subIndex: number) => (
 

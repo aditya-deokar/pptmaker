@@ -232,7 +232,7 @@ export const TodoList: React.FC<ListProps> = ({
                         disabled={!isEditable}
                     />
                     <ListItem
-                        item={item.replace(/^\[x\] /, '')}
+                    item={item.replace(/^\[[ x]\] /, '')}
                         index={index}
                         onChange={(index, value) =>
                             handleChange(
