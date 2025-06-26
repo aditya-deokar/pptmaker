@@ -1,51 +1,49 @@
-'use server'
-
+"use server";
 
 import prisma from "@/lib/prisma";
-import { onAuthenticateUser } from "./user"
+import { onAuthenticateUser } from "./user";
 import { OutlineCard } from "@/lib/types";
+import { JsonValue } from "@/generated/prisma/runtime/library";
 
-export const getAllProjects =async ()=>{
-    try {
-        const checkUser = await onAuthenticateUser();
-        if(checkUser.status!==200 || !checkUser.user){
-            return {
-                status:403,
-                error:"User Not Authenticated"
-            }
-        }
-
-        const projects= await prisma.project.findMany({
-            where:{
-                userId:checkUser.user.id,
-                isDeleted:false,
-            },
-            orderBy:{
-                updatedAt:'desc',
-            },
-
-        })
-
-
-        if(projects.length===0){
-            return {
-                status:404,
-                error:"No Projects Found"
-            }
-        }
-
-        return {
-            status:200,
-            data:projects
-        }
-    } catch (error) {
-        console.log("🔴 ERROR", error);
-        return {
-             status: 500 ,
-             error:"Internal Server Error"
-            };
+export const getAllProjects = async () => {
+  try {
+    const checkUser = await onAuthenticateUser();
+    if (checkUser.status !== 200 || !checkUser.user) {
+      return {
+        status: 403,
+        error: "User Not Authenticated",
+      };
     }
-}
+
+    const projects = await prisma.project.findMany({
+      where: {
+        userId: checkUser.user.id,
+        isDeleted: false,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+    });
+
+    if (projects.length === 0) {
+      return {
+        status: 404,
+        error: "No Projects Found",
+      };
+    }
+
+    return {
+      status: 200,
+      data: projects,
+    };
+  } catch (error) {
+    console.log("🔴 ERROR", error);
+    return {
+      status: 500,
+      error: "Internal Server Error",
+    };
+  }
+};
 
 export const getRecentProjects = async () => {
   try {
@@ -222,7 +220,6 @@ export const deleteAllProjects = async (projectIds: string[]) => {
   }
 };
 
-
 export const createProject = async (title: string, outlines: OutlineCard[]) => {
   try {
     console.log("Creating project with title:", title);
@@ -266,38 +263,65 @@ export const createProject = async (title: string, outlines: OutlineCard[]) => {
   }
 };
 
-
-export const getProjectById=async( presentationId:string )=>{
-
+export const getProjectById = async (presentationId: string) => {
   try {
-    const checkUser= await onAuthenticateUser();
+    const checkUser = await onAuthenticateUser();
 
-    if(checkUser.status!==200 || !checkUser.user ){
+    if (checkUser.status !== 200 || !checkUser.user) {
       return {
-        status:403,
-        error:'User not authenticated'
-      }
+        status: 403,
+        error: "User not authenticated",
+      };
     }
 
-
     const project = await prisma.project.findFirst({
-      where:{
-        id:presentationId
+      where: {
+        id: presentationId,
       },
-
     });
 
-    if(!project){
-      return{
-        status:404,
-        error:"Project Not Found"
-      }
+    if (!project) {
+      return {
+        status: 404,
+        error: "Project Not Found",
+      };
     }
 
     return { status: 200, data: project };
-
   } catch (error) {
     console.error("🔴 ERROR", error);
     return { status: 500, error: "Internal server error" };
   }
-}
+};
+
+export const updateSlides = async (projectId: string, slides: JsonValue) => {
+  try {
+    if (!projectId || !slides) {
+      return {
+        status: 400,
+        error: "Project ID and slides are required.",
+      };
+    }
+
+    const updatedProject = await prisma.project.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        slides,
+      },
+    });
+
+    if (!updatedProject) {
+      return {
+        status: 500,
+        error: "Failed to update slides.",
+      };
+    }
+
+    return {
+      status:200,
+      data:updatedProject
+    }
+  } catch (error) {}
+};

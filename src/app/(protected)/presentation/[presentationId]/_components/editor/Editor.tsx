@@ -3,13 +3,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { LayoutSlides, Slide } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useSlideStore } from '@/store/useSlideStore'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDrag, useDrop } from 'react-dnd'
 import { v4 as uuid4 } from "uuid"
 import { MasterRecursiveComponent } from './MasterRecursiveComponent'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import { EllipsisVertical, Trash2 } from 'lucide-react'
+import { updateSlides } from '@/actions/projects'
 
 
 
@@ -104,6 +105,29 @@ export const DraggableSlide: React.FC<DraggableSlideProps>=({
     canDrag: isEditable,
   })
 
+  const [_, drop] = useDrop({
+    accept: ['SLIDE', 'LAYOUT'],
+    hover(item:{ index: number; type:string }){
+      if(!ref.current || !isEditable){
+        return
+      }
+
+      const dragIndex= item.index
+      const hoverIndex= index
+
+      if(item.type === 'SLIDE'){
+        if(dragIndex === hoverIndex){
+          return
+        }
+
+        moveSlide(dragIndex, hoverIndex)
+        item.index = hoverIndex
+      }
+    }
+  })
+
+  drag(drop(ref))
+
   const handleContentChange =(contentId:string, newContent:string | string[] | string[][])=>{
     console.log("Content changed", slide, contentId, newContent);
 
@@ -167,6 +191,7 @@ const Editor = ({isEditable}: Props) => {
 
   const [loading, setLoading] = useState(true);
   const slideRefs = useRef<(HTMLDivElement | null )[]>([]);
+  const autosaveTimeoutRefs = useRef<NodeJS.Timeout | null>(null)
 
   const { getOrderedSlides, currentSlide, removeSlide, addSlideAtIndex, reorderSlides, slides, project,} = useSlideStore();
 
@@ -215,6 +240,40 @@ const Editor = ({isEditable}: Props) => {
   useEffect(() => {
     if(typeof window !== 'undefined') setLoading(false);
   }, [])
+
+
+  const saveSlides=useCallback(()=>{
+    // alert('meemeee')
+
+    if(isEditable && project){
+      (async()=>{
+        await updateSlides(project.id, JSON.parse(JSON.stringify(slides)))
+      })()
+    }
+  },[isEditable, project, slides])
+
+
+
+  useEffect(() => {
+    if(autosaveTimeoutRefs.current){
+      clearTimeout(autosaveTimeoutRefs.current);
+    }
+
+
+    if(isEditable){
+      autosaveTimeoutRefs.current = setTimeout(()=>{
+        saveSlides();
+      },2000)
+    }
+
+    return ()=>{
+      if(autosaveTimeoutRefs.current){
+         clearTimeout(autosaveTimeoutRefs.current);
+      }
+    }
+  
+  }, [slides, isEditable, project])
+  
   
   
 
