@@ -31,6 +31,7 @@ import {
   FourImageColumns,
   ThreeImageColumns,
 } from "./slideLayouts";
+
 import {
   Heading1,
   CalloutBoxComponent,
@@ -43,8 +44,11 @@ import {
   Table,
   Title,
   TodoListComponent,
-} from "./slideComponents";
+  BulletListComponent
+} from "@/lib/slideComponents";
 
+import { Template } from "@/icons/Template";
+import { Trash } from "@/icons/Trash";
 
 
 export const data = {
