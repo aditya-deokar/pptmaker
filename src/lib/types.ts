@@ -93,7 +93,7 @@ export interface Layout {
   name:string
   icon:React.FC
   type:string
-  components:LayoutSlides
+  component:LayoutSlides
   layoutType: string
 }
 

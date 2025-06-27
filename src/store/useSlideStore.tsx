@@ -57,9 +57,9 @@ export const useSlideStore = create(
         set((state) => {
           const newSlides = [...state.slides];
           const insertIndex = slide.slideOrder;
-          newSlides.splice(insertIndex, 0, { ...slide, id: uuidv4() });
+          newSlides.splice(insertIndex as number, 0, { ...slide, id: uuidv4() });
 
-          for (let i = insertIndex; i < newSlides.length; i++) {
+          for (let i = insertIndex !; i < newSlides.length; i++) {
             newSlides[i].slideOrder = i;
           }
 
@@ -198,3 +198,4 @@ export const useSlideStore = create(
     }
   )
 );
+
