@@ -6,7 +6,7 @@ import { Layout } from "@/lib/types";
 import { useSlideStore } from "@/store/useSlideStore";
 import React from "react";
 import { useDrag } from "react-dnd";
-import LayoutPreviewItem from "./LayoutPreviewItem";
+import LayoutPreviewItem from "./components-tab/LayoutPreviewItem";
 
 export const DraggableLayoutItem = ({
   component,
@@ -49,11 +49,12 @@ const LayoutChooser = () => {
 
   return (
     <ScrollArea
-      className="h-[400px]"
+      className="h-[400px] p-4 shadow-2xl rounded-lg"
       style={{
         backgroundColor: currentTheme.slideBackgroundColor,
       }}
     >
+      <div className="mb-1 text-center font-bold">Layouts</div>
       <div className="p-4">
         {layouts.map((group) => (
           <div key={group.name} className="mb-b">

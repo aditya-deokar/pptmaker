@@ -9,7 +9,7 @@ type Props = {}
 
 const LayoutPreview = (props: Props) => {
 
-    const { getOrderedSlides, reorderSlides } = useSlideStore();
+    const { getOrderedSlides, reorderSlides , currentTheme} = useSlideStore();
     const [loading, setLoading] = useState(true)
     const slides= getOrderedSlides();
 
@@ -25,7 +25,11 @@ const LayoutPreview = (props: Props) => {
     }, [])
     
   return (
-    <div className='w-64 h-full fixed left-0 top-20 border-r overflow-y-auto '>
+    <div className='w-64 h-full fixed left-0 top-20 border-r overflow-y-auto '
+    style={{
+        backgroundColor: currentTheme.slideBackgroundColor,
+      }}
+    >
         <ScrollArea className='h-full w-full ' suppressHydrationWarning>
             {loading ? (
                 <div className='w-full px-4 flex flex-col space-y-6 '>

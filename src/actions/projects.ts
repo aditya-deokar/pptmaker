@@ -320,8 +320,34 @@ export const updateSlides = async (projectId: string, slides: JsonValue) => {
     }
 
     return {
-      status:200,
-      data:updatedProject
-    }
+      status: 200,
+      data: updatedProject,
+    };
   } catch (error) {}
+};
+
+export const updateTheme = async (projectId: string, theme: string) => {
+  try {
+    if (!projectId || !theme) {
+      return { status: 400, error: "Project ID and theme are required." };
+    }
+
+    const updatedProject = await prisma.project.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        themeName: theme,
+      },
+    });
+
+    if (!updatedProject) {
+      return { status: 500, error: "Failed to update theme" };
+    }
+
+    return { status: 200, data: updatedProject };
+  } catch (error) {
+    console.error("ERROR:", error);
+    return { status: 500, error: "Internal server error" };
+  }
 };

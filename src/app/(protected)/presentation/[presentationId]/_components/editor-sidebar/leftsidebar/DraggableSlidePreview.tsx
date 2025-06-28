@@ -47,7 +47,7 @@ const DraggableSlidePreview = ({ index, moveSlide, slide}: Props) => {
         <div
             ref={ref}
             className={cn(
-                'relative cursor-pointer group',
+                'relative cursor-pointer group shadow-xl hover:shadow-2xl',
                 index === currentSlide ? 'before:bg-blue-500' : 'before:bg-transparent',
                 isDragging ? 'opacity-50' : 'opacity-100'
             )}

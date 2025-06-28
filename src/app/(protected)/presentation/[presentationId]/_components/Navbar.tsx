@@ -35,12 +35,12 @@ const Navbar = ({ presentationId }: Props) => {
         color:currentTheme.accentColor,
     }}
     >
-        <Link passHref href={'/dashboaed'}>
+        <Link passHref href={'/dashboard'}>
             <Button
              variant={'outline'}
              style={{
                 backgroundColor:currentTheme.navbarColor || currentTheme.backgroundColor,
-                // color:currentTheme.accentColor,
+                color:currentTheme.accentColor,
                 }}
             >
                 <Home />
@@ -58,7 +58,7 @@ const Navbar = ({ presentationId }: Props) => {
             <Button
              style={{
                 backgroundColor:currentTheme.navbarColor || currentTheme.backgroundColor,
-                // color:currentTheme.accentColor,
+                color:currentTheme.accentColor,
                 }}
                 variant={'outline'}
                 onClick={handleCopy}
