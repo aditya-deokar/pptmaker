@@ -81,6 +81,7 @@ const page = (props: Props) => {
                 backgroundColor:currentTheme.backgroundColor,
                 color:currentTheme.accentColor,
                 fontFamily:currentTheme.fontFamily,
+                
                 }}
           >
             <LayoutPreview />

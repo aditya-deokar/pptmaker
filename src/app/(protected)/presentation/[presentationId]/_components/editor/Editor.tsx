@@ -142,7 +142,7 @@ export const DraggableSlide: React.FC<DraggableSlideProps>=({
     cn(
       'w-full rounded-lg shadow-lg relative p-0 min-h-[400px] max-h-[800px] ',
       'shadow-xl transition-shadow duration-300',
-      'flex flex-col',
+      'flex flex-col !p-4',
       index === currentSlide ? 'ring-2 ring-blue-500 ring-offset-2' : '',
       slide.className,
       isDragging ? 'opacity-50 ' : 'opacity-100'

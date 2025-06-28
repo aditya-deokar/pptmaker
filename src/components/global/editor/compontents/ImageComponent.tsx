@@ -18,7 +18,10 @@ type Props= {
 const ImageComponent = ({alt, contentId, onContentChange, src , className, isEditable=true, isPreview= false}:Props) => {
   return (
     <div className={`relative group w-full h-full rounded-lg`}>
-        <Image src={src} alt={alt} 
+        <Image 
+        src={'/file.svg'} 
+        // src={src} 
+        alt={alt} 
         width={isPreview ? 48 : 800}
         height={isPreview ? 48 : 800}
         className={`object-cover w-full h-full rounded-lg ${className}`}
