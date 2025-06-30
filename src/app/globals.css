@@ -8,6 +8,9 @@ body {
 
 @layer base {
   :root {
+    --gradient-color: rgba(0, 0, 0, 0.05);
+    --gradient-primary: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+    --gradient-secondary: linear-gradient(135deg, #f97316 0%, #eab308 100%);
     --background: 0 0% 100%;
     --background-70:210 2% 75%;
     --background-80:0 11% 95%;
@@ -55,8 +58,11 @@ body {
     
   }
   .dark {
+    --gradient-color: rgba(255, 255, 255, 0.08);
+    --gradient-primary: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+    --gradient-secondary: linear-gradient(135deg, #f97316 0%, #eab308 100%);
     --background: 240 10% 3.9%;
-    --background-primary:220 7% 8% 1
+    --background-primary:220 7% 8% 1;
     --background-90:210 2% 75%;
     --background-80:228 7% 14%;
     --background-70:220 3% 35%;
@@ -108,6 +114,13 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+
+  .verto{
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-500
+  }
+  .verto-bg{
+    @apply bg-gradient-to-r from-red-500 to-orange-500
+  }
 }
 
 .text-vivid{
@@ -115,5 +128,42 @@ body {
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+
+
+.hero-gradient {
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(239, 68, 68, 0.15) 0%,
+    rgba(249, 115, 22, 0.05) 30%,
+    rgba(0, 0, 0, 0) 70%
+  );
+}
+
+.dotted-grid {
+  background-image: radial-gradient(circle, #ffffff 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.1;
+}
+
+.timer-progress {
+  stroke-dasharray: 283;
+  transform-origin: center;
+  transform: rotate(-90deg);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 

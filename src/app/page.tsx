@@ -1,7 +1,26 @@
+import { VertoFaqSection } from "@/components/landingPage/verto-faq-section";
+import { VertoFeaturesSection } from "@/components/landingPage/verto-features-section";
+import { VertoFinalCtaSection } from "@/components/landingPage/verto-final-cta-section";
+import { VertoHeroSection } from "@/components/landingPage/verto-hero-section";
+import { VertoHowItWorksSection } from "@/components/landingPage/verto-how-it-works-section";
+import { VertoPricingSection } from "@/components/landingPage/verto-pricing-section";
+import { VertoSocialProofBar } from "@/components/landingPage/verto-social-proof-bar";
+import { VertoTestimonialsSection } from "@/components/landingPage/verto-testimonials-section";
+import { VertoUseCasesSection } from "@/components/landingPage/verto-use-cases-section";
+
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-     
-    </div>
+    <main className="min-h-screen dark:bg-black">
+
+      <VertoHeroSection />
+      {/* <VertoSocialProofBar /> */}
+      <VertoHowItWorksSection />
+      <VertoFeaturesSection />
+      <VertoUseCasesSection />
+      <VertoTestimonialsSection />
+      <VertoPricingSection />
+      <VertoFaqSection />
+      <VertoFinalCtaSection />
+    </main>
   );
 }
