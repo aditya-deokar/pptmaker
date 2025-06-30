@@ -16,6 +16,7 @@ import { NavMain } from "./nav-main";
 import { NavFooter } from "./nav-footer";
 import { Project, User } from "@/generated/prisma";
 import { data } from "@/lib/constants";
+import Link from "next/link";
 
 
 export function AppSidebar({
@@ -42,7 +43,7 @@ export function AppSidebar({
           </div>
 
           <span className="truncate text-primary text-3xl font-semibold">
-            PPT Gen
+            <Link href={'/'}>Verto AI</Link>
           </span>
         </SidebarMenuButton>
       </SidebarHeader>
