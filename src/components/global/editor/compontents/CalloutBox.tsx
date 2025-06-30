@@ -52,10 +52,10 @@ const  CalloutBox = ({ type, children, className }: Props) => {
     return <div
              className={cn(
                 'p-4 rounded-lg border-l-4 flex items-start',
-                colors[type].bg,
-                colors[type].border,
-                colors[type].text,
-                className
+                // colors[type].bg,
+                // colors[type].border,
+                // colors[type].text,
+                // className
              )}
            >
                 <Icon className="mr-3 h-5 w-5 mt-0.5" />

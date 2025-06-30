@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { useSlideStore } from '@/store/useSlideStore'
 import React, { useEffect, useRef } from 'react'
 
 interface ParagraphProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement>{
@@ -10,6 +11,8 @@ interface ParagraphProps extends React.TextareaHTMLAttributes<HTMLTextAreaElemen
 const Paragraph = React.forwardRef<HTMLTextAreaElement, ParagraphProps>(
     ( {className, styles, isPreview=false , ...props }, ref )=>{
         const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+        const { currentTheme }= useSlideStore();
 
         useEffect(() => {
           const textarea= textareaRef.current
@@ -34,11 +37,12 @@ const Paragraph = React.forwardRef<HTMLTextAreaElement, ParagraphProps>(
                 `w-full bg-transparent font-normal text-gray-900 placeholder:text-gray-300 focus:outline-none resize-none overflow-hidden leading-tight`,
                 `${isPreview ? 'text-[0.5rem]' : 'text-lg'}`,
                 className
+                
             )}
             style={{
                 padding:0,
                 margin:0,
-                color:'inherit',
+                color:currentTheme.fontColor,
                 boxSizing:'content-box',
                 lineHeight:'1.5rem',
                 minHeight:'1.5rem',

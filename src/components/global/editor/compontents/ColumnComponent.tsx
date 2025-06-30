@@ -54,7 +54,7 @@ const ColumnComponent = ({
           className={cn(
             'h-full w-full flex ',
             !isEditable && '!border-0',
-            className
+            // className
           )}
         >
             {columns.map((item, index) => (
@@ -63,10 +63,11 @@ const ColumnComponent = ({
                         minSize={20}
                         defaultSize={100 / columns.length}
                     >
-                        <div className={cn('h-full w-full', item.className)}>
+                        <div className={cn('h-full w-full', 
+                          // item.className
+                          )}>
                             <MasterRecursiveComponent
                                content={item}
-                               id={item.id}
                                isPreview={isPreview}
                                onContentChange={onContentChange}
                                slideId={slideId}
