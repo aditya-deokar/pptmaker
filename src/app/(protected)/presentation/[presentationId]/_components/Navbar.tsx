@@ -7,6 +7,7 @@ import { HomeIcon, Play } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
+import PresentationMode from './PresentationMode'
 
 type Props = {
     presentationId:string
@@ -51,7 +52,7 @@ const Navbar = ({ presentationId }: Props) => {
 
         <Link href={'/presentation/template-market'} 
         className='text-lg font-semibold hidden sm:block'>
-            Presentation Title
+            Presentation Editor
         </Link>
 
         <div className='flex items-center gap-4'>
@@ -76,7 +77,11 @@ const Navbar = ({ presentationId }: Props) => {
              </Button>
         </div>
                 {/* add presentation */}
-        {/* {isPresentationMode && <PresentationMode/> } */}
+        {isPresentationMode && (
+            <PresentationMode
+            onClose={()=> setIsPresentationMode(false)}
+            />
+        ) }
     </nav>
   )
 }

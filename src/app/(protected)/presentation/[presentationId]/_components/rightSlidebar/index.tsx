@@ -8,11 +8,10 @@ import {
 } from "@radix-ui/react-popover";
 import { Button } from "@/components/ui/button";
 import { LayoutTemplate, Palette, Type } from "lucide-react";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
 import LayoutChooser from "./tabs/LayoutChooser";
-import { component } from "@/lib/constants";
 import ComponentCard from "./tabs/components-tab/ComponentPreview";
 import ThemeChooser from "./tabs/ThemeChooser";
+import TextTypography from "./tabs/TextTypography";
 
 
 type Props = {};
@@ -46,7 +45,7 @@ const EditorSidebar = (props: Props) => {
                             className="h-10 w-10 rounded-full hover:scale-110 transition-all"
                         >
                             <Type className="h-5 w-5" />
-                            <span className="sr-only">Choose Layout</span>
+                            <span className="sr-only">Choose Typography</span>
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent
@@ -58,22 +57,7 @@ const EditorSidebar = (props: Props) => {
                             color: currentTheme.fontColor,
                         }}
                     >
-                        {/* <ScrollArea className="h-[400px]">
-                            <div className="p-4 flex flex-col space-y-6">
-                                {component.map((group, idx) => (
-                                    <div className="space-y-2" key={idx}>
-                                        <h3 className="text-sm font-medium text-muted-foreground px-1">
-                                            {group.name}
-                                        </h3>
-                                        <div className="grid grid-cols-3 gap-4">
-                                            {group.components.map((item) => (
-                                                <ComponentCard key={item.componentType} item={item} />
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </ScrollArea> */}
+                        <TextTypography/>
                     </PopoverContent>
                 </Popover>
                 <Popover>

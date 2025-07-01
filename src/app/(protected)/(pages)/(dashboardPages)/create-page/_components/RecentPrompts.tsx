@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { timeAgo } from '@/lib/utils'
 import useCreativeAIStore from '@/store/useCreativeAiStore'
 import { toast } from '@/hooks/use-toast'
+import { ShineBorder } from '@/components/global/ui/shine-border'
 
 const RecentPrompts = () => {
 
@@ -45,7 +46,7 @@ const RecentPrompts = () => {
         className='space-y-2 w-full lg:max-w-[80%] mx-auto'>
             {prompts.map((prompt, i)=>(
                 <motion.div variants={itemVariants} key={i}>
-                    <Card className="p-4 flex items-center justify-between hover:bg-accent/50 transition-colors duration-300">
+                    <ShineBorder className='p-4 flex items-center justify-between' borderClassName='border border-primary/30'>
                         <div className="max-w-[70%]">
                             <h3 className="font-semibold text-xl line-clamp-1">{prompt?.title}</h3>
                             <p className="font-semibold text-sm text-muted-foreground">
@@ -58,13 +59,14 @@ const RecentPrompts = () => {
                             <Button
                                 variant="default"
                                 size="sm"
-                                className="rounded-xl bg-primary-20 dark:hover:bg-gray-700 hover:bg-gray-200 text-primary"
+                                className="rounded-lg bg-primary-20 dark:hover:bg-gray-700 hover:bg-gray-200 text-primary"
                                 onClick={() => handleEdit(prompt?.id)}
                             >
                                 Edit
                             </Button>
                         </div>
-                    </Card>
+        
+                    </ShineBorder>
                 </motion.div>
             ))}
         </motion.div>

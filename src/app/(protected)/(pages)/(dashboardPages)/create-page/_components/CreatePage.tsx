@@ -5,6 +5,7 @@ import usePromptStore from '@/store/usePromptStore'
 import { motion } from 'framer-motion'
 import React, { useEffect } from 'react'
 import RecentPrompts from './RecentPrompts'
+import { ShineBorder } from '@/components/global/ui/shine-border'
 
 
 type Props ={
@@ -39,8 +40,8 @@ const CreatePage = ({ onSelectOption }:Props) => {
                     key={option.type}
                     variants={itemVariants}
                     whileHover={{
-                        scale: 1.03,
-                        rotate: 1,
+                        scale: 1.02,
+                        // rotate: 1,
                         transition: { duration: 0.01 },
                     }}
                     className={`${option.highlight
@@ -48,9 +49,11 @@ const CreatePage = ({ onSelectOption }:Props) => {
                             : "hover:bg-vivid-gradient border"
                         } rounded-xl p-[1px] transition-all duration-300 ease-in-out`}
                 >
-                    <motion.div
-                        className="w-full p-4 flex flex-col gap-y-6 items-start bg-white 
-              dark:bg-black rounded-xl"
+                    <ShineBorder>
+                        <motion.div
+                        className={`${option.highlight
+                            && "dark:bg-gradient-to-br dark:from-black dark:via-black dark:to-red-900/20 overflow-hidden"
+                        } w-full p-4 flex flex-col gap-y-6 items-start bg-background rounded-xl`}
                         whileHover={{
                             transition: { duration: 0.01 },
                         }}
@@ -80,7 +83,7 @@ const CreatePage = ({ onSelectOption }:Props) => {
                         >
                             <Button
                                 variant={option.highlight ? "default" : "outline"}
-                                className="w-fit rounded-xl font-bold"
+                                className="w-fit rounded-lg font-bold"
                                 size={"sm"}
                                 onClick={() => onSelectOption(option.type)}
                             >
@@ -88,6 +91,7 @@ const CreatePage = ({ onSelectOption }:Props) => {
                             </Button>
                         </motion.div>
                     </motion.div>
+                    </ShineBorder>
                 </motion.div>
             ))}
         </motion.div>
