@@ -42,7 +42,7 @@ export function AppSidebar({
             </Avatar>
           </div>
 
-          <span className="truncate text-primary text-3xl font-semibold">
+          <span className="truncate text-vivid text-3xl font-semibold">
             <Link href={'/'}>Verto AI</Link>
           </span>
         </SidebarMenuButton>
