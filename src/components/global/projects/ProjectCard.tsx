@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { deleteProject, recoverProject } from '@/actions/projects'
 import ThumnailPreview from './ThumnailPreview'
+import { ShineBorder } from '../ui/shine-border'
 
 
 type Props = {
@@ -116,7 +117,8 @@ const ProjectCard = ({
   };
 
   return (
-    <motion.div
+    <ShineBorder>
+      <motion.div
     className={`group w-full flex-col flex gap-y-3 rounded-xl p-3 transition-colors ${!isDelete && 'hover:bg-muted/50'}`}
     variants={itemVariants}
     >
@@ -147,8 +149,8 @@ const ProjectCard = ({
               >
                 <Button
                   size="sm"
-                  variant="ghost"
-                  className="bg-background-80 dark:hover:bg-background-90"
+                  variant="default"
+                  // className="bg-background-80 dark:hover:bg-background-90"
                   disabled={loading}
                 >
                   Recover
@@ -165,8 +167,8 @@ const ProjectCard = ({
               >
                 <Button
                   size="sm"
-                  variant="ghost"
-                  className="bg-background-80 dark:hover:bg-background-90"
+                  variant="outline"
+                  // className="bg-background-80 dark:hover:bg-background-90"
                   disabled={loading}
                 >
                   Delete
@@ -177,6 +179,7 @@ const ProjectCard = ({
             </div>
         </div>
     </motion.div>
+    </ShineBorder>
   )
 }
 
