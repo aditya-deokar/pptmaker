@@ -17,7 +17,7 @@ export function VertoFinalCtaSection() {
           viewport={{ once: true }}
         >
           <ShineBorder borderClassName="border border-red-500/30 rounded-xl">
-            <div className="p-12 bg-gradient-to-br from-black via-black to-red-900/20 rounded-xl text-center">
+            <div className="p-12 dark:bg-gradient-to-br dark:from-black dark:via-black dark:to-red-900/20 rounded-xl text-center">
               <motion.div
                 className="mb-6"
                 initial={{ scale: 0, rotate: -180 }}
@@ -60,13 +60,13 @@ export function VertoFinalCtaSection() {
                 viewport={{ once: true }}
               >
                 <ShineBorder className="max-w-md mx-auto mb-6" borderClassName="border border-white/10 rounded-xl">
-                  <div className="flex gap-2 p-2 bg-black/80 rounded-xl">
-                    <Input
-                      placeholder="Enter your email address"
-                      className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-gray-400"
-                    />
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button className="bg-gradient-to-r from-red-500 to-orange-500 text-white hover:opacity-90 gap-2 px-6">
+                  <div className="flex gap-4 p-2 bg-background rounded-xl">
+                     <Input
+                        placeholder="Enter your Email Id"
+                        className="border-none outline-none focus:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent shadow-none w-full"
+                      />
+                    <motion.div  whileTap={{ scale: 0.95 }}>
+                      <Button className="verto-bg hover:opacity-90 gap-2 px-6">
                         Generate Your First Presentation for Free
                         <ArrowRight className="w-4 h-4" />
                       </Button>

@@ -45,7 +45,7 @@ export function VertoFaqSection() {
   }
 
   return (
-    <section className="py-16 px-6 bg-black/50">
+    <section className="py-16 px-6 bg-background">
       <div className="max-w-4xl mx-auto">
         <motion.div
           className="text-center mb-16"
@@ -64,7 +64,7 @@ export function VertoFaqSection() {
           {faqs.map((faq, index) => (
             <motion.div
               key={index}
-              className="border border-white/10 rounded-xl overflow-hidden bg-black/30"
+              className="border border-white/10 rounded-xl overflow-hidden bg-primary/10"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}

@@ -68,7 +68,7 @@ export function VertoTestimonialsSection() {
   }
 
   return (
-    <section className="py-16 px-6 bg-black/50">
+    <section className="py-16 px-6 bg-background">
       <div className="max-w-6xl mx-auto">
         <motion.div
           className="text-center mb-16"
@@ -79,7 +79,7 @@ export function VertoTestimonialsSection() {
         >
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
             Don't Just Take Our{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-500">
+            <span className="verto">
               Word For It
             </span>
           </h2>
@@ -96,11 +96,9 @@ export function VertoTestimonialsSection() {
             <motion.div
               key={testimonial.name}
               variants={itemVariants}
-              whileHover={{ y: -5, scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
             >
               <ShineBorder borderClassName="border border-white/10 rounded-xl h-full">
-                <div className="p-6 h-full bg-black/80 rounded-xl">
+                <div className="p-6 h-full md:h-80 bg-primary/10 rounded-xl">
                   <motion.div
                     className="flex gap-1 mb-4"
                     initial={{ opacity: 0 }}
@@ -121,9 +119,9 @@ export function VertoTestimonialsSection() {
                     ))}
                   </motion.div>
 
-                  <blockquote className="text-lg font-medium mb-4 text-white">"{testimonial.quote}"</blockquote>
+                  <blockquote className="text-lg font-medium mb-4 text-primary">"{testimonial.quote}"</blockquote>
 
-                  <p className="text-gray-400 mb-6 leading-relaxed">{testimonial.fullText}</p>
+                  <p className="text-primary/70 mb-6 leading-relaxed">{testimonial.fullText}</p>
 
                   <motion.div
                     className="flex items-center gap-3"
@@ -132,13 +130,13 @@ export function VertoTestimonialsSection() {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     viewport={{ once: true }}
                   >
-                    <motion.img
+                    {/* <motion.img
                       src={testimonial.image || "/placeholder.svg"}
                       alt={testimonial.name}
                       className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-orange-500"
                       whileHover={{ scale: 1.1 }}
                       transition={{ type: "spring", stiffness: 300 }}
-                    />
+                    /> */}
                     <div>
                       <div className="font-semibold">{testimonial.name}</div>
                       <div className="text-sm text-gray-400">

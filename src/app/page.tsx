@@ -1,3 +1,4 @@
+import Navbar from "@/components/landingPage/navbar";
 import { VertoFaqSection } from "@/components/landingPage/verto-faq-section";
 import { VertoFeaturesSection } from "@/components/landingPage/verto-features-section";
 import { VertoFinalCtaSection } from "@/components/landingPage/verto-final-cta-section";
@@ -11,14 +12,14 @@ import { VertoUseCasesSection } from "@/components/landingPage/verto-use-cases-s
 export default function Home() {
   return (
     <main className="min-h-screen dark:bg-black">
-
+      <Navbar/>
       <VertoHeroSection />
       {/* <VertoSocialProofBar /> */}
       <VertoHowItWorksSection />
       <VertoFeaturesSection />
       <VertoUseCasesSection />
       <VertoTestimonialsSection />
-      <VertoPricingSection />
+      {/* <VertoPricingSection /> */}
       <VertoFaqSection />
       <VertoFinalCtaSection />
     </main>

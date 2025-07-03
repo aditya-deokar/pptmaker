@@ -7,13 +7,13 @@ import { ArrowRight, Play } from "lucide-react"
 import { InteractiveGrid } from "../global/ui/interactive-grid"
 import { ShineBorder } from "../global/ui/shine-border"
 import Link from "next/link"
-import { ThemeSwitcher } from "../global/mode-toggle"
+
 
 export function VertoHeroSection() {
   return (
     <section className="relative min-h-screen pt-32 pb-16 overflow-hidden hero-gradient">
 
-      <ThemeSwitcher/>
+    
       <InteractiveGrid containerClassName="absolute inset-0" className="opacity-30" points={40} />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6">

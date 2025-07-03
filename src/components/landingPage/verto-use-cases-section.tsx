@@ -49,7 +49,7 @@ export function VertoUseCasesSection() {
         >
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
             Built for Every{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-500">
+            <span className="verto">
               Storyteller
             </span>
           </h2>
@@ -77,7 +77,7 @@ export function VertoUseCasesSection() {
                 onClick={() => setActiveTab(key)}
                 className={`gap-2 ${
                   activeTab === key
-                    ? "bg-gradient-to-r from-red-500 to-orange-500 text-white"
+                    ? "verto-bg"
                     : "border-white/10 bg-white/5 hover:bg-white/10"
                 }`}
               >
@@ -97,7 +97,7 @@ export function VertoUseCasesSection() {
             transition={{ duration: 0.5 }}
           >
             <ShineBorder borderClassName="border border-white/10 rounded-xl">
-              <div className="p-8 bg-black/80 rounded-xl">
+              <div className="p-8 bg-primary/10 rounded-xl">
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   <motion.div
                     initial={{ opacity: 0, x: -30 }}
@@ -105,7 +105,7 @@ export function VertoUseCasesSection() {
                     transition={{ duration: 0.6, delay: 0.2 }}
                   >
                     <h3 className="text-2xl font-bold mb-4">{useCases[activeTab as keyof typeof useCases].title}</h3>
-                    <p className="text-gray-400 text-lg mb-6 leading-relaxed">
+                    <p className="text-primary text-lg mb-6 leading-relaxed">
                       {useCases[activeTab as keyof typeof useCases].description}
                     </p>
                     <div className="grid grid-cols-2 gap-3">
@@ -118,7 +118,7 @@ export function VertoUseCasesSection() {
                           transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
                         >
                           <div className="w-2 h-2 rounded-full bg-gradient-to-r from-red-500 to-orange-500"></div>
-                          <span className="text-sm text-gray-300">{feature}</span>
+                          <span className="text-sm text-primary/80">{feature}</span>
                         </motion.div>
                       ))}
                     </div>
