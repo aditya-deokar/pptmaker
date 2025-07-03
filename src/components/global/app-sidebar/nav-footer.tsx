@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/generated/prisma";
 import { useToast } from "@/hooks/use-toast";
+import { buySubscription } from "@/actions/payment";
 
 export function NavFooter({ prismaUser }: { prismaUser: User }) {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -26,7 +27,7 @@ export function NavFooter({ prismaUser }: { prismaUser: User }) {
   const handleUpgrading = async () => {
     setLoading(true);
     try {
-      const res = await BuySubscription(prismaUser.id);
+      const res = await buySubscription(prismaUser.id);
 
       if (res.status !== 200) {
         throw new Error("Failed to upgrade subscription");

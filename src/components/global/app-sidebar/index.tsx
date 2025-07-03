@@ -38,7 +38,7 @@ export function AppSidebar({
           <div className="flex aspect-square size-8 items-center justify-center rounded-lg text-sidebar-primary-foreground">
             <Avatar className="h-10 w-10 rounded-full">
               <AvatarImage src={"/vivid.png"} alt={`logo`} />
-              <AvatarFallback className="rounded-lg">VI</AvatarFallback>
+              <AvatarFallback className="rounded-lg">Verto AI</AvatarFallback>
             </Avatar>
           </div>
 

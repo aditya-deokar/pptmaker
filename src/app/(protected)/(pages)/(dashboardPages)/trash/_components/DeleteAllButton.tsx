@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { deleteAllProjects } from "@/actions/projects";
 import { AlertDialogBox } from "@/components/global/alert-dialog";
@@ -17,6 +17,8 @@ const DeleteAllButton = ({ Projects }: Props) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const router = useRouter();
+
+  const handleOpenChange = (value: boolean) => setOpen(value);
 
   const handleDeleteAllProjects = async () => {
     setLoading(true);
@@ -53,12 +55,12 @@ const DeleteAllButton = ({ Projects }: Props) => {
       className="bg-red-500 text-white dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700"
       onClick={handleDeleteAllProjects}
       loading={loading}
-      handleOpen={() => setOpen(true)}
+      handleOpen={handleOpenChange}
       open={open}
     >
       <Button
         size="lg"
-        className="bg-background-80 rounded-lg dark:hover:bg-background-90 text-primary font-semibold hover:text-white"
+        className="bg-background-80 rounded-lg dark:hover:bg-background-90 text-primary font-semibold "
       >
         <Trash className="mr-2 h-4 w-4" />
         Delete All

@@ -18,7 +18,7 @@ type Props = {
   loading?: boolean;
   onClick?: () => void;
   open: boolean;
-  handleOpen: () => void;
+  handleOpen: (value: boolean) => void;
 };
 
 export function AlertDialogBox({
