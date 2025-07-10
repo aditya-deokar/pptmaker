@@ -1,3 +1,4 @@
+import { DotPattern } from "@/components/global/ui/DotPattern";
 import Navbar from "@/components/landingPage/navbar";
 import { VertoFaqSection } from "@/components/landingPage/verto-faq-section";
 import { VertoFeaturesSection } from "@/components/landingPage/verto-features-section";
@@ -12,6 +13,8 @@ import { VertoUseCasesSection } from "@/components/landingPage/verto-use-cases-s
 export default function Home() {
   return (
     <main className="min-h-screen dark:bg-black">
+      <DotPattern dotColor="#94a3b8" dotSize={1.2} spacing={20} />
+
       <Navbar/>
       <VertoHeroSection />
       {/* <VertoSocialProofBar /> */}
