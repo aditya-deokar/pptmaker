@@ -11,6 +11,7 @@ import React, { useState } from 'react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import { generateLayouts } from '@/actions/genai'
+import { generatePresentationGraph } from '@/agentic-workflow/actions/genai-graph'
 
 type Props = {
     selectedTheme:Theme
@@ -43,13 +44,14 @@ const ThemePicker = ({onThemeSelect, selectedTheme, themes}: Props) => {
         }
 
         try {
-            const res = await generateLayouts(
-                params.presentationId as string,
-                currentTheme.name
-            );
+            // const res = await generateLayouts(
+            //     params.presentationId as string,
+            //     currentTheme.name
+            // );
+            const res = await generatePresentationGraph(" intro to Langgraph ");
             
             // --- FIX: Check if the response and nested data exist before processing ---
-            if (!res || res.status !== 200 || !res.data || !res.data.data) {
+            if (!res || res.status !== 200 || !res.data || !res.data) {
                 throw new Error(res.error || "Failed to generate layouts");
             }
 
