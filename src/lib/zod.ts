@@ -1,4 +1,7 @@
+// /lib/schemas/layoutSchema.ts
+
 import { z } from "zod";
+
 // Enum for allowed ContentType values
 const ContentTypeEnum = z.enum([
   "column",

@@ -29,8 +29,8 @@ const CustomImage = ({
   return (
     <div className="relative group w-full h-full rounded-lg">
       <Image
-        // src={typeof src === "string" ? src.trim() : src}
-        src={'/file.svg'}
+        src={typeof src === "string" ? src.trim() : src}
+        // src={'/file.svg'}
         width={isPreview ? 48 : 800}
         height={isPreview ? 48 : 800}
         alt={alt}
