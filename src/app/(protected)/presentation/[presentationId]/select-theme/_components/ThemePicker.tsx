@@ -44,11 +44,11 @@ const ThemePicker = ({onThemeSelect, selectedTheme, themes}: Props) => {
         }
 
         try {
-            // const res = await generateLayouts(
-            //     params.presentationId as string,
-            //     currentTheme.name
-            // );
-            const res = await generatePresentationGraph(" intro to Langgraph ");
+            const res = await generateLayouts(
+                params.presentationId as string,
+                currentTheme.name
+            );
+            // const res = await generatePresentationGraph(" intro to Langgraph ");
             
             // --- FIX: Check if the response and nested data exist before processing ---
             if (!res || res.status !== 200 || !res.data || !res.data) {
@@ -60,7 +60,8 @@ const ThemePicker = ({onThemeSelect, selectedTheme, themes}: Props) => {
             });
 
             // --- FIX: Extract the actual array of slides from the nested response object ---
-            const slidesArray = res.data.data;
+            // const slidesArray = res.data.data;
+            const slidesArray = res.data;
 
             setSlides(slidesArray);
             router.push(`/presentation/${project.id}`);

@@ -2,7 +2,7 @@ import { OutlineCard } from "@/lib/types";
 import { create } from "zustand";
 import { persist, devtools } from "zustand/middleware";
 
-type page= 'create'| 'creative-ai' | 'create-scratch'
+type page= 'create'| 'creative-ai' | 'create-scratch' | 'agentic-workflow'
 type Prompt ={
     id:string
     createdAt:string

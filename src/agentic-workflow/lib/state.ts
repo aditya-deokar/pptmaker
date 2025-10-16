@@ -35,6 +35,7 @@ export interface SlideGenerationData {
 
 // The main state object for our graph.
 export interface PresentationGraphState {
+//   projectId: string | null;
   userInput: string;
   outlines: string[] | null;
   slideData: SlideGenerationData[];

@@ -4,34 +4,21 @@
 import { START, END, StateGraph, StateGraphArgs } from "@langchain/langgraph";
 import { PresentationGraphState } from "../lib/state";
 import { runOutlineGenerator } from "../agents/outlineAgent";
-import { runContentWriter } from "../agents/contentAgent";
+import { runContentWriter } from "../agents/contentAgent"; // The new bulk agent
 import { runLayoutDesigner } from "../agents/layoutAgent";
 import { runImageQueryGenerator } from "../agents/imageQueryAgent";
+import { runImageGenerator } from "../agents/imageGenerationAgent"; // Assuming this exists now
 import { runJsonCompiler } from "../agents/jsonCompilerAgent";
+import prisma from "@/lib/prisma";
 
-// Routers
-const shouldWriteContent = (
-  state: PresentationGraphState
-): "contentWriter" | "layoutDesigner" => {
-  const hasPendingContent = state.slideData.some((s) => s.slideContent === null);
-  return hasPendingContent ? "contentWriter" : "layoutDesigner";
-};
+// const shouldGenerateImage = (state: PresentationGraphState): "imageGenerator" | "jsonCompiler" => {
+//   console.log("-> Router: Checking if more images are needed...");
+//   const hasPendingImage = state.slideData.some(slide => slide.imageQuery && !slide.imageUrl);
+//   return hasPendingImage ? "imageGenerator" : "jsonCompiler";
+// };
 
-const shouldDesignLayout = (
-  state: PresentationGraphState
-): "layoutDesigner" | "imageQueryGenerator" => {
-  const hasPendingLayout = state.slideData.some((s) => s.layoutType === null);
-  return hasPendingLayout ? "layoutDesigner" : "imageQueryGenerator";
-};
 
-const shouldGenerateImageQuery = (
-  state: PresentationGraphState
-): "imageQueryGenerator" | "jsonCompiler" => {
-  const hasPendingQuery = state.slideData.some((s) => s.imageQuery === "pending");
-  return hasPendingQuery ? "imageQueryGenerator" : "jsonCompiler";
-};
-
-// Channels (kept; works fine with current API)
+// Channels definition remains the same
 const channels: StateGraphArgs<PresentationGraphState>["channels"] = {
   userInput: { value: (_x, y) => y, default: () => "" },
   outlines: { value: (_x, y) => y, default: () => null },
@@ -40,47 +27,38 @@ const channels: StateGraphArgs<PresentationGraphState>["channels"] = {
   error: { value: (_x, y) => y, default: () => null },
 };
 
-// IMPORTANT: chain calls so node keys are preserved in the type
+// Define the graph structure with the simplified, more linear flow
 const app = new StateGraph<PresentationGraphState>({ channels })
   .addNode("outlineGenerator", runOutlineGenerator)
   .addNode("contentWriter", runContentWriter)
   .addNode("layoutDesigner", runLayoutDesigner)
   .addNode("imageQueryGenerator", runImageQueryGenerator)
+//   .addNode("imageGenerator", runImageGenerator)
   .addNode("jsonCompiler", runJsonCompiler)
 
-  // Entry
+  // 1. Entry point
   .addEdge(START, "outlineGenerator")
 
-  // Routing after outline
-  .addConditionalEdges("outlineGenerator", shouldWriteContent, {
-    contentWriter: "contentWriter",
-    layoutDesigner: "layoutDesigner",
-  })
+  // 2. A completely linear sequence for all LLM-based generation steps.
+  // Each of these is a single, bulk API call.
+  .addEdge("outlineGenerator", "contentWriter")
+  .addEdge("contentWriter", "layoutDesigner")
+  .addEdge("layoutDesigner", "imageQueryGenerator")
+  .addEdge("imageQueryGenerator", "jsonCompiler")
 
-  // Content loop
-  .addConditionalEdges("contentWriter", shouldWriteContent, {
-    contentWriter: "contentWriter",
-    layoutDesigner: "layoutDesigner",
-  })
+  // 3. The final remaining loop for the external image generation tool.
+//   .addConditionalEdges("imageGenerator", shouldGenerateImage, {
+//     imageGenerator: "imageGenerator", // Loop back if more images are needed
+//     jsonCompiler: "jsonCompiler",     // Proceed to the final step when done
+//   })
 
-  // Layout loop
-  .addConditionalEdges("layoutDesigner", shouldDesignLayout, {
-    layoutDesigner: "layoutDesigner",
-    imageQueryGenerator: "imageQueryGenerator",
-  })
-
-  // Image query loop
-  .addConditionalEdges("imageQueryGenerator", shouldGenerateImageQuery, {
-    imageQueryGenerator: "imageQueryGenerator",
-    jsonCompiler: "jsonCompiler",
-  })
-
-  // Finish
+  // 4. Finish
   .addEdge("jsonCompiler", END)
   .compile();
 
-// Server action
+// Server action (no changes needed here, it remains robust)
 export const generatePresentationGraph = async (topic: string) => {
+  console.log("🚀 Starting Presentation Generation Graph for topic:", topic);
   try {
     const initialState: PresentationGraphState = {
       userInput: topic,
@@ -89,12 +67,24 @@ export const generatePresentationGraph = async (topic: string) => {
       finalPresentationJson: null,
       error: null,
     };
-    // const finalState = await app.invoke(initialState, { recursionLimit: 100 });
-
-    const finalState = await app.invoke({ userInput: topic }, { recursionLimit: 100 });
     
-    if (finalState.error) throw new Error(`Graph execution failed: ${finalState.error}`);
+    // const finalState = await app.invoke(initialState, { recursionLimit: 150 });
+    const finalState = await app.invoke({ userInput: topic }, { recursionLimit: 100 });
+
+    if (finalState.error) {
+      throw new Error(`Graph execution failed: ${finalState.error}`);
+    }
+
+    console.log("✅ Graph execution finished successfully.");
+    // console.log(finalState.finalPresentationJson);
+    console.log(JSON.stringify(finalState.finalPresentationJson, null, 2));
+    if ( !finalState.finalPresentationJson) {
+          return { status: "Failed to generate valid layouts" };
+    }
+    
+   
     return { status: 200, data: finalState.finalPresentationJson };
+    
   } catch (error) {
     console.error("Graph error:", error);
     return { status: 500, error: "Failed to generate presentation." };

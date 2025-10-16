@@ -6,6 +6,7 @@ import usePromptStore from '@/store/usePromptStore'
 import CreatePage from './CreatePage'
 import CreativeAI from './CreativeAI'
 import ScratchPage from './ScratchPage/ScratchPage'
+import AgenticWorkflowPage from './AgenticWorkflowPage'
 
 const RenderPage = () => {
 
@@ -21,6 +22,8 @@ const RenderPage = () => {
             router.push('/templates');
         }else if(option === 'create-scratch'){
             setPage('create-scratch')
+        }else if(option === 'agentic-workflow'){
+            setPage('agentic-workflow')
         }else{
             setPage('creative-ai')
         }
@@ -29,6 +32,8 @@ const RenderPage = () => {
         switch(page){
             case "create":
                 return <CreatePage onSelectOption={handleSelectOption} />
+            case "agentic-workflow":
+                return <AgenticWorkflowPage onBack={handleBack} />
             case "creative-ai":
                 return <CreativeAI onBack={handleBack} />
             case "create-scratch":
