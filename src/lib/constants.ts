@@ -84,22 +84,22 @@ export const data = {
 
 export const CreatePageCard = [
   {
-    title: "Use a",
-    highlightedText: "Template",
-    description: "Write a prompt and leave everything else for us to handle",
-    type: "template",
+    title: "AI-Powered",
+    highlightedText: "Agentic Workflow",
+    description: "Let 5 specialized AI agents work together to create your perfect presentation",
+    type: "agentic-workflow",
+    highlight: true,
   },
   {
     title: "Generate with",
     highlightedText: "Creative AI",
     description: "Write a prompt and leave everything else for us to handle",
     type: "creative-ai",
-    highlight: true,
   },
   {
     title: "Start from",
     highlightedText: "Scratch",
-    description: "Write a prompt and leave everything else for us to handle",
+    description: "Build your presentation from the ground up with full control",
     type: "create-scratch",
   },
 ];

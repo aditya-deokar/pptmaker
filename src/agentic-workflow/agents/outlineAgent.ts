@@ -38,7 +38,7 @@ export async function runOutlineGenerator(state: PresentationGraphState): Promis
       imageUrl: null,
       finalJson: null,
     }));
-    
+    console.log(object.outlines);
     return {
       outlines: object.outlines,
       slideData: initialSlideData,

@@ -5,59 +5,72 @@ import { generateObject } from "ai";
 import { PresentationGraphState } from "../lib/state";
 import { model } from "../lib/llm";
 
-
-// Define the expected output structure for this agent
-const contentSchema = z.object({
+// Schema for a single slide's content (reusable)
+const singleSlideContentSchema = z.object({
   title: z.string().describe("A compelling and concise title for the slide."),
   content: z.string().describe("The main body content for the slide. This can be a paragraph or a markdown list (using '-' for bullets). Keep it brief and engaging."),
 });
 
+// --- NEW SCHEMA ---
+// This is the main schema for our bulk generation call.
+// It expects an object containing an array of slide content.
+const bulkContentSchema = z.object({
+  slidesContent: z.array(singleSlideContentSchema).describe("An array of content objects, one for each slide outline provided."),
+});
+
 /**
- * Agent 2: Writes the title and body content for a single slide.
- * It finds the next slide that needs content and processes it.
+ * Agent 2 (Upgraded): Writes the title and body content for ALL slides in a single API call.
+ * This is more efficient and helps avoid rate-limiting issues.
  * @param state The current state of the graph.
  * @returns A partial state object with the updated slide data.
  */
 export async function runContentWriter(state: PresentationGraphState): Promise<Partial<PresentationGraphState>> {
-  console.log("--- Running Content Writer Agent ---");
+  console.log("--- Running Bulk Content Writer Agent ---");
 
-  // Find the index of the first slide that has an outline but no title yet.
-  const currentSlideIndex = state.slideData.findIndex(slide => slide.slideTitle === null);
-
-  // If all slides are done, there's nothing to do.
-  if (currentSlideIndex === -1) {
-    console.log("✅ All slide content has been generated.");
+  if (!state.outlines || state.outlines.length === 0) {
+    console.log("✅ No outlines to process. Skipping content generation.");
     return {};
   }
   
-  const currentSlide = state.slideData[currentSlideIndex];
-  console.log(`✍️ Writing content for slide ${currentSlideIndex + 1}: "${currentSlide.outline}"`);
+  // Format the outlines into a clear, numbered list for the prompt
+  const formattedOutlines = state.outlines.map((outline, index) => `${index + 1}. ${outline}`).join('\n');
 
   try {
     const { object } = await generateObject({
       model: model,
-      schema: contentSchema,
-      prompt: `You are an expert presentation copywriter. Your task is to write the content for a single slide.
+      schema: bulkContentSchema,
+      prompt: `You are an expert presentation copywriter. Your task is to write the title and body content for EVERY slide outline provided below.
+
       The overall presentation topic is: "${state.userInput}".
-      The specific topic for this slide is: "${currentSlide.outline}".
-      Please generate a title and the main content. The content should be suitable for a presentation slide (concise, clear, and easy to read). If listing items, use markdown bullets.`,
+      
+      Here are the slide outlines:
+      ${formattedOutlines}
+
+      Please generate a title and the main content for each outline. The content should be suitable for a presentation slide (concise, clear, and easy to read). If listing items, use markdown bullets.
+      You MUST return a JSON object containing an array called 'slidesContent'. This array must have the exact same number of elements as the number of outlines provided, and in the same order.`,
     });
     
-    // Create a new array with the updated slide data to avoid mutation
-    const updatedSlideData = [...state.slideData];
-    updatedSlideData[currentSlideIndex] = {
-      ...updatedSlideData[currentSlideIndex],
-      slideTitle: object.title,
-      slideContent: object.content,
-    };
+    // Robustness check: Ensure the AI returned the correct number of slides
+    if (object.slidesContent.length !== state.outlines.length) {
+      throw new Error("AI did not return the correct number of slide content objects.");
+    }
+
+    // Merge the newly generated content into our existing slideData array
+    const updatedSlideData = state.slideData.map((slide, index) => ({
+      ...slide,
+      slideTitle: object.slidesContent[index].title,
+      slideContent: object.slidesContent[index].content,
+    }));
+
+    console.log("✅ All slide content has been generated in a single batch.");
 
     return {
       slideData: updatedSlideData,
     };
   } catch (error) {
-    console.error(`🔴 Error writing content for slide "${currentSlide.outline}":`, error);
+    console.error(`🔴 Error writing content for all slides:`, error);
     return {
-      error: `Failed to write content for the slide: ${currentSlide.outline}`,
+      error: `Failed to write content for the presentation slides.`,
     };
   }
 }
