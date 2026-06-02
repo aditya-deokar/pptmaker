@@ -1,7 +1,7 @@
 
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Wand2 } from "lucide-react";
 import Link from "next/link";
@@ -20,39 +20,50 @@ export default function HeroV2() {
 
     // Default to dark mode colors if not mounted yet
     const currentTheme = mounted ? (resolvedTheme || theme) : 'dark';
-    
-    const linesColors = currentTheme === 'dark' 
-        ? ["#d0693f", "#0f0f0f", "#917b7b"] 
+
+    const linesColors = currentTheme === 'dark'
+        ? ["#F55C7A", "#FF7193", "#F6BC66"]
         : ["#F55C7A", "#F6BC66", "#8B5CF6"]; // Light mode: vibrant brand colors
+
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start start", "end start"]
+    });
 
     const opacity = 1;
     const y = 0;
+
+    // 3D Scroll Effect for Mockup
+    const mockupRotateX = useTransform(scrollYProgress, [0, 1], [0, 25]);
+    const mockupScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
+    const mockupOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0.5]);
+    const mockupY = useTransform(scrollYProgress, [0, 1], [0, -100]);
 
 
     return (
         <section ref={containerRef} className="relative min-h-[100vh] flex flex-col justify-center pt-32 pb-20 md:pt-48 bg-white dark:bg-[#050505] overflow-hidden transition-colors duration-500">
 
             {/* Floating Lines Background */}
-            <div className="absolute inset-0 z-0 pointer-events-none opacity-30 dark:opacity-20">
-                <FloatingLines 
-                    enabledWaves={["top","middle","bottom"]}
-                    lineCount={8}
-                    lineDistance={8}
-                    bendRadius={8}
-                    bendStrength={-2}
+            <div className="absolute inset-0 z-0 pointer-events-none opacity-40 dark:opacity-30">
+                <FloatingLines
+                    enabledWaves={["top", "middle", "bottom"]}
+                    lineCount={5}
+                    lineDistance={10}
+                    bendRadius={6}
+                    bendStrength={-1.5}
                     interactive
                     parallax={true}
-                    animationSpeed={1}
+                    animationSpeed={0.4}
                     linesGradient={linesColors}
                     mixBlendMode={currentTheme === 'dark' ? 'screen' : 'multiply'}
                 />
             </div>
 
             {/* Background Glow */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-[#F55C7A] opacity-[0.05] blur-[150px] rounded-full" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-[#F6BC66] opacity-[0.05] blur-[150px] rounded-full" />
-            </div>
+            {/* <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-[#F55C7A] opacity-[0.08] dark:opacity-[0.15] blur-[150px] rounded-full" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-[#F6BC66] opacity-[0.08] dark:opacity-[0.15] blur-[150px] rounded-full" />
+            </div> */}
 
             {/* Content Container - Aligned with Menu Overlay */}
             <div className="relative z-10 w-full px-6 md:pl-[120px] md:pr-10">
@@ -121,36 +132,45 @@ export default function HeroV2() {
             </div>
 
             {/* Floating UI Mockup - Anchored to bottom/grid */}
-            <motion.figure
-                style={{ y, opacity }}
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.5 }}
-                className="w-full px-6 md:pl-[120px] md:pr-10 mt-20 md:mt-32"
-            >
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div className="col-span-1 md:col-span-4 relative rounded-3xl border border-black/10 dark:border-white/10 bg-gray-50 dark:bg-[#0A0A0A] shadow-2xl overflow-hidden aspect-[21/9] group">
-                        <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent pointer-events-none" />
+            <div style={{ perspective: "2000px" }} className="w-full px-6 md:pl-[120px] md:pr-10 mt-20 md:mt-32">
+                <motion.figure
+                    style={{
+                        rotateX: mockupRotateX,
+                        scale: mockupScale,
+                        y: mockupY,
+                        opacity: mockupOpacity
+                    }}
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                    className="w-full"
+                >
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div className="col-span-1 md:col-span-4 relative rounded-3xl border border-black/10 dark:border-white/10 bg-gray-50 dark:bg-[#0A0A0A] shadow-2xl overflow-hidden group">
+                            <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent pointer-events-none z-20" />
 
-                        {/* Fake UI Header */}
-                        <div className="h-12 border-b border-white/5 bg-black/40 backdrop-blur-md flex items-center px-6 gap-4">
-                            <div className="flex gap-2">
-                                <div className="w-3 h-3 rounded-full bg-red-500/20" />
-                                <div className="w-3 h-3 rounded-full bg-yellow-500/20" />
-                                <div className="w-3 h-3 rounded-full bg-green-500/20" />
+                            {/* Fake UI Header */}
+                            <div className="h-12 border-b border-black/5 dark:border-white/5 bg-white/40 dark:bg-black/40 backdrop-blur-md flex items-center px-6 gap-4 relative z-10">
+                                <div className="flex gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-red-500/50" />
+                                    <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
+                                    <div className="w-3 h-3 rounded-full bg-green-500/50" />
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Content Preview */}
-                        <div className="p-8 md:p-12 flex h-full items-center justify-center bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center opacity-50 grayscale group-hover:grayscale-0 transition-all duration-700">
-                            <div className="bg-black/80 backdrop-blur-xl p-8 rounded-2xl border border-white/10 max-w-lg text-center transform transition-transform duration-500 group-hover:scale-105 group-hover:-translate-y-2">
-                                <h3 className="text-2xl font-bold text-white mb-2 font-[family-name:var(--font-inter-tight)]">AI Design Engine</h3>
-                                <p className="text-white/60 text-sm">Analyzing context and generating pixel-perfect layouts...</p>
+                            {/* Content Preview */}
+                            <div className="w-full relative overflow-hidden bg-white dark:bg-[#0A0A0A]">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                    src="/hero/image.png"
+                                    alt="Dashboard Interface"
+                                    className="w-full h-auto object-cover"
+                                />
                             </div>
                         </div>
                     </div>
-                </div>
-            </motion.figure>
+                </motion.figure>
+            </div>
         </section>
     );
 }
