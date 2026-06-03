@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
                 });
 
                 // Update user subscription flag
-                await prisma.user.update({
+                await prisma.user.updateMany({
                     where: { id: userId },
                     data: { subscription: true },
                 });
@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
                 });
 
                 // Update user subscription flag based on status
-                await prisma.user.update({
+                await prisma.user.updateMany({
                     where: { id: subscription.userId },
                     data: { subscription: isActiveStatus(attributes.status) },
                 });
@@ -185,7 +185,7 @@ export async function POST(req: NextRequest) {
                 });
 
                 // Revoke access
-                await prisma.user.update({
+                await prisma.user.updateMany({
                     where: { id: subscription.userId },
                     data: { subscription: false },
                 });
@@ -220,7 +220,7 @@ export async function POST(req: NextRequest) {
                 });
 
                 // Restore access
-                await prisma.user.update({
+                await prisma.user.updateMany({
                     where: { id: subscription.userId },
                     data: { subscription: true },
                 });
@@ -253,7 +253,7 @@ export async function POST(req: NextRequest) {
                 });
 
                 // Revoke access during pause
-                await prisma.user.update({
+                await prisma.user.updateMany({
                     where: { id: subscription.userId },
                     data: { subscription: false },
                 });

@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { findUserIdByClerkId } from "@/lib/user-compat";
 
 export async function getMobileProject(projectId: string) {
     const { userId } = await auth();
@@ -10,9 +11,7 @@ export async function getMobileProject(projectId: string) {
         throw new Error("Unauthorized");
     }
 
-    const user = await prisma.user.findUnique({
-        where: { clerkId: userId },
-    });
+    const user = await findUserIdByClerkId(userId);
 
     if (!user) {
         throw new Error("User not found");

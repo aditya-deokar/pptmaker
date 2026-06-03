@@ -2,10 +2,14 @@ import { getAiModel } from "@/lib/ai-provider";
 
 /**
  * Shared LLM model instance for all agents
- * Using getAiModel to support BYOAK with fallback to system defaults.
+ * Using getAiModel to support BYOK with fallback to system defaults.
  */
-export async function getModel() {
-  return await getAiModel("gemini-3-flash-preview");
+export async function getModel(clerkId?: string) {
+  return await getAiModel(
+    "gemini-3-flash-preview",
+    undefined,
+    clerkId ? { clerkId } : undefined
+  );
 }
 
 /**

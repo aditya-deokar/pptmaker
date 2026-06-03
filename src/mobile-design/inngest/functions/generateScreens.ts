@@ -6,7 +6,10 @@ import { ANALYSIS_PROMPT, GENERATION_SYSTEM_PROMPT } from "@/mobile-design/lib/p
 import prisma from "@/lib/prisma";
 import { BASE_VARIABLES, THEME_LIST } from "@/mobile-design/lib/themes";
 import { unsplashTool } from "../tool";
-import { google } from "@/mobile-design/lib/google";
+import {
+  getMobileDesignAnalysisModel,
+  getMobileDesignGenerationModel,
+} from "@/mobile-design/lib/ai";
 
 const AnalysisSchema = z.object({
   theme: z
@@ -110,7 +113,7 @@ export const generateScreens = inngest.createFunction(
         `.trim();
 
       const { object } = await generateObject({
-        model: google("gemini-1.5-flash"),
+        model: await getMobileDesignAnalysisModel(userId),
         schema: AnalysisSchema,
         system: ANALYSIS_PROMPT,
         prompt: analysisPrompt,
@@ -168,10 +171,10 @@ export const generateScreens = inngest.createFunction(
 
       await step.run(`generated-screen-${i}`, async () => {
         const result = await generateText({
-          model: google("gemini-1.5-flash"),
+          model: await getMobileDesignGenerationModel(userId),
           system: GENERATION_SYSTEM_PROMPT,
           tools: {
-            searchUnsplash: unsplashTool,
+            searchUnsplash: unsplashTool as any,
           },
           prompt: `
           - Screen ${i + 1}/${analysis.screens.length}

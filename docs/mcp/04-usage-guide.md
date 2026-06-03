@@ -1,466 +1,314 @@
-# Verto AI - MCP Server Usage Guide
+# Verto AI MCP Client Setup Guide
 
-> Connect MCP-compatible AI clients to Verto AI's presentation platform.
+This document describes the **current MCP server implementation** in this repository and the recommended client setup for the hosted Verto AI deployment:
 
----
+- App: `https://verto.ai.aditya-deokar.me`
+- MCP endpoint: `https://verto.ai.aditya-deokar.me/api/mcp`
+- Discovery URL: `https://verto.ai.aditya-deokar.me/.well-known/oauth-protected-resource`
+- Public guide page: `https://verto.ai.aditya-deokar.me/docs/mcp/04-usage-guide`
 
-## What is MCP?
+## Executive Summary
 
-The **Model Context Protocol (MCP)** is an open standard that lets AI assistants connect to external tools and data sources. Verto AI exposes an MCP server so agents can **list, create, edit, generate, delete, and publish presentations** on your behalf.
+Use **Streamable HTTP** for the hosted app.
 
----
+Use **stdio** only when:
 
-## Prerequisites
+- you are running this repository locally
+- your MCP client cannot send remote headers cleanly
+- you explicitly want the client to spawn the server process itself
 
-1. **Verto AI API Key** - Generate one from your [Verto AI Settings page](http://localhost:3000/settings)
-2. **Node.js 18+** and project dependencies installed
-3. For **stdio**: local access to this repository
-4. For **Streamable HTTP**: a running Verto AI app with `/api/mcp` reachable by the client
+For most users of the hosted Verto AI product, the setup should be:
 
----
+1. Generate a Verto AI MCP key in Settings
+2. Add the hosted URL `https://verto.ai.aditya-deokar.me/api/mcp`
+3. Send the key as `Authorization: Bearer vk_live_...`
 
-## Quick Start
+## What This MCP Server Exposes
 
-### 1. Set your API key
+### Transport
 
-For local stdio clients, add your key to `.env`:
+- `Streamable HTTP` at `/api/mcp`
+- `stdio` via `src/mcp/transport/stdio.ts`
 
-```env
-VERTO_API_KEY=verto_your_api_key_here
-```
+### Authentication
 
-### 2. Start the MCP server in stdio mode
+- **Remote HTTP clients**: `Authorization: Bearer <vk_live_...>`
+- **Local stdio clients**: `VERTO_API_KEY=<vk_live_...>`
+- **Browser-based flows on the same signed-in session**: the server can fall back to the current Clerk session
+
+### Current protocol version
+
+- `2025-03-26`
+
+This matters because the current hosted HTTP implementation is **session-based**. Clients must initialize first before sending tool calls.
+
+## Current Server Behavior
+
+The codebase currently implements the following HTTP behavior:
+
+- `GET /api/mcp`
+  - returns MCP server metadata when no session ID is present
+  - acts as a lightweight health/discovery endpoint
+- `POST /api/mcp`
+  - accepts MCP JSON-RPC requests
+  - creates a session when the first request is `initialize`
+  - rejects non-initialize requests that do not include a valid session ID
+- `DELETE /api/mcp`
+  - closes the current session
+- `OPTIONS /api/mcp`
+  - supports CORS preflight
+
+### Important implication
+
+This endpoint is **not** a plain REST API.
+
+If you send a direct `tools/list` POST without doing the MCP initialize handshake first, this server will reject the request.
+
+That is why the recommended validation tools are:
+
+- a real MCP client
+- MCP Inspector
+- Claude Code
+- Cursor
+
+## Why Streamable HTTP Is The Right Default Here
+
+The hosted Verto AI app already lives on a public domain, so Streamable HTTP is the right fit for the main product use case:
+
+- no repository checkout required
+- no Node.js runtime required on the end user machine
+- multiple users can connect to the same deployed service
+- easier onboarding for Claude, Cursor, hosted agents, and cloud connectors
+
+### Best use cases for Streamable HTTP
+
+- Claude Code connected to the hosted Verto AI server
+- Cursor remote MCP setup
+- Claude custom connectors using a public MCP URL
+- internal team agents using a shared deployed MCP service
+- browser or cloud workflows that should not spawn local processes
+
+### Best use cases for stdio
+
+- local development of this repository
+- testing the MCP server implementation directly from source
+- clients that only support command-based MCP servers
+- fallback when a remote client has weak header support
+
+## Tools Registered Today
+
+The current MCP server registers 11 presentation-focused tools:
+
+| Tool | Purpose |
+| --- | --- |
+| `presentation_list` | List presentations for the authenticated user |
+| `presentation_get` | Read one presentation, optionally including slide JSON |
+| `presentation_create` | Create a new presentation from title and outlines |
+| `presentation_delete` | Soft-delete a presentation |
+| `presentation_recover` | Recover a soft-deleted presentation |
+| `presentation_delete_permanently` | Permanently delete presentations with `confirm: true` |
+| `presentation_update_slides` | Replace the full slides array |
+| `presentation_update_theme` | Change the theme of a presentation |
+| `presentation_publish` | Publish a presentation to a public share URL |
+| `presentation_unpublish` | Remove public access |
+| `presentation_generate` | Run the long-running Verto AI generation pipeline |
+
+## Resources Registered Today
+
+The current MCP server registers 4 read-only resources:
+
+| Resource URI | Purpose |
+| --- | --- |
+| `verto://presentations` | Read-only presentation discovery context |
+| `verto://templates` | Published template catalog |
+| `verto://themes` | Valid theme names and visual metadata |
+| `verto://generation/{runId}/progress` | Progress state for running generation jobs |
+
+## Security Notes
+
+### API keys
+
+- generated keys currently use the prefix `vk_live_`
+- plaintext keys are shown only once
+- keys are stored as bcrypt hashes in the database
+- the UI currently allows up to 5 active keys per user
+
+### Origin validation
+
+The HTTP transport validates the `Origin` header against the configured allowlist. This is important for browser safety and DNS rebinding protection.
+
+### Claude remote connector note
+
+For Claude custom connectors, the connection comes from **Anthropic's cloud infrastructure**, not from the user's laptop. That means the hosted Verto AI MCP URL must stay publicly reachable.
+
+## Hosted Client Setup
+
+## 1. Claude Code
+
+Recommended command:
 
 ```bash
-npx tsx src/mcp/transport/stdio.ts
+claude mcp add --transport http verto-ai https://verto.ai.aditya-deokar.me/api/mcp \
+  --header "Authorization: Bearer ${VERTO_MCP_KEY}"
 ```
 
-### 3. Or test with MCP Inspector
+Set the environment variable before running the command:
 
 ```bash
-npx @modelcontextprotocol/inspector
+export VERTO_MCP_KEY="vk_live_your_api_key"
 ```
 
-In Inspector:
+On Windows PowerShell:
 
-1. Choose `stdio` to test the local server, or `Streamable HTTP` to test `/api/mcp`
-2. For stdio, use `npx tsx src/mcp/transport/stdio.ts`
-3. For HTTP, use `http://localhost:3000/api/mcp` or your deployed URL
-4. If testing HTTP auth, send `Authorization: Bearer verto_your_api_key_here`
+```powershell
+$env:VERTO_MCP_KEY = "vk_live_your_api_key"
+```
 
----
+## 2. Cursor
 
-## Transport Options
-
-Verto AI supports two MCP transports:
-
-| Transport | Use Case | Endpoint / Startup |
-|-----------|----------|--------------------|
-| **stdio** | Local desktop and IDE clients | `npx tsx src/mcp/transport/stdio.ts` |
-| **Streamable HTTP** | Remote or cloud clients, browser-based integrations, shared deployments | `https://your-domain.com/api/mcp` |
-
-### Streamable HTTP behavior
-
-- `GET /api/mcp` returns server metadata and acts as a health check
-- `POST /api/mcp` handles MCP JSON-RPC requests
-- `DELETE /api/mcp` closes an MCP session
-- `OPTIONS /api/mcp` supports CORS preflight
-- HTTP auth uses `Authorization: Bearer <VERTO_API_KEY>` for API-key clients
-- Browser-based clients can also authenticate through an existing Clerk session
-
----
-
-## Connecting with stdio Clients
-
-### Antigravity (Google Gemini Coding Assistant)
+Add a remote MCP server to `.cursor/mcp.json` or `~/.cursor/mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "verto-ai": {
-      "command": "npx",
-      "args": ["tsx", "src/mcp/transport/stdio.ts"],
-      "cwd": "C:/Users/adity/Documents/PPT Gen/verto-ai",
-      "env": {
-        "VERTO_API_KEY": "verto_your_api_key_here"
-      }
-    }
-  }
-}
-```
-
-### Claude Desktop
-
-Add to your Claude Desktop config file:
-
-- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Windows: `%APPDATA%\\Claude\\claude_desktop_config.json`
-
-```json
-{
-  "mcpServers": {
-    "verto-ai": {
-      "command": "npx",
-      "args": ["tsx", "src/mcp/transport/stdio.ts"],
-      "cwd": "C:/Users/adity/Documents/PPT Gen/verto-ai",
-      "env": {
-        "VERTO_API_KEY": "verto_your_api_key_here"
-      }
-    }
-  }
-}
-```
-
-### Cursor
-
-```json
-{
-  "mcpServers": {
-    "verto-ai": {
-      "command": "npx",
-      "args": ["tsx", "src/mcp/transport/stdio.ts"],
-      "cwd": "C:/Users/adity/Documents/PPT Gen/verto-ai",
-      "env": {
-        "VERTO_API_KEY": "verto_your_api_key_here"
-      }
-    }
-  }
-}
-```
-
-### Windsurf
-
-```json
-{
-  "mcpServers": {
-    "verto-ai": {
-      "command": "npx",
-      "args": ["tsx", "src/mcp/transport/stdio.ts"],
-      "cwd": "C:/Users/adity/Documents/PPT Gen/verto-ai",
-      "env": {
-        "VERTO_API_KEY": "verto_your_api_key_here"
-      }
-    }
-  }
-}
-```
-
-### VS Code
-
-```json
-{
-  "mcp": {
-    "servers": {
-      "verto-ai": {
-        "command": "npx",
-        "args": ["tsx", "src/mcp/transport/stdio.ts"],
-        "cwd": "${workspaceFolder}",
-        "env": {
-          "VERTO_API_KEY": "verto_your_api_key_here"
-        }
-      }
-    }
-  }
-}
-```
-
----
-
-## Adding the Streamable HTTP Server to MCP Clients
-
-Use the HTTP endpoint when you want a **remote/shared MCP server** instead of launching a local process.
-
-### Generic HTTP configuration shape
-
-If your MCP client supports remote HTTP servers via JSON config, the entry typically looks like this:
-
-```json
-{
-  "mcpServers": {
-    "verto-ai": {
-      "type": "http",
-      "url": "https://your-domain.com/api/mcp",
+      "url": "https://verto.ai.aditya-deokar.me/api/mcp",
       "headers": {
-        "Authorization": "Bearer ${VERTO_API_KEY}"
+        "Authorization": "Bearer ${env:VERTO_MCP_KEY}"
       }
     }
   }
 }
 ```
 
-Use:
+## 3. Generic Remote MCP Client
 
-- `type: "http"` for Streamable HTTP
-- `url` set to your deployed MCP route
-- `Authorization: Bearer ...` for API-key auth
-
-### Claude Code
-
-Claude Code has first-class documented support for remote HTTP MCP servers.
-
-Add from the CLI:
-
-```bash
-claude mcp add --transport http verto-ai https://your-domain.com/api/mcp \
-  --header "Authorization: Bearer ${VERTO_API_KEY}"
-```
-
-Or store it in `.mcp.json`:
+If a client accepts a Streamable HTTP server entry in JSON:
 
 ```json
 {
   "mcpServers": {
     "verto-ai": {
-      "type": "http",
-      "url": "https://your-domain.com/api/mcp",
+      "type": "streamable-http",
+      "url": "https://verto.ai.aditya-deokar.me/api/mcp",
       "headers": {
-        "Authorization": "Bearer ${VERTO_API_KEY}"
+        "Authorization": "Bearer ${VERTO_MCP_KEY}"
       }
     }
   }
 }
 ```
 
-### Anthropic Messages API MCP Connector
+## 4. Claude / Claude Desktop Custom Connector
 
-If you are connecting from the Anthropic API instead of a desktop IDE client, configure the remote server in the `mcp_servers` array:
+For Claude's remote connector flow:
+
+1. Open `Customize > Connectors`
+2. Choose `Add custom connector`
+3. Paste `https://verto.ai.aditya-deokar.me/api/mcp`
+4. Complete the auth flow if prompted
+5. Enable the connector in the conversation where you want Verto AI tools available
+
+### Important note
+
+This is a **remote** connector flow. Anthropic reaches the server from its own infrastructure, so the endpoint must be public and firewall-accessible.
+
+## 5. Local stdio Fallback
+
+Only use this if you are running the repository locally.
 
 ```json
 {
-  "mcp_servers": [
-    {
-      "type": "url",
-      "name": "verto-ai",
-      "url": "https://your-domain.com/api/mcp",
-      "authorization_token": "verto_your_api_key_here"
+  "mcpServers": {
+    "verto-ai-local": {
+      "command": "npx",
+      "args": ["tsx", "src/mcp/transport/stdio.ts"],
+      "cwd": "/path/to/pptmaker",
+      "env": {
+        "VERTO_API_KEY": "vk_live_your_api_key"
+      }
     }
-  ],
-  "tools": [
-    {
-      "type": "mcp_toolset",
-      "mcp_server_name": "verto-ai"
-    }
-  ]
+  }
 }
 ```
 
-### Cursor and other remote-capable clients
-
-Cursor's docs say it supports **Streamable HTTP** for MCP, but remote-auth configuration UX can vary by version. In practice:
-
-1. Open the client's MCP settings
-2. Add a **remote HTTP** MCP server
-3. Set the server URL to `https://your-domain.com/api/mcp`
-4. If the client supports custom headers, add `Authorization: Bearer <VERTO_API_KEY>`
-5. If your client only supports OAuth for remote MCP auth, use the **stdio** transport for Verto AI instead
-
-### Local HTTP example
-
-If your Next.js app is running locally:
-
-```text
-http://localhost:3000/api/mcp
-```
-
-If deployed:
-
-```text
-https://your-domain.com/api/mcp
-```
-
----
-
-## Basic HTTP Verification
+## Verification
 
 ### Health check
 
 ```bash
-curl http://localhost:3000/api/mcp
+curl https://verto.ai.aditya-deokar.me/api/mcp
 ```
 
-### List tools over Streamable HTTP
+Expected result:
 
-```bash
-curl -X POST http://localhost:3000/api/mcp \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer verto_your_api_key_here" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "tools/list",
-    "id": 1
-  }'
-```
+- server metadata
+- protocol version
+- supported transport list
 
----
+### Recommended functional validation
 
-## Available Tools (11)
+Use an MCP-aware client instead of raw curl for tools:
 
-### Read-only
+- Claude Code
+- Cursor
+- MCP Inspector
 
-| Tool | Description |
-|------|-------------|
-| `presentation_list` | List all presentations with pagination, sorting, and soft-delete filtering |
-| `presentation_get` | Get a single presentation by ID, optionally including slide content |
+### Why raw curl is not the best tool here
 
-### Create, delete, and recover
+The hosted server expects:
 
-| Tool | Description |
-|------|-------------|
-| `presentation_create` | Create a new presentation with title and outlines |
-| `presentation_delete` | Soft-delete a presentation |
-| `presentation_recover` | Restore a soft-deleted presentation |
-| `presentation_delete_permanently` | Permanent deletion, requires `confirm: true` |
+1. an MCP initialize request
+2. a valid returned session ID
+3. subsequent requests on that session
 
-### Update
-
-| Tool | Description |
-|------|-------------|
-| `presentation_update_slides` | Replace the full slides array |
-| `presentation_update_theme` | Change the visual theme |
-
-### Publishing
-
-| Tool | Description |
-|------|-------------|
-| `presentation_publish` | Create a public share URL |
-| `presentation_unpublish` | Remove public access |
-
-### AI generation
-
-| Tool | Description |
-|------|-------------|
-| `presentation_generate` | Run the AI generation pipeline with progress tracking |
-
----
-
-## Available Resources (4)
-
-| Resource URI | Description |
-|-------------|-------------|
-| `verto://presentations` | Guidance for browsing presentations via `presentation_list` |
-| `verto://templates` | Published template catalog |
-| `verto://themes` | Available themes and visual metadata |
-| `verto://generation/{runId}/progress` | Progress details for a running generation job |
-
----
-
-## Example Workflows
-
-### Create a presentation from scratch
-
-```text
-1. presentation_create(title: "Q4 Sales Report", outlines: [...])
-2. presentation_update_theme(presentation_id: "...", theme_name: "Dark Elegance")
-3. presentation_update_slides(presentation_id: "...", slides: [...])
-4. presentation_publish(presentation_id: "...")
-```
-
-### Generate a presentation with AI
-
-```text
-1. presentation_generate(topic: "Climate change strategy deck")
-2. If status is RUNNING, read verto://generation/{runId}/progress
-3. When project_id is available, call presentation_get(presentation_id: "...")
-4. Optionally publish with presentation_publish(...)
-```
-
-### Edit an existing presentation
-
-```text
-1. presentation_list()
-2. presentation_get(presentation_id: "...", include_slides: true)
-3. Modify the slides array
-4. presentation_update_slides(presentation_id: "...", slides: [...])
-```
-
-### Browse themes before updating
-
-```text
-1. Read verto://themes
-2. presentation_update_theme(presentation_id: "...", theme_name: "Ocean Breeze")
-```
-
----
+So a direct `tools/list` POST is not a correct representation of the real transport flow.
 
 ## Troubleshooting
 
-### "Authentication required"
+### The endpoint opens but tools do not work
 
-- For stdio, make sure `VERTO_API_KEY` is present in the process environment
-- For HTTP, send `Authorization: Bearer <VERTO_API_KEY>`
-- If you are using a browser-based client, make sure the Clerk session belongs to the same Verto account
+Check:
 
-### Remote HTTP client connects but tools fail
+- the URL is exactly `https://verto.ai.aditya-deokar.me/api/mcp`
+- the client is using MCP, not plain REST
+- the key is being sent as a Bearer token
+- the client supports remote HTTP MCP properly
 
-- Verify the URL is exactly `/api/mcp`
-- Confirm the deployed domain is reachable from the client
-- Check that the client is using **Streamable HTTP**, not raw REST
-- If the client cannot send custom Bearer headers for remote HTTP, fall back to stdio
+### Authentication failures
 
-### CORS or preflight problems
+Check:
 
-- Set `MCP_ALLOWED_ORIGINS` for your deployed domains if needed
-- Confirm the client is sending requests to the same domain you allow
+- the key begins with `vk_live_`
+- the key is active and not revoked
+- the header is `Authorization: Bearer <key>`
+- for stdio, `VERTO_API_KEY` is present in the spawned process environment
 
-### "Request exceeds the 10MB MCP limit"
+### Claude custom connector cannot connect
 
-- Reduce payload size, especially full slide arrays
-- Avoid sending deeply nested or duplicated JSON
+Check:
 
-### "Rate limit exceeded"
+- the domain is public
+- no firewall is blocking external access
+- the endpoint is reachable from outside your local machine
 
-- Free tier users have lower per-minute MCP limits
-- Wait for the returned `retry_after_seconds` value before retrying
+### A client only supports command-based MCP
 
-### Tools not showing in Claude Desktop / Cursor
+Use the local stdio transport instead of the hosted HTTP endpoint.
 
-- Restart the client after saving config changes
-- Verify the `cwd` path for stdio setups
-- For HTTP setups, verify the remote server is healthy with `GET /api/mcp`
+## Known Compatibility Note
 
----
+This server currently advertises MCP protocol version `2025-03-26` and uses the session-based Streamable HTTP flow implemented in the app today.
 
-## Development Scripts
+That means:
 
-`package.json` already includes:
+- modern clients with compatibility support should work
+- tools that expect only the newest stateless HTTP behavior may need a compatibility mode
+- if a remote client struggles, stdio remains the safest fallback
 
-```json
-{
-  "scripts": {
-    "mcp:dev": "npx tsx src/mcp/transport/stdio.ts",
-    "mcp:inspect": "npx @modelcontextprotocol/inspector npx tsx src/mcp/transport/stdio.ts"
-  }
-}
-```
+## Official References Used To Cross-Check Client Guidance
 
-Run:
-
-```bash
-bun run mcp:dev
-bun run mcp:inspect
-```
-
----
-
-## Notes
-
-- Prefer **stdio** for local desktop/IDE setups
-- Prefer **Streamable HTTP** for shared, remote, or server-hosted MCP access
-- Verto AI's remote MCP auth currently expects a **Bearer API key** or a **Clerk browser session**
-- Some MCP clients support remote HTTP today but still vary in how they expose custom auth headers; when in doubt, use stdio locally
-
-
-
-<!-- 
- // "verto-ai": {
-    //   "command": "npx",
-    //   "args": [
-    //     "tsx",
-    //     "src/mcp/transport/stdio.ts"
-    //   ],
-    //   "cwd": "C:/Users/adity/Documents/PPT Gen/verto-ai",
-    //   "env": {
-    //     "VERTO_API_KEY": "vk_live_01f252f55a17f24e9a384099ac411ea7de16792b"
-    //   },
-    //   "disabled": true
-    // } -->
+- Claude Code MCP docs: `https://docs.anthropic.com/en/docs/claude-code/mcp`
+- Claude custom connectors over remote MCP: `https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp`
+- Cursor MCP docs: `https://docs.cursor.com/context/model-context-protocol`
+- MCP Streamable HTTP transport spec: `https://modelcontextprotocol.io/specification/draft/basic/transports`

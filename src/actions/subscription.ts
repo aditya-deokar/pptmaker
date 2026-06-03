@@ -134,7 +134,7 @@ export const syncSubscriptionStatus = async () => {
 
         if (!subscription) {
             // No subscription, ensure user.subscription is false
-            await prisma.user.update({
+            await prisma.user.updateMany({
                 where: { id: checkUser.user.id },
                 data: { subscription: false },
             });
@@ -174,7 +174,7 @@ export const syncSubscriptionStatus = async () => {
 
             // Update user flag
             const isActive = ["active", "on_trial"].includes(attributes.status);
-            await prisma.user.update({
+            await prisma.user.updateMany({
                 where: { id: checkUser.user.id },
                 data: { subscription: isActive },
             });

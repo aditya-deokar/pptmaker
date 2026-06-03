@@ -1,74 +1,37 @@
 // /agents/imageGenerationAgent.ts
+import { generateText } from "ai";
+import { AiProvider } from "@/generated/prisma";
+import { getAiModel } from "@/lib/ai-provider";
 import { PresentationGraphState } from "../lib/state";
 
-// Gemini REST endpoint for image generation (preview)
-const GEMINI_IMAGE_MODEL =
-  "gemini-2.5-flash-image-preview";
-const GEMINI_ENDPOINT =
-  `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_IMAGE_MODEL}:generateContent`;
-
 /**
- * Calls Gemini 2.5 Flash Image Preview to generate an image from a text prompt
- * and returns a data URL (data:<mime>;base64,<bytes>) for easy in-app rendering.
- * When no image is returned, resolves to null.
+ * Uses the shared resolver so legacy image generation does not depend on
+ * standalone Gemini environment variables anymore.
  */
 async function generateImageUrl(query: string): Promise<string | null> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.error("🔴 GEMINI_API_KEY is not set");
-    return null;
-  }
-
-  // Minimal request: text prompt only; model returns interleaved parts, including image inline_data.
-  // See: image bytes appear in response.candidates.content.parts[*].inline_data
-  const body = {
-    contents: [
-      {
-        parts: [{ text: query }],
-      },
-    ],
-    // Optional: you can explicitly request images; omitted here for maximal compatibility
-    // generationConfig: { responseModalities: ["IMAGE"] },
-  };
-
   try {
-    const resp = await fetch(GEMINI_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
+    const result = await generateText({
+      model: await getAiModel("gemini-3-flash-preview", AiProvider.GOOGLE),
+      providerOptions: {
+        google: { responseModalities: ["TEXT", "IMAGE"] },
       },
-      body: JSON.stringify(body),
+      prompt: query,
     });
 
-    if (!resp.ok) {
-      const errText = await resp.text().catch(() => "");
-      console.error("🔴 Gemini API error:", resp.status, errText);
-      return null;
+    const imageFile = result.files?.find((file) => {
+      const mimeType = (file as any).mimeType;
+      return mimeType && typeof mimeType === "string" && mimeType.startsWith("image/");
+    });
+
+    if (imageFile?.base64) {
+      const mimeType = (imageFile as any).mimeType || "image/png";
+      return `data:${mimeType};base64,${imageFile.base64}`;
     }
 
-    const data = await resp.json();
-
-    // Find first inline image in the candidates
-    const candidates = data?.candidates ?? [];
-    for (const c of candidates) {
-      const parts = c?.content?.parts ?? [];
-      for (const p of parts) {
-        // REST uses snake_case inline_data; SDKs may camelCase (inlineData). Handle both.
-        const inline = p.inline_data || p.inlineData;
-        if (inline?.data) {
-          const mime =
-            inline.mime_type || inline.mimeType || "image/png";
-          const b64 = inline.data;
-          return `data:${mime};base64,${b64}`;
-        }
-      }
-    }
-
-    console.warn("⚠️ No image bytes found in Gemini response.");
+    console.warn("No image bytes found in Gemini response.");
     return null;
   } catch (error) {
-    console.error("🔴 Gemini image generation failed:", error);
+    console.error("Gemini image generation failed:", error);
     return null;
   }
 }
@@ -87,13 +50,13 @@ export async function runImageGenerator(
   );
 
   if (currentSlideIndex === -1) {
-    console.log("✅ All necessary images have been generated.");
+    console.log("All necessary images have been generated.");
     return {};
   }
 
   const currentSlide = state.slideData[currentSlideIndex];
   console.log(
-    `🏞️ Generating image for slide ${currentSlideIndex + 1}: "${currentSlide.outline}"`
+    `Generating image for slide ${currentSlideIndex + 1}: "${currentSlide.outline}"`
   );
 
   const imageUrl = await generateImageUrl(currentSlide.imageQuery!);
@@ -101,7 +64,7 @@ export async function runImageGenerator(
   const updatedSlideData = [...state.slideData];
   updatedSlideData[currentSlideIndex] = {
     ...updatedSlideData[currentSlideIndex],
-    imageUrl, // data URL or null if generation failed
+    imageUrl,
   };
 
   return { slideData: updatedSlideData };

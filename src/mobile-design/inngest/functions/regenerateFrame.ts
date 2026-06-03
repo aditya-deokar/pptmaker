@@ -4,7 +4,7 @@ import { GENERATION_SYSTEM_PROMPT } from "@/mobile-design/lib/prompt";
 import prisma from "@/lib/prisma";
 import { BASE_VARIABLES, THEME_LIST } from "@/mobile-design/lib/themes";
 import { unsplashTool } from "../tool";
-import { google } from "@/mobile-design/lib/google";
+import { getMobileDesignGenerationModel } from "@/mobile-design/lib/ai";
 
 export const regenerateFrame = inngest.createFunction(
   { id: "regenerate-frame", triggers: [{ event: "ui/regenerate.frame" }] },
@@ -43,10 +43,10 @@ export const regenerateFrame = inngest.createFunction(
       `;
 
       const aiResult = await generateText({
-        model: google("gemini-1.5-flash"),
+        model: await getMobileDesignGenerationModel(userId),
         system: GENERATION_SYSTEM_PROMPT,
         tools: {
-          searchUnsplash: unsplashTool,
+          searchUnsplash: unsplashTool as any,
         },
         prompt: `
         USER REQUEST: ${prompt}

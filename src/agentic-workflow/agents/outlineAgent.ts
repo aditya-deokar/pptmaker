@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { generateObject } from "ai";
-import { model } from "../lib/llm";
+import { getModel } from "../lib/llm";
 import { PresentationGraphState } from "../lib/state";
 
 
@@ -21,7 +21,7 @@ export async function runOutlineGenerator(state: PresentationGraphState): Promis
 
   try {
     const { object } = await generateObject({
-      model: model,
+      model: await getModel(),
       schema: outlineSchema,
       prompt: `You are an expert presentation creator. Given the following topic, please generate a clear and logical outline-solid for a presentation. The topic is: "${state.userInput}"`,
     });
@@ -29,7 +29,7 @@ export async function runOutlineGenerator(state: PresentationGraphState): Promis
     console.log("✅ Outlines generated successfully.");
 
     // Initialize the slideData array based on the new outlines
-    const initialSlideData = object.outlines.map(outline => ({
+    const initialSlideData = object.outlines.map((outline: string) => ({
       outline,
       slideTitle: null,
       slideContent: null,

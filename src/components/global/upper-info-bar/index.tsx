@@ -6,11 +6,11 @@ import React from "react";
 import { Uplaod } from "@/icons/Upload";
 import SearchBar from "./upper-info-searchbar";
 import NewProjectButton from "./new-project-button";
-import { User } from "@/generated/prisma";
 import { ThemeSwitcher } from "../mode-toggle";
+import type { AuthenticatedAppUser } from "@/lib/user-compat";
 
 
-const UpperInfoBar = ({ user }: { user: User }) => {
+const UpperInfoBar = ({ user }: { user: AuthenticatedAppUser }) => {
   return (
     <header className="flex shrink-0 flex-wrap items-center gap-2 bg-background/80 backdrop-blur-xl border shadow-sm rounded-xl p-4 justify-between w-full">
       <SidebarTrigger className="-ml-1" />

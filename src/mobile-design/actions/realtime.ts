@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { inngest } from "@/mobile-design/inngest/client";
 import { getSubscriptionToken } from "@inngest/realtime";
-import prisma from "@/lib/prisma";
+import { findUserIdByClerkId } from "@/lib/user-compat";
 
 export async function fetchRealtimeSubscriptionToken() {
     const { userId } = await auth();
@@ -13,9 +13,7 @@ export async function fetchRealtimeSubscriptionToken() {
     }
 
     // Get the database user ID (not Clerk ID)
-    const user = await prisma.user.findUnique({
-        where: { clerkId: userId },
-    });
+    const user = await findUserIdByClerkId(userId);
 
     if (!user) {
         throw new Error("User not found");

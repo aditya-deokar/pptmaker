@@ -166,7 +166,11 @@ export async function POST(request: NextRequest) {
         // of DeepPartial<Slide[]> that behaves identically to the old
         // `partialObjectStream` from `streamObject`.
         const result = streamText({
-          model: await getAiModel("gemini-3.1-flash-lite-preview"),
+          model: await getAiModel(
+            "gemini-3.1-flash-lite-preview",
+            undefined,
+            { clerkId }
+          ),
           system,
           prompt: user,
           temperature: 0.7,

@@ -6,13 +6,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User } from '@/generated/prisma';
 import { Plus } from '@/icons/Plus';
 import { Presentation, Smartphone, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
+import type { AuthenticatedAppUser } from '@/lib/user-compat';
 
-function NewProjectButton({ user }: { user: User }) {
+function NewProjectButton({ user }: { user: AuthenticatedAppUser }) {
   const router = useRouter();
   return (
     <DropdownMenu>

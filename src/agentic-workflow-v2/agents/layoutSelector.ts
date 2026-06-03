@@ -80,7 +80,7 @@ Generate layout selections for all ${slides.length} slides NOW:`;
 
     console.log("🤖 Calling AI to select layouts...");
 
-    const model = await getModel();
+    const model = await getModel(state.userId);
     const { object } = await generateObject({
       model: model,
       schema: layoutSelectionSchema,
@@ -94,7 +94,7 @@ Generate layout selections for all ${slides.length} slides NOW:`;
     validateSlideCount(layouts.length, slides.length, "Layout Selector");
 
     console.log(`✅ Selected layouts:`);
-    layouts.forEach((layout, i) => {
+    layouts.forEach((layout: (typeof layouts)[number], i: number) => {
       console.log(
         `   ${i + 1}. ${layout.layoutType} - ${layout.reasoning.slice(0, 50)}...`
       );
