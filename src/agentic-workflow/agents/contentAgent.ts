@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { generateObject } from "ai";
 import { PresentationGraphState } from "../lib/state";
-import { model } from "../lib/llm";
+import { getModel } from "../lib/llm";
 
 // Schema for a single slide's content (reusable)
 const singleSlideContentSchema = z.object({
@@ -37,7 +37,7 @@ export async function runContentWriter(state: PresentationGraphState): Promise<P
 
   try {
     const { object } = await generateObject({
-      model: model,
+      model: await getModel(),
       schema: bulkContentSchema,
       prompt: `You are an expert presentation copywriter. Your task is to write the title and body content for EVERY slide outline provided below.
 

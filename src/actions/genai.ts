@@ -2,6 +2,7 @@
 
 import { generateObject, generateText} from 'ai'
 import { getAiModel } from '@/lib/ai-provider';
+import { AiProvider } from '@/generated/prisma';
 import { v4 as uuidv4 } from "uuid";
 import { ContentItem, ContentType, Slide } from '@/lib/types';
 import { GeneratedOutputSchema, outlineSchema } from '@/lib/zodSchema';
@@ -176,7 +177,7 @@ Generate an image that looks like it was shot by a professional photographer or 
 `;
 
     const result = await generateText({
-      model: await getAiModel('gemini-3-flash-preview'),
+      model: await getAiModel('gemini-3-flash-preview', AiProvider.GOOGLE),
       providerOptions: {
         google: { responseModalities: ['TEXT', 'IMAGE'] },
       },
@@ -887,10 +888,10 @@ Generate the complete JSON array now!
     }
 
     // Populate UUIDs and sanitize the generated content
-    const sanitizedSlides = object.map(slide => {
+    const sanitizedSlides = object.map((slide: any) => {
       populateUuids(slide);
       return sanitizeSlide(slide);
-    }).filter(slide => slide !== null);
+    }).filter((slide: any) => slide !== null);
 
     console.log("🟢 Rich layouts generated and sanitized successfully 🟢");
     return { status: 200, data: sanitizedSlides };

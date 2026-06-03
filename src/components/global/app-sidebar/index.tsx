@@ -14,17 +14,18 @@ import { AvatarImage } from "@radix-ui/react-avatar";
 import { RecentOpen } from "./recent-open";
 import { NavMain } from "./nav-main";
 import { NavFooter } from "./nav-footer";
-import { Project, User } from "@/generated/prisma";
+import { Project } from "@/generated/prisma";
 import { data } from "@/lib/constants";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import type { AuthenticatedAppUser } from "@/lib/user-compat";
 
 export function AppSidebar({
   recentProjects,
   user,
   className,
   ...props
-}: { recentProjects: Project[] } & { user: User } & React.ComponentProps<typeof Sidebar>) {
+}: { recentProjects: Project[] } & { user: AuthenticatedAppUser } & React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar
       collapsible="icon"

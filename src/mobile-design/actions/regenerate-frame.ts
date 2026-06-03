@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { inngest } from "@/mobile-design/inngest/client";
 import { revalidatePath } from "next/cache";
+import { findUserIdByClerkId } from "@/lib/user-compat";
 
 export async function regenerateFrame(frameId: string, projectId: string, prompt: string) {
     const { userId } = await auth();
@@ -13,9 +14,7 @@ export async function regenerateFrame(frameId: string, projectId: string, prompt
         throw new Error("Prompt is required for regeneration");
     }
 
-    const user = await prisma.user.findUnique({
-        where: { clerkId: userId },
-    });
+    const user = await findUserIdByClerkId(userId);
 
     if (!user) throw new Error("User not found");
 

@@ -1,17 +1,15 @@
 'use server'
 
 import { currentUser } from "@clerk/nextjs/server";
-import prisma from "@/lib/prisma";
 import { getUserUsageDetails } from "@/lib/usage-limit";
+import { findUserIdByClerkId } from "@/lib/user-compat";
 
 export async function getUserUsage() {
   try {
     const user = await currentUser();
     if (!user) return { status: 403, error: "Unauthorized" };
 
-    const dbUser = await prisma.user.findUnique({
-      where: { clerkId: user.id },
-    });
+    const dbUser = await findUserIdByClerkId(user.id);
 
     if (!dbUser) return { status: 404, error: "User not found" };
 

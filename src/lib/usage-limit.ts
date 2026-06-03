@@ -1,36 +1,42 @@
+import { getUserAiConfigRecord } from "./ai-config-compat";
 import prisma from "./prisma";
-import { SubscriptionStatus } from "@/generated/prisma";
-
-export const LIMITS = {
-  FREE: 5,
-  BYOAK: 15,
-};
+import {
+  GENERATION_LIMITS as LIMITS,
+  isStoredAiKeyUsable,
+  resolveGenerationAccess,
+} from "./byok-policy";
 
 /**
  * Calculates the total project limit for a user based on their status and keys.
  */
 export async function getUserUsageDetails(userId: string) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      AiKeys: { select: { id: true } },
-      Subscription: { select: { status: true } },
-    },
-  });
+  const user = await getUserAiConfigRecord({ appUserId: userId });
 
-  if (!user) return { usage: 0, limit: LIMITS.FREE, isUnlimited: false };
-
-  // 1. Check for Active Subscription
-  const isUnlimited = user.Subscription?.status === SubscriptionStatus.ACTIVE;
-  if (isUnlimited) {
-    return { usage: user.usageCount, limit: Infinity, isUnlimited: true };
+  if (!user) {
+    return {
+      usage: 0,
+      limit: LIMITS.FREE,
+      isUnlimited: false,
+      byokActive: false,
+      remainingFreeProjects: LIMITS.FREE,
+      freeTierLimit: LIMITS.FREE,
+    };
   }
 
-  // 2. Check for BYOAK
-  const hasAiKeys = user.AiKeys.length > 0;
-  const limit = hasAiKeys ? LIMITS.BYOAK : LIMITS.FREE;
+  const access = resolveGenerationAccess({
+    usageCount: user.usageCount,
+    subscriptionStatus: user.subscriptionStatus,
+    hasUsableAiKeys: user.keys.some((key) => isStoredAiKeyUsable(key)),
+  });
 
-  return { usage: user.usageCount, limit, isUnlimited: false };
+  return {
+    usage: user.usageCount,
+    limit: access.limit,
+    isUnlimited: access.isUnlimited,
+    byokActive: access.byokActive,
+    remainingFreeProjects: access.remainingFreeProjects,
+    freeTierLimit: access.freeTierLimit,
+  };
 }
 
 /**
@@ -49,7 +55,7 @@ export async function checkAndIncrementUsage(userId: string) {
   }
 
   // Increment the usage count
-  await prisma.user.update({
+  await prisma.user.updateMany({
     where: { id: userId },
     data: { usageCount: { increment: 1 } },
   });

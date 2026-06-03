@@ -1,11 +1,11 @@
-// /lib/llm.ts
+import { getAiModel } from "@/lib/ai-provider";
+import { AiProvider } from "@/generated/prisma";
 
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-
-// Ensure you have GOOGLE_API_KEY set in your .env file
-export const google = createGoogleGenerativeAI({
-  apiKey: process.env.GOOGLE_API_KEY,
-});
-
-// We'll use a specific model for consistency
-export const model = google("gemini-3-flash-preview");
+/**
+ * Legacy workflow fallback.
+ * Routes through the shared resolver so this path no longer bypasses BYOK rules
+ * or relies on separate environment variable names.
+ */
+export async function getModel() {
+  return getAiModel("gemini-3-flash-preview", AiProvider.GOOGLE);
+}

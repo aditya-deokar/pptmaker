@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { findUserIdByClerkId } from "@/lib/user-compat";
 
 export async function updateMobileProject(
     projectId: string,
@@ -14,9 +15,7 @@ export async function updateMobileProject(
         throw new Error("Unauthorized");
     }
 
-    const user = await prisma.user.findUnique({
-        where: { clerkId: userId },
-    });
+    const user = await findUserIdByClerkId(userId);
 
     if (!user) {
         throw new Error("User not found");
@@ -45,9 +44,7 @@ export async function updateProjectTheme(
         throw new Error("Unauthorized");
     }
 
-    const user = await prisma.user.findUnique({
-        where: { clerkId: userId },
-    });
+    const user = await findUserIdByClerkId(userId);
 
     if (!user) {
         throw new Error("User not found");

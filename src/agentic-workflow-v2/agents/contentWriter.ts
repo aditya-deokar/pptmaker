@@ -170,7 +170,7 @@ Generate compelling, layout-aware content for ALL ${outlines.length} slides NOW:
 
     console.log("🤖 Calling AI to generate layout-aware content...");
 
-    const model = await getModel();
+    const model = await getModel(state.userId);
     const { object } = await generateObject({
       model: model,
       schema: layoutAwareContentSchema,
@@ -187,7 +187,7 @@ Generate compelling, layout-aware content for ALL ${outlines.length} slides NOW:
     }
 
     console.log(`✅ Generated layout-aware content for ${slidesContent.length} slides:`);
-    slidesContent.forEach((slide, i) => {
+    slidesContent.forEach((slide: (typeof slidesContent)[number], i: number) => {
       const layout = state.slideData[i]?.layoutType || "unknown";
       const extras = [];
       if (slide.statValue) extras.push(`stat: ${slide.statValue}`);

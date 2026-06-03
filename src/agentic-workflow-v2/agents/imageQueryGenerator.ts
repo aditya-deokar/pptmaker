@@ -103,7 +103,7 @@ Generate image queries for all ${slidesNeedingImages.length} slides:`;
 
     console.log("🤖 Calling AI to generate image queries...");
 
-    const model = await getModel();
+    const model = await getModel(state.userId);
     const { object } = await generateObject({
       model: model,
       schema: imageQuerySchema,
@@ -115,14 +115,16 @@ Generate image queries for all ${slidesNeedingImages.length} slides:`;
     const imageQueries = object.imageQueries;
 
     console.log(`✅ Generated ${imageQueries.length} image queries:`);
-    imageQueries.forEach((query) => {
+    imageQueries.forEach((query: (typeof imageQueries)[number]) => {
       console.log(`   Slide ${query.slideIndex + 1}: "${query.query}"`);
       emitToken(state, `Slide ${query.slideIndex + 1}: ${query.query}`);
     });
 
     // Update slide data with image queries
     const updatedSlideData = state.slideData.map((slide, index) => {
-      const queryData = imageQueries.find((q) => q.slideIndex === index);
+      const queryData = imageQueries.find(
+        (q: (typeof imageQueries)[number]) => q.slideIndex === index
+      );
       
       if (queryData) {
         return {

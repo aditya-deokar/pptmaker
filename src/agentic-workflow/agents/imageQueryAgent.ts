@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { generateObject } from "ai";
-import { model } from "../lib/llm";
+import { getModel } from "../lib/llm";
 import { PresentationGraphState } from "../lib/state";
 
 // --- NEW SCHEMA ---
@@ -51,7 +51,7 @@ export async function runImageQueryGenerator(state: PresentationGraphState): Pro
 
   try {
     const { object } = await generateObject({
-      model: model,
+      model: await getModel(),
       schema: bulkImageQuerySchema,
       prompt: `
         You are an expert AI prompt engineer and creative director. Your task is to write high-quality image generation prompts for a list of presentation slides.
@@ -73,13 +73,15 @@ export async function runImageQueryGenerator(state: PresentationGraphState): Pro
 
     // 3. Merge the generated queries back into the main slideData array.
     const updatedSlideData = [...state.slideData];
-    object.imageQueries.forEach(generatedQuery => {
+    object.imageQueries.forEach(
+      (generatedQuery: { slideIndex: number; query: string }) => {
       // Use the original index returned by the AI to update the correct slide
-      const targetIndex = generatedQuery.slideIndex;
-      if (updatedSlideData[targetIndex]) {
-        updatedSlideData[targetIndex].imageQuery = generatedQuery.query;
+        const targetIndex = generatedQuery.slideIndex;
+        if (updatedSlideData[targetIndex]) {
+          updatedSlideData[targetIndex].imageQuery = generatedQuery.query;
+        }
       }
-    });
+    );
     
     console.log(`✅ ${object.imageQueries.length} image queries generated in a single batch.`);
 

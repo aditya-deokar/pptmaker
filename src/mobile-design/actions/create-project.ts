@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { inngest } from "@/mobile-design/inngest/client";
 import { revalidatePath } from "next/cache";
 import { checkAndIncrementUsage } from "@/lib/usage-limit";
+import { findUserIdByClerkId } from "@/lib/user-compat";
 
 export async function createMobileProject(formData: {
     name: string;
@@ -16,9 +17,7 @@ export async function createMobileProject(formData: {
         throw new Error("Unauthorized");
     }
 
-    const user = await prisma.user.findUnique({
-        where: { clerkId: userId },
-    });
+    const user = await findUserIdByClerkId(userId);
 
     if (!user) {
         throw new Error("User not found");

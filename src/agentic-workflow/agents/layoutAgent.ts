@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { generateObject } from "ai";
-import { model } from "../lib/llm";
+import { getModel } from "../lib/llm";
 import { PresentationGraphState } from "../lib/state";
 
 // Schema for a single slide's design decision.
@@ -45,7 +45,7 @@ export async function runLayoutDesigner(state: PresentationGraphState): Promise<
 
   try {
     const { object } = await generateObject({
-      model: model,
+      model: await getModel(),
       schema: bulkLayoutSchema,
       prompt: `
         You are an expert presentation visual designer tasked with creating an engaging and varied slide deck. Your goal is to analyze the content for a series of slides and choose the best layout for each one.

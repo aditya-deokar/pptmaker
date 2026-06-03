@@ -148,7 +148,7 @@ Now generate your comprehensive outline:`;
     console.log("🤖 Calling AI to generate outline...");
 
     const { object } = await generateObject({
-      model: await getModel(),
+      model: await getModel(state.userId),
       schema: outlineSchema,
       prompt: prompt,
       temperature: modelConfigs.outline.temperature,
@@ -156,7 +156,7 @@ Now generate your comprehensive outline:`;
 
     const outlines = object.outlines;
     console.log(`✅ Generated ${outlines.length} slide topics:`);
-    outlines.forEach((outline, i) => {
+    outlines.forEach((outline: string, i: number) => {
       console.log(`   ${i + 1}. ${outline}`);
       emitToken(state, `Slide ${i + 1}: ${outline}`);
     });
@@ -169,7 +169,7 @@ Now generate your comprehensive outline:`;
     }
 
     // Initialize slide data for each outline
-    const initialSlideData = outlines.map((outline) => ({
+    const initialSlideData = outlines.map((outline: string) => ({
       outline,
       slideTitle: null,
       slideContent: null,

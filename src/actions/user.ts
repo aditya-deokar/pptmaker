@@ -2,6 +2,10 @@
 
 import prisma from '@/lib/prisma';
 import { currentUser } from '@clerk/nextjs/server';
+import {
+  AUTHENTICATED_APP_USER_SELECT,
+  findAuthenticatedAppUserByClerkId,
+} from '@/lib/user-compat';
 
 
 export const onAuthenticateUser = async () => {
@@ -13,18 +17,7 @@ export const onAuthenticateUser = async () => {
 
     // console.log("USER", user.id);
 
-    const userExist = await prisma.user.findUnique({
-      where: {
-        clerkId: user.id,
-      },
-      include:{
-        PurchasedProjects: {
-          select:{
-            id: true
-          }
-        }
-      }
-    });
+    const userExist = await findAuthenticatedAppUserByClerkId(user.id);
     if (userExist) {
       return { status: 200, user: userExist };
     }
@@ -36,6 +29,7 @@ export const onAuthenticateUser = async () => {
         name: user.firstName + " " + user.lastName,
         profileImage: user.imageUrl,
       },
+      select: AUTHENTICATED_APP_USER_SELECT,
     });
     if (newUser) {
       return { status: 201, user: newUser };

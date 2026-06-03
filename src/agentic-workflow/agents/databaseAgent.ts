@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { PresentationGraphState } from "../lib/state";
 import { currentUser } from '@clerk/nextjs/server';
+import { findUserIdByClerkId } from "@/lib/user-compat";
 
 // Removed local PrismaClient initialization to use shared instance from @/lib/prisma.
 
@@ -45,9 +46,7 @@ export async function saveToDatabase(
              return { error: "User not authenticated" };
            }
        
-           const userExist = await prisma.user.findUnique({
-             where: { clerkId: user.id },
-           });
+           const userExist = await findUserIdByClerkId(user.id);
        
            if (!userExist) {
              return { error: "User not found in the database" };
@@ -56,7 +55,7 @@ export async function saveToDatabase(
     await prisma.project.create({
       data: {
         title: userInput,
-        userId: user.id,
+        userId: userExist.id,
         outlines: outlines,
         slides: finalPresentationJson as any, // Cast to 'any' to satisfy Prisma's Json type
         createdAt: new Date(), // if you have a createdAt field

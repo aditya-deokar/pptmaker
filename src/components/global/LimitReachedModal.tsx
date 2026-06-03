@@ -20,8 +20,8 @@ interface LimitReachedModalProps {
 }
 
 export function LimitReachedModal({ isOpen, onClose, usage, limit }: LimitReachedModalProps) {
-  // BYOAK is an option if they are still on the first tier (5 projects)
-  const isByoakAvailable = limit <= 5
+  // BYOK is an option if they are still on the first tier (5 projects)
+  const isByokAvailable = limit <= 5
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -39,7 +39,7 @@ export function LimitReachedModal({ isOpen, onClose, usage, limit }: LimitReache
         </DialogHeader>
 
         <div className="grid gap-4 py-6">
-          {isByoakAvailable && (
+          {isByokAvailable && (
             <div className="flex flex-col gap-3 p-4 rounded-xl border border-vivid/20 bg-vivid/5 relative overflow-hidden group transition-all hover:bg-vivid/10">
               <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Key className="w-12 h-12" />
@@ -49,7 +49,7 @@ export function LimitReachedModal({ isOpen, onClose, usage, limit }: LimitReache
                 <span>Power User Option</span>
               </div>
               <p className="text-sm text-muted-foreground pr-8 leading-relaxed">
-                Add your own API key (Google, OpenAI, or Groq) to unlock <strong>10 additional projects</strong> for free.
+                Add your own API key (Google, OpenAI, or Groq) to unlock <strong>10 additional projects</strong> for presentation and mobile design generation.
               </p>
               <Link href="/settings" onClick={onClose} className="w-full">
                 <Button variant="outline" className="w-full border-vivid/30 hover:bg-vivid/10 text-vivid mt-2 font-semibold">

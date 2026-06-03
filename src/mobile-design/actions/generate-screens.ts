@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { inngest } from "@/mobile-design/inngest/client";
 import { revalidatePath } from "next/cache";
+import { findUserIdByClerkId } from "@/lib/user-compat";
 
 export async function generateScreens(
     projectId: string,
@@ -16,9 +17,7 @@ export async function generateScreens(
         throw new Error("Unauthorized");
     }
 
-    const user = await prisma.user.findUnique({
-        where: { clerkId: userId },
-    });
+    const user = await findUserIdByClerkId(userId);
 
     if (!user) {
         throw new Error("User not found");

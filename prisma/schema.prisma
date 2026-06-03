@@ -58,6 +58,7 @@ model User {
   name               String
   email              String   @unique
   profileImage       String?
+  defaultAiProvider  AiProvider?
   subscription       Boolean? @default(false)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -257,9 +258,13 @@ model UserAiKey {
   id           String     @id @default(cuid())
   userId       String     @db.Uuid
   provider     AiProvider
+  modelName    String?
   key          String     // Encrypted key string
   iv           String     // Initialization vector for AES
   tag          String     // Authentication tag for GCM
+  validatedAt  DateTime?
+  lastUsedAt   DateTime?
+  lastValidationError String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
@@ -290,4 +295,3 @@ model McpApiKey {
   @@index([keyPrefix])
   @@index([userId])
 }
-

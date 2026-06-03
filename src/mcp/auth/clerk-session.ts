@@ -25,7 +25,10 @@ export async function resolveClerkSession(): Promise<AuthContext | null> {
 
     const user = await prisma.user.findUnique({
       where: { clerkId },
-      include: {
+      select: {
+        id: true,
+        clerkId: true,
+        email: true,
         Subscription: { select: { status: true } },
       },
     });

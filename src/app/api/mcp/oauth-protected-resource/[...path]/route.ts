@@ -1,4 +1,5 @@
 import { headers } from 'next/headers';
+import { MCP_DOCS_PATH, MCP_HTTP_PATH } from '@/lib/mcp-client-guide';
 
 async function getBaseUrl(): Promise<string> {
   const requestHeaders = await headers();
@@ -14,9 +15,9 @@ export async function GET(): Promise<Response> {
   const baseUrl = await getBaseUrl();
 
   return Response.json({
-    resource: `${baseUrl}/api/mcp`,
+    resource: `${baseUrl}${MCP_HTTP_PATH}`,
     bearer_methods_supported: ['header'],
     resource_name: 'Verto AI MCP Server',
-    resource_documentation: `${baseUrl}/docs/mcp/04-usage-guide`,
+    resource_documentation: `${baseUrl}${MCP_DOCS_PATH}`,
   });
 }

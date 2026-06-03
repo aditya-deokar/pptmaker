@@ -10,13 +10,13 @@ import { Button } from "@/components/ui/button";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { User } from "@/generated/prisma";
 import { useToast } from "@/hooks/use-toast";
 import { buySubscription } from "@/actions/payment";
 import { ManageSubscription } from "@/components/global/subscription";
 import { UsageProgress } from "@/components/global/UsageProgress";
+import type { AuthenticatedAppUser } from "@/lib/user-compat";
 
-export function NavFooter({ prismaUser }: { prismaUser: User }) {
+export function NavFooter({ prismaUser }: { prismaUser: AuthenticatedAppUser }) {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
