@@ -223,13 +223,12 @@ function patchImageInContentTree(
 }
 
 /**
+ * @deprecated Images are now resolved inline during streaming in the API route.
+ * This function is kept for backward compatibility but is no longer called by the client.
+ *
  * Post-generation image patching for Streamable Slides.
- *
- * Scans all slides in a project for image nodes with empty/placeholder content,
- * resolves them to real images via the existing Unsplash/fallback provider,
- * patches the content trees in-place, and saves the updated slides to the DB.
- *
- * Called by the client after generation is complete.
+ * Scans all slides for image nodes with empty/placeholder content,
+ * resolves them, and saves the updated slides to the DB.
  */
 export async function patchStreamableImages(projectId: string) {
   try {

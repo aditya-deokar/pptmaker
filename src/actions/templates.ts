@@ -365,11 +365,24 @@ export async function saveProjectAsTemplate(
       return { status: 404 as const, error: "Project not found" };
     }
 
-    if (!project.slides || !Array.isArray(project.slides)) {
+    if (!project.slides) {
       return { status: 400 as const, error: "Project has no slides" };
     }
 
-    const slides = project.slides as any[];
+    let slides: any[];
+    if (typeof project.slides === 'string') {
+      try {
+        slides = JSON.parse(project.slides);
+      } catch (e) {
+        return { status: 400 as const, error: "Invalid slides format" };
+      }
+    } else {
+      slides = project.slides as any[];
+    }
+
+    if (!Array.isArray(slides)) {
+      return { status: 400 as const, error: "Project has no slides" };
+    }
 
     // Build layout sequence and outlines from slide data
     const layoutSequence = slides.map(
@@ -439,9 +452,9 @@ export async function saveProjectAsTemplate(
       status: 200 as const,
       data: { templateId: template.id },
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("saveProjectAsTemplate error:", error);
-    return { status: 500 as const, error: "Failed to save as template" };
+    return { status: 500 as const, error: "Failed to save as template: " + (error?.message || String(error)) };
   }
 }
 

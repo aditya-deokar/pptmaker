@@ -155,15 +155,14 @@ function blockquote(name: string, text: string, className?: string): ContentItem
   };
 }
 
-function statBox(name: string, value: string, label?: string): ContentItem {
+function statBox(name: string, value: string, label?: string, icon?: string): ContentItem {
   return {
     id: uid("stat"),
     type: "statBox",
     name,
-    content: [
-      { id: uid("sv"), type: "heading2", name: "value", content: value },
-      ...(label ? [{ id: uid("sl"), type: "paragraph", name: "label", content: label }] : []),
-    ] as ContentItem[],
+    content: value,
+    label: label,
+    icon: icon,
   };
 }
 
@@ -255,7 +254,7 @@ function buildVertoSlides(): Slide[] {
           "A full-stack creative workspace built on Next.js 16 — not just a slide generator",
           "text-center opacity-70 mb-10"
         ),
-        resizableCol("features", [
+        col("features", [
           col("f1", [
             h3("icon1", "🧠", "text-4xl mb-2"),
             h4("title1", "AI Presentation Generation"),
@@ -276,7 +275,7 @@ function buildVertoSlides(): Slide[] {
             h4("title4", "BYOK Runtime"),
             para("desc4", "Bring your own Google, OpenAI, or Groq keys with model preferences and validation-aware storage", "opacity-70 text-sm"),
           ], "p-6 rounded-xl border border-border/30 flex flex-col gap-2"),
-        ]),
+        ], "grid grid-cols-2 gap-6"),
       ]),
     },
 
@@ -324,27 +323,27 @@ function buildVertoSlides(): Slide[] {
       className: "p-4 md:p-8 mx-auto min-h-[400px]",
       content: col("root", [
         title("title", "8-Agent Generation Pipeline", "mb-8 text-center"),
-        resizableCol("flow", [
+        col("flow", [
           col("s1", [
             h3("n1", "1", "text-2xl font-bold text-primary mb-2"),
             h4("t1", "projectInitializer"),
           ], "flex-1 bg-primary/10 rounded-lg p-6 text-center"),
-          para("arrow1", "→", "text-3xl text-primary"),
+          para("arrow1", "→", "text-3xl text-primary text-center min-w-[2rem]"),
           col("s2", [
             h3("n2", "2", "text-2xl font-bold text-primary mb-2"),
             h4("t2", "outlineGenerator"),
           ], "flex-1 bg-primary/10 rounded-lg p-6 text-center"),
-          para("arrow2", "→", "text-3xl text-primary"),
+          para("arrow2", "→", "text-3xl text-primary text-center min-w-[2rem]"),
           col("s3", [
             h3("n3", "3", "text-2xl font-bold text-primary mb-2"),
             h4("t3", "layoutSelector"),
           ], "flex-1 bg-primary/10 rounded-lg p-6 text-center"),
-          para("arrow3", "→", "text-3xl text-primary"),
+          para("arrow3", "→", "text-3xl text-primary text-center min-w-[2rem]"),
           col("s4", [
             h3("n4", "4", "text-2xl font-bold text-primary mb-2"),
             h4("t4", "contentWriter"),
           ], "flex-1 bg-primary/10 rounded-lg p-6 text-center"),
-        ], "flex items-center gap-2"),
+        ], "flex flex-row items-center justify-between gap-2 w-full"),
         para(
           "pipeline-desc",
           "Layout selection happens before content writing so the generated copy fits the target slide shape. The pipeline continues through imageQueryGenerator → imageFetcher → jsonCompiler → databasePersister to produce the final deck.",
@@ -366,10 +365,10 @@ function buildVertoSlides(): Slide[] {
         h2("title", "Platform KPIs at a Glance", "text-center mb-4"),
         para("desc", "The numbers that define Verto AI's capabilities today", "text-center opacity-70 mb-12"),
         resizableCol("metrics", [
-          statBox("m1", "11", "MCP Tools Exposed"),
-          statBox("m2", "8", "AI Pipeline Agents"),
-          statBox("m3", "3", "AI Providers (BYOK)"),
-          statBox("m4", "30+", "Slide Layouts Available"),
+          statBox("m1", "11", "MCP Tools Exposed", "🔌"),
+          statBox("m2", "8", "AI Pipeline Agents", "🤖"),
+          statBox("m3", "3", "AI Providers (BYOK)", "🔑"),
+          statBox("m4", "30+", "Slide Layouts Available", "🎨"),
         ]),
       ]),
     },
@@ -385,7 +384,7 @@ function buildVertoSlides(): Slide[] {
       className: "p-4 md:p-8 mx-auto min-h-[400px]",
       content: col("root", [
         title("title", "Feature Deep-Dive", "mb-8 text-center"),
-        resizableCol("grid", [
+        col("grid", [
           col("i1", [
             h3("icon1", "⚡", "text-4xl mb-2"),
             h4("t1", "AI Presentation Generation"),
@@ -466,8 +465,8 @@ function buildVertoSlides(): Slide[] {
             ),
           ], "h-full bg-muted/20 rounded-3xl border border-border/50 p-2"),
           col("c2", [
-            statBox("s1", "Next.js 16", "App Router + Turbopack"),
-            statBox("s2", "React 19", "Tailwind CSS 4 + Radix UI"),
+            statBox("s1", "Next.js 16", "App Router + Turbopack", "🚀"),
+            statBox("s2", "React 19", "Tailwind CSS 4 + Radix UI", "⚛️"),
           ], "flex flex-col gap-4"),
           col("c3", [
             h2("heading", "Core Technologies"),
@@ -557,9 +556,9 @@ function buildVertoSlides(): Slide[] {
       content: col("root", [
         h2("title", "Growth & Performance Metrics", "text-center mb-12"),
         resizableCol("stats", [
-          statBox("s1", "30+", "Slide Layouts & Components"),
-          statBox("s2", "4", "Product Surfaces (Web, Mobile, MCP, Templates)"),
-          statBox("s3", "< 60s", "Average Deck Generation Time"),
+          statBox("s1", "30+", "Slide Layouts & Components", "🎨"),
+          statBox("s2", "4", "Product Surfaces (Web, Mobile, MCP, Templates)", "📱"),
+          statBox("s3", "< 60s", "Average Deck Generation Time", "⚡"),
         ]),
       ]),
     },

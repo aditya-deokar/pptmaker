@@ -362,24 +362,14 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
           >
             <StatBox
               className={content.className}
-              icon={content.icon} // These inputs aren't in standard ContentItem yet, 
-              // but we can assume they might be added or we rely on 'content' string parsing if strictly adhering to type.
-              // For now, let's map 'content' to value and assume other props.
-              // Actually, let's stick to using 'content' as the main value driver if strict.
-              // But my component implementation handles these props.
+              icon={content.icon}
+              label={content.label}
               value={typeof content.content === 'string' ? content.content : "0"}
               isPreview={isPreview}
               isEditable={isEditable}
-              // Since specific fields like 'icon' and 'label' are not on ContentItem, 
-              // we'd typically need to extend ContentItem or parse them from a JSON string in 'content',
-              // or use a 'metadata' field. 
-              // For this MVP, I'll rely on generic props or just render basic.
-              // To make it truly editable, I should bind onChange to specific fields if I extended ContentItem,
-              // but onContentChange takes a string. 
-              // Let's assume for now we just edit the 'value' via onContentChange.
               onChange={(_field, val) => {
-                // Simple single-field mapping for now:
                 if (_field === 'value') onContentChange(content.id, val);
+                // In a fully featured editor, we would dispatch updateComponent(slideId, content.id, { [_field]: val })
               }}
             />
           </motion.div>

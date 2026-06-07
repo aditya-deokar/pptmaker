@@ -35,7 +35,7 @@ const Paragraph = React.forwardRef<HTMLTextAreaElement, ParagraphProps>(
             <textarea
                 className={cn(
                     `w-full bg-transparent font-normal placeholder:text-muted-foreground/25 placeholder:italic focus:placeholder:text-muted-foreground/10 focus:outline-hidden transition-colors duration-200 resize-none leading-relaxed tracking-wide hover:bg-black/5 dark:hover:bg-white/5 focus:bg-transparent rounded-md`,
-                    isPreview ? 'text-sm leading-normal cursor-default pointer-events-none hover:bg-transparent dark:hover:bg-transparent' : 'text-[clamp(0.875rem,2.5cqw,1.25rem)]',
+                    isPreview ? 'text-sm leading-normal cursor-default pointer-events-none hover:bg-transparent dark:hover:bg-transparent' : 'text-[clamp(0.875rem,1.5cqw,1.125rem)]',
                     className
                 )}
                 style={{

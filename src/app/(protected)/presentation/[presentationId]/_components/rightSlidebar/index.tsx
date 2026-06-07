@@ -23,7 +23,7 @@ const EditorSidebar = () => {
     return (
         <div className="w-full h-full flex flex-col bg-background/50 backdrop-blur-xl border-l border-border/50 relative">
             {/* Header / Tabs */}
-            <div className="flex items-center justify-between p-3 border-b border-border/50 bg-background/50 backdrop-blur-md z-10 sticky top-0 shrink-0">
+            <div className="flex items-center justify-between p-3 pr-14 border-b border-border/50 bg-background/50 backdrop-blur-md z-10 sticky top-0 shrink-0">
                 <div className="flex w-full items-center gap-1 bg-muted/40 p-1 rounded-xl">
                     {(['layout', 'typography', 'theme'] as TabType[]).map((tab) => {
                         const Icon = tab === 'layout' ? LayoutTemplate : tab === 'typography' ? Type : Palette;
@@ -35,7 +35,7 @@ const EditorSidebar = () => {
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={cn(
-                                    "relative flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium transition-colors duration-300 rounded-lg outline-none",
+                                    "relative flex-1 flex items-center justify-center gap-2 px-2 py-2 text-sm font-medium transition-colors duration-300 rounded-lg outline-none",
                                     isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                                 )}
                             >
@@ -48,7 +48,7 @@ const EditorSidebar = () => {
                                 )}
                                 <span className="relative z-10 flex items-center gap-2">
                                     <Icon className={cn("w-4 h-4", isActive ? "text-primary" : "opacity-70")} />
-                                    <span className="hidden lg:inline">{label}</span>
+                                    <span className="hidden xl:inline">{label}</span>
                                 </span>
                             </button>
                         );

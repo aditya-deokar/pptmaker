@@ -91,6 +91,12 @@ const SlideThumbnail = ({ index, moveSlide, slide, onInsert }: Props) => {
 
     drag(drop(ref))
 
+    const handleThumbnailClick = () => {
+        setCurrentSlide(index);
+        // Dispatch custom event to scroll the main editor to this slide
+        window.dispatchEvent(new CustomEvent('editor:scroll-to-slide', { detail: { index } }));
+    };
+
     return (
         <motion.div 
             ref={ref as any} 
@@ -105,13 +111,13 @@ const SlideThumbnail = ({ index, moveSlide, slide, onInsert }: Props) => {
             {/* Slide Card */}
             <div
                 className={cn(
-                    'group relative flex flex-col gap-2 p-3 rounded-xl transition-all duration-300 overflow-visible',
+                    'group relative flex flex-col gap-2 p-3 rounded-xl transition-all duration-300 overflow-visible cursor-pointer',
                     isDragging ? 'opacity-40 scale-95 ring-2 ring-primary/50 grayscale-[0.5]' : 'opacity-100',
                     index === currentSlide 
                         ? 'bg-muted border border-border ' 
                         : 'hover:bg-muted/50 border border-transparent hover:border-border/50',
                 )}
-                onClick={() => setCurrentSlide(index)}
+                onClick={handleThumbnailClick}
             >
                 <div className="flex items-center justify-between w-full relative z-10">
                     <span className={cn(

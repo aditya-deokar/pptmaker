@@ -92,55 +92,62 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-5">
-      <section className="rounded-[28px] border bg-card/85 p-5 shadow-sm">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-          <div className="space-y-3">
-            <Badge className="rounded-full border border-foreground/10 bg-background px-3 py-1 text-foreground hover:bg-background">
+    <div className="space-y-6 p-4 md:p-8">
+      <section className="relative overflow-hidden rounded-[32px] border bg-card/40 p-6 shadow-sm backdrop-blur-xl md:p-8">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50" />
+        <div className="relative flex flex-col gap-8 xl:flex-row xl:items-center xl:justify-between">
+          <div className="space-y-4">
+            <Badge className="rounded-full border border-foreground/10 bg-background/50 px-3 py-1 text-foreground backdrop-blur-md hover:bg-background/80">
               Settings
             </Badge>
-            <div className="space-y-1.5">
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-semibold tracking-tight text-foreground">
                 Clean controls for your workspace
               </h1>
-              <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+              <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
                 Keep appearance, AI routing, and external access in one focused place.
               </p>
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3 xl:min-w-[560px]">
-            <div className="rounded-2xl border bg-background/90 p-4">
-              <div className="flex items-center gap-2">
-                <div className="rounded-xl bg-muted p-2">
+          <div className="grid gap-4 sm:grid-cols-3 xl:min-w-[600px]">
+            <div className="rounded-[24px] border bg-background/50 p-5 shadow-sm backdrop-blur-sm transition-all hover:bg-background/80">
+              <div className="flex items-center gap-3">
+                <div className="rounded-2xl bg-muted/50 p-2.5">
                   <Palette className="h-4 w-4 text-foreground" />
                 </div>
                 <p className="text-sm font-medium">Theme</p>
               </div>
-              <p className="mt-3 text-base font-semibold">{activeThemeLabel}</p>
-              <p className="mt-1 text-sm text-muted-foreground">Switch instantly from the account tab.</p>
+              <div className="mt-4">
+                <p className="text-base font-semibold">{activeThemeLabel}</p>
+                <p className="mt-1 text-sm text-muted-foreground">Switch from account tab</p>
+              </div>
             </div>
 
-            <div className="rounded-2xl border bg-background/90 p-4">
-              <div className="flex items-center gap-2">
-                <div className="rounded-xl bg-muted p-2">
+            <div className="rounded-[24px] border bg-background/50 p-5 shadow-sm backdrop-blur-sm transition-all hover:bg-background/80">
+              <div className="flex items-center gap-3">
+                <div className="rounded-2xl bg-muted/50 p-2.5">
                   <Cpu className="h-4 w-4 text-foreground" />
                 </div>
                 <p className="text-sm font-medium">Runtime</p>
               </div>
-              <p className="mt-3 text-base font-semibold">Unified AI</p>
-              <p className="mt-1 text-sm text-muted-foreground">One setup for presentations and mobile design.</p>
+              <div className="mt-4">
+                <p className="text-base font-semibold">Unified AI</p>
+                <p className="mt-1 text-sm text-muted-foreground">One setup for all apps</p>
+              </div>
             </div>
 
-            <div className="rounded-2xl border bg-background/90 p-4">
-              <div className="flex items-center gap-2">
-                <div className="rounded-xl bg-muted p-2">
+            <div className="rounded-[24px] border bg-background/50 p-5 shadow-sm backdrop-blur-sm transition-all hover:bg-background/80">
+              <div className="flex items-center gap-3">
+                <div className="rounded-2xl bg-muted/50 p-2.5">
                   <KeyRound className="h-4 w-4 text-foreground" />
                 </div>
                 <p className="text-sm font-medium">Access</p>
               </div>
-              <p className="mt-3 text-base font-semibold">Hosted MCP</p>
-              <p className="mt-1 text-sm text-muted-foreground">Keys and client setup stay together.</p>
+              <div className="mt-4">
+                <p className="text-base font-semibold">Hosted MCP</p>
+                <p className="mt-1 text-sm text-muted-foreground">Keys stay together</p>
+              </div>
             </div>
           </div>
         </div>
@@ -151,10 +158,10 @@ export default function SettingsPage() {
         onValueChange={(value) =>
           setActiveTab(value as (typeof settingsSections)[number]["value"])
         }
-        className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)] xl:items-start"
+        className="grid gap-6 xl:grid-cols-[300px_minmax(0,1fr)] xl:items-start"
       >
-        <aside className="space-y-4 xl:sticky xl:top-4">
-          <TabsList className="grid h-auto w-full grid-cols-1 gap-2 rounded-[28px] border bg-card/85 p-2 shadow-sm">
+        <aside className="space-y-4 xl:sticky xl:top-6">
+          <TabsList className="grid h-auto w-full grid-cols-1 gap-1.5 rounded-[32px] border bg-card/40 p-3 shadow-sm backdrop-blur-xl">
             {settingsSections.map((section) => {
               const Icon = section.icon;
 
@@ -163,17 +170,17 @@ export default function SettingsPage() {
                   key={section.value}
                   value={section.value}
                   className={cn(
-                    "h-auto w-full justify-start rounded-[22px] px-4 py-4 text-left",
-                    "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+                    "h-auto w-full justify-start whitespace-normal rounded-[24px] px-4 py-3.5 text-left transition-all",
+                    "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-border"
                   )}
                 >
-                  <div className="flex w-full items-start gap-3">
-                    <div className="rounded-2xl bg-muted p-2.5">
+                  <div className="flex w-full min-w-0 items-start gap-3.5">
+                    <div className="shrink-0 rounded-2xl bg-muted/50 p-2.5">
                       <Icon className="h-4 w-4 text-foreground" />
                     </div>
-                    <div className="space-y-1">
+                    <div className="min-w-0 space-y-1">
                       <p className="text-sm font-medium">{section.label}</p>
-                      <p className="text-xs leading-5 text-muted-foreground">
+                      <p className="text-xs leading-relaxed text-muted-foreground">
                         {section.description}
                       </p>
                     </div>
@@ -183,43 +190,45 @@ export default function SettingsPage() {
             })}
           </TabsList>
 
-          <div className="rounded-[24px] border bg-card/85 p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="rounded-[28px] border bg-card/40 p-5 shadow-sm backdrop-blur-xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Current section
             </p>
-            <p className="mt-3 text-sm font-medium text-foreground">{activeSection.label}</p>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              {activeSection.description}
-            </p>
+            <div className="mt-4">
+              <p className="text-sm font-medium text-foreground">{activeSection.label}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                {activeSection.description}
+              </p>
+            </div>
           </div>
         </aside>
 
         <div className="min-w-0 space-y-6">
-          <TabsContent value="account" className="mt-0 space-y-6">
-            <section className="rounded-[30px] border bg-card/85 p-6 shadow-sm">
-              <div className="space-y-2">
-                <h2 className="text-xl font-semibold tracking-tight">Account</h2>
-                <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+          <TabsContent value="account" className="mt-0 space-y-6 outline-none">
+            <section className="rounded-[32px] border bg-card/40 p-6 shadow-sm backdrop-blur-xl md:p-8">
+              <div className="space-y-2.5">
+                <h2 className="text-2xl font-semibold tracking-tight">Account</h2>
+                <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
                   Keep the workspace comfortable, then jump into your secure account manager for
                   profile, password, and sign-in changes.
                 </p>
               </div>
 
-              <div className="mt-6 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-                <div className="rounded-[26px] border bg-background/90 p-5 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-2xl bg-muted p-2.5">
-                      <Palette className="h-4 w-4 text-foreground" />
+              <div className="mt-8 grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
+                <div className="rounded-[28px] border bg-background/50 p-6 shadow-sm backdrop-blur-sm">
+                  <div className="flex items-center gap-3.5">
+                    <div className="rounded-2xl bg-muted/50 p-3">
+                      <Palette className="h-5 w-5 text-foreground" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">Appearance</p>
+                      <p className="text-base font-medium text-foreground">Appearance</p>
                       <p className="text-sm text-muted-foreground">
                         Choose how Verto looks while you work.
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  <div className="mt-6 grid gap-4 sm:grid-cols-3">
                     {themeOptions.map((option) => {
                       const Icon = option.icon;
                       const isActive = activeTheme === option.value;
@@ -230,17 +239,17 @@ export default function SettingsPage() {
                           type="button"
                           onClick={() => setTheme(option.value)}
                           className={cn(
-                            "rounded-2xl border p-4 text-left transition-all",
-                            "hover:-translate-y-0.5 hover:border-foreground/15 hover:shadow-sm",
+                            "group rounded-[20px] border p-4 text-left transition-all duration-200",
+                            "hover:-translate-y-1 hover:border-foreground/20 hover:shadow-md",
                             isActive
-                              ? "border-foreground/15 bg-foreground text-background shadow-sm"
-                              : "bg-background text-foreground"
+                              ? "border-foreground/20 bg-foreground text-background shadow-md"
+                              : "bg-background/50 text-foreground"
                           )}
                         >
                           <div
                             className={cn(
-                              "inline-flex rounded-xl p-2",
-                              isActive ? "bg-white/10" : "bg-muted"
+                              "inline-flex rounded-xl p-2.5 transition-colors",
+                              isActive ? "bg-background/20" : "bg-muted/50 group-hover:bg-muted"
                             )}
                           >
                             <Icon
@@ -253,8 +262,8 @@ export default function SettingsPage() {
                           <p className="mt-4 text-sm font-medium">{option.label}</p>
                           <p
                             className={cn(
-                              "mt-1 text-xs leading-5",
-                              isActive ? "text-background/70" : "text-muted-foreground"
+                              "mt-1.5 text-xs leading-relaxed",
+                              isActive ? "text-background/80" : "text-muted-foreground"
                             )}
                           >
                             {option.description}
@@ -265,39 +274,41 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="rounded-[26px] border bg-background/90 p-5 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-2xl bg-muted p-2.5">
-                      <ShieldCheck className="h-4 w-4 text-foreground" />
+                <div className="flex flex-col justify-between rounded-[28px] border bg-background/50 p-6 shadow-sm backdrop-blur-sm">
+                  <div>
+                    <div className="flex items-center gap-3.5">
+                      <div className="rounded-2xl bg-muted/50 p-3">
+                        <ShieldCheck className="h-5 w-5 text-foreground" />
+                      </div>
+                      <div>
+                        <p className="text-base font-medium text-foreground">Account & security</p>
+                        <p className="text-sm text-muted-foreground">
+                          Managed through your secure account portal.
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-foreground">Account & security</p>
-                      <p className="text-sm text-muted-foreground">
-                        Managed through your secure account portal.
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="mt-5 space-y-3 rounded-2xl border bg-muted/25 p-4">
-                    <div className="flex items-start gap-3">
-                      <UserRound className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm leading-6 text-muted-foreground">
-                        Update your name, photo, email, and connected sign-in methods.
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <ShieldCheck className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm leading-6 text-muted-foreground">
-                        Review password, sessions, and account security from one place.
-                      </p>
+                    <div className="mt-6 space-y-4 rounded-[20px] border bg-muted/30 p-5">
+                      <div className="flex items-start gap-3">
+                        <UserRound className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                        <p className="text-sm leading-relaxed text-muted-foreground">
+                          Update your name, photo, email, and connected sign-in methods.
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                        <p className="text-sm leading-relaxed text-muted-foreground">
+                          Review password, sessions, and account security from one place.
+                        </p>
+                      </div>
                     </div>
                   </div>
 
                   <Button
-                    className="mt-5 h-11 w-full rounded-2xl"
+                    className="mt-6 h-12 w-full rounded-[20px] text-base font-medium transition-all hover:scale-[1.02]"
                     onClick={handleOpenAccountManager}
                   >
-                    <ArrowUpRight className="h-4 w-4" />
+                    <ArrowUpRight className="mr-2 h-4 w-4" />
                     Open account manager
                   </Button>
                 </div>
@@ -305,26 +316,34 @@ export default function SettingsPage() {
             </section>
           </TabsContent>
 
-          <TabsContent value="ai-config" className="mt-0 space-y-4">
-            <div className="space-y-1 px-1">
-              <h2 className="text-xl font-semibold tracking-tight">AI Runtime</h2>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Manage your provider keys, preferred routing, and shared runtime behavior for the
-                whole workspace.
-              </p>
-            </div>
-            <AiConfiguration />
+          <TabsContent value="ai-config" className="mt-0 space-y-6 outline-none">
+            <section className="rounded-[32px] border bg-card/40 p-6 shadow-sm backdrop-blur-xl md:p-8">
+              <div className="space-y-2.5">
+                <h2 className="text-2xl font-semibold tracking-tight">AI Runtime</h2>
+                <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
+                  Manage your provider keys, preferred routing, and shared runtime behavior for the
+                  whole workspace.
+                </p>
+              </div>
+              <div className="mt-8">
+                <AiConfiguration />
+              </div>
+            </section>
           </TabsContent>
 
-          <TabsContent value="mcp-keys" className="mt-0 space-y-4">
-            <div className="space-y-1 px-1">
-              <h2 className="text-xl font-semibold tracking-tight">MCP Access</h2>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Create keys and connect hosted Verto AI tools to Claude, Cursor, and other MCP
-                clients.
-              </p>
-            </div>
-            <McpApiKeys />
+          <TabsContent value="mcp-keys" className="mt-0 space-y-6 outline-none">
+            <section className="rounded-[32px] border bg-card/40 p-6 shadow-sm backdrop-blur-xl md:p-8">
+              <div className="space-y-2.5">
+                <h2 className="text-2xl font-semibold tracking-tight">MCP Access</h2>
+                <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
+                  Create keys and connect hosted Verto AI tools to Claude, Cursor, and other MCP
+                  clients.
+                </p>
+              </div>
+              <div className="mt-8">
+                <McpApiKeys />
+              </div>
+            </section>
           </TabsContent>
         </div>
       </Tabs>

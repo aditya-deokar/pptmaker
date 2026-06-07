@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const providerFieldDefaults: Record<AiProvider, string> = {
   [AiProvider.GOOGLE]: '',
@@ -267,8 +268,42 @@ export function AiConfiguration() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[280px] items-center justify-center rounded-[28px] border bg-card/40">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div className="rounded-[32px] border bg-card/40 p-6 shadow-sm md:p-8">
+          <div className="grid gap-8 xl:grid-cols-[1.4fr_1fr]">
+            <div className="space-y-6">
+              <Skeleton className="h-6 w-40 rounded-full" />
+              <div className="space-y-3">
+                <Skeleton className="h-8 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-4/5" />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Skeleton className="h-32 rounded-[24px]" />
+                <Skeleton className="h-32 rounded-[24px]" />
+                <Skeleton className="h-32 rounded-[24px]" />
+              </div>
+            </div>
+            <Skeleton className="h-full min-h-[300px] rounded-[28px]" />
+          </div>
+        </div>
+
+        <div className="rounded-[32px] border bg-card/40 p-6 shadow-sm md:p-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-32" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+            <Skeleton className="h-6 w-24 rounded-full" />
+          </div>
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            <Skeleton className="h-36 rounded-[24px]" />
+            <Skeleton className="h-36 rounded-[24px]" />
+            <Skeleton className="h-36 rounded-[24px]" />
+          </div>
+        </div>
+
+        <Skeleton className="h-[500px] w-full rounded-[32px]" />
       </div>
     )
   }
@@ -310,119 +345,82 @@ export function AiConfiguration() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[30px] border bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.9),transparent_36%),linear-gradient(135deg,rgba(250,250,250,0.98),rgba(244,244,245,0.9))] p-6 shadow-sm">
-        <div className="grid gap-6 xl:grid-cols-[1.4fr_0.95fr]">
-          <div className="space-y-5">
+      <section className="rounded-[32px] border bg-card/40 p-6 shadow-sm backdrop-blur-xl md:p-8">
+        <div className="grid gap-8 xl:grid-cols-[1.4fr_1fr]">
+          <div className="space-y-6">
             <div className="space-y-3">
-              <Badge className="rounded-full border border-foreground/10 bg-background/90 px-3 py-1 text-foreground shadow-sm hover:bg-background/90">
+              <Badge className="rounded-full border border-foreground/10 bg-background/50 px-3 py-1 text-foreground backdrop-blur-md hover:bg-background/80">
                 Bring Your Own Model
               </Badge>
               <div className="space-y-2">
                 <h3 className="text-2xl font-semibold tracking-tight">{heroTitle}</h3>
-                <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                  {heroDescription}
-                </p>
+                <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{heroDescription}</p>
               </div>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-2xl border bg-background/85 p-4 shadow-sm">
-                <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                  Current status
-                </p>
-                <p className="mt-3 text-lg font-semibold">
-                  {configuration.businessModel.byokActive ? 'BYOK live' : 'Hosted default'}
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {configuration.businessModel.byokActive
-                    ? 'Your saved provider can be used right now.'
-                    : 'Verto will keep using the hosted runtime until BYOK is active.'}
-                </p>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="rounded-[24px] border bg-background/50 p-5 shadow-sm backdrop-blur-sm transition-all hover:border-foreground/20 hover:bg-background/80">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Current status</p>
+                <p className="mt-3 text-lg font-semibold">{configuration.businessModel.byokActive ? 'BYOK live' : 'Hosted default'}</p>
+                <p className="mt-1.5 text-xs text-muted-foreground">{configuration.businessModel.byokActive ? 'Saved provider active.' : 'Using hosted runtime.'}</p>
               </div>
 
-              <div className="rounded-2xl border bg-background/85 p-4 shadow-sm">
-                <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                  Connected
-                </p>
-                <p className="mt-3 text-lg font-semibold">
-                  {connectedProviders.length} of {configuration.providers.length} providers
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {usableProviders.length > 0
-                    ? `${usableProviders.length} key${usableProviders.length === 1 ? '' : 's'} are ready to route.`
-                    : 'Add one provider to unlock custom routing.'}
-                </p>
+              <div className="rounded-[24px] border bg-background/50 p-5 shadow-sm backdrop-blur-sm transition-all hover:border-foreground/20 hover:bg-background/80">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Connected</p>
+                <p className="mt-3 text-lg font-semibold">{connectedProviders.length} of {configuration.providers.length}</p>
+                <p className="mt-1.5 text-xs text-muted-foreground">{usableProviders.length} ready to route.</p>
               </div>
 
-              <div className="rounded-2xl border bg-background/85 p-4 shadow-sm">
-                <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                  Routing
-                </p>
-                <p className="mt-3 text-lg font-semibold">
-                  {activeProviderLabel || 'Automatic'}
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Falls back to {fallbackProviderLabel} {configuration.systemFallback.modelName}.
-                </p>
+              <div className="rounded-[24px] border bg-background/50 p-5 shadow-sm backdrop-blur-sm transition-all hover:border-foreground/20 hover:bg-background/80">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Routing</p>
+                <p className="mt-3 text-lg font-semibold">{activeProviderLabel || 'Automatic'}</p>
+                <p className="mt-1.5 text-xs text-muted-foreground line-clamp-1">Fallback: {fallbackProviderLabel}</p>
               </div>
             </div>
 
             {configuration.compatibility.message ? (
-              <div className="rounded-2xl border border-sky-500/20 bg-sky-500/8 px-4 py-3 text-sm text-sky-900">
+              <div className="rounded-2xl border border-sky-500/20 bg-sky-500/10 px-4 py-3 text-sm text-sky-600">
                 {configuration.compatibility.message}
               </div>
             ) : null}
           </div>
 
-          <div className="rounded-[28px] border bg-background/90 p-5 shadow-sm">
-            <div className="flex items-center gap-2">
-              <div className="rounded-2xl bg-foreground p-2 text-background">
-                <ShieldCheck className="h-4 w-4" />
+          <div className="flex flex-col justify-between rounded-[28px] border bg-background/50 p-6 shadow-sm backdrop-blur-sm">
+            <div>
+              <div className="flex items-center gap-3.5">
+                <div className="rounded-2xl bg-muted/50 p-3">
+                  <ShieldCheck className="h-5 w-5 text-foreground" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Primary routing</p>
+                  <p className="text-sm text-muted-foreground">Preferred saved provider.</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium">Primary routing</p>
-                <p className="text-sm text-muted-foreground">
-                  Choose how Verto should prefer your saved providers.
-                </p>
+
+              <div className="mt-6 space-y-3">
+                <Label htmlFor="default-provider" className="text-muted-foreground">Default provider</Label>
+                <Select value={defaultProviderValue} onValueChange={setDefaultProviderValue}>
+                  <SelectTrigger
+                    id="default-provider"
+                    className="h-12 rounded-[20px] bg-background/50"
+                    disabled={!configuration.compatibility.supportsDefaultProvider}
+                  >
+                    <SelectValue placeholder="Choose a default provider" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="automatic">Automatic</SelectItem>
+                    {usableProviders.map((provider) => (
+                      <SelectItem key={provider.provider} value={provider.provider}>
+                        {provider.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-
-            <div className="mt-5 space-y-2">
-              <Label htmlFor="default-provider">Default provider</Label>
-              <Select value={defaultProviderValue} onValueChange={setDefaultProviderValue}>
-                <SelectTrigger
-                  id="default-provider"
-                  className="h-11 rounded-2xl"
-                  disabled={!configuration.compatibility.supportsDefaultProvider}
-                >
-                  <SelectValue placeholder="Choose a default provider" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="automatic">Automatic</SelectItem>
-                  {usableProviders.map((provider) => (
-                    <SelectItem key={provider.provider} value={provider.provider}>
-                      {provider.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs leading-5 text-muted-foreground">
-                {configuration.compatibility.supportsDefaultProvider
-                  ? 'Automatic keeps routing flexible and falls back safely when a provider is unavailable.'
-                  : 'Default provider selection will unlock after the latest AI settings upgrade finishes syncing.'}
-              </p>
-            </div>
-
-            <div className="mt-5 rounded-2xl border bg-muted/30 p-4">
-              <p className="text-sm font-medium">Used across Verto</p>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Presentations, streamable slides, MCP generation, and mobile design all use this
-                same saved runtime setup.
-              </p>
             </div>
 
             <Button
-              className="mt-5 h-11 w-full rounded-2xl"
+              className="mt-6 h-12 w-full rounded-[20px] transition-all hover:scale-[1.02]"
               variant="outline"
               onClick={handleSaveDefaultProvider}
               disabled={
@@ -431,29 +429,25 @@ export function AiConfiguration() {
                 savingDefaultProvider
               }
             >
-              {savingDefaultProvider ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              Save routing preference
+              {savingDefaultProvider ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Save preference
             </Button>
           </div>
         </div>
       </section>
 
-      <section className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h4 className="text-lg font-semibold">Providers</h4>
-            <p className="text-sm text-muted-foreground">
-              Pick one provider to manage. Everything else stays out of the way.
-            </p>
+      <section className="rounded-[32px] border bg-card/40 p-6 shadow-sm backdrop-blur-xl md:p-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <h4 className="text-xl font-semibold tracking-tight">Providers</h4>
+            <p className="text-sm text-muted-foreground">Manage your API keys.</p>
           </div>
           <Badge variant="outline" className="rounded-full px-3 py-1">
             {selectedProviderConfig.label}
           </Badge>
         </div>
 
-        <div className="grid gap-3 lg:grid-cols-3">
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
           {configuration.providers.map((providerConfig) => {
             const providerState = getProviderState(providerConfig, configuration)
             const isSelected = providerConfig.provider === selectedProvider
@@ -464,45 +458,46 @@ export function AiConfiguration() {
                 type="button"
                 onClick={() => setSelectedProvider(providerConfig.provider)}
                 className={cn(
-                  'rounded-[26px] border bg-card/80 p-4 text-left shadow-sm transition-all',
-                  'hover:-translate-y-0.5 hover:border-foreground/15 hover:shadow-md',
-                  isSelected && 'border-foreground/20 bg-background shadow-md ring-1 ring-foreground/10'
+                  'rounded-[24px] border p-5 text-left transition-all duration-200',
+                  isSelected 
+                    ? 'border-foreground/20 bg-background/60 shadow-md ring-1 ring-foreground/10' 
+                    : 'bg-background/40 hover:-translate-y-1 hover:border-foreground/15 hover:bg-background/60 hover:shadow-sm'
                 )}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-3">
-                    <div className={cn('rounded-2xl p-2.5', providerState.iconClassName)}>
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className={cn('shrink-0 rounded-[18px] p-2.5', providerState.iconClassName)}>
                       {providerConfig.usable ? (
                         <CheckCircle2 className="h-5 w-5" />
                       ) : (
                         <Circle className="h-5 w-5" />
                       )}
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-semibold">{providerConfig.label}</p>
+                        <p className="font-semibold text-foreground truncate">{providerConfig.label}</p>
                         {providerConfig.isDefault ? (
-                          <Badge variant="secondary" className="rounded-full">
+                          <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
                             Default
                           </Badge>
                         ) : null}
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground truncate">
                         {providerState.description}
                       </p>
                     </div>
                   </div>
 
                   {isSelected ? (
-                    <ArrowRight className="mt-1 h-4 w-4 text-muted-foreground" />
+                    <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-foreground/50" />
                   ) : null}
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Badge className={cn('rounded-full border', providerState.badgeClassName)}>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Badge className={cn('rounded-full border px-2 py-0.5 text-[10px]', providerState.badgeClassName)}>
                     {providerState.label}
                   </Badge>
-                  <Badge variant="outline" className="rounded-full">
+                  <Badge variant="outline" className="rounded-full bg-background/50 px-2 py-0.5 text-[10px]">
                     {providerConfig.modelName || providerConfig.defaultModel}
                   </Badge>
                 </div>
@@ -514,23 +509,21 @@ export function AiConfiguration() {
 
       <section
         className={cn(
-          'rounded-[30px] border p-6 shadow-sm',
+          'rounded-[32px] border p-6 shadow-sm backdrop-blur-xl md:p-8',
           selectedProviderState.panelClassName
         )}
       >
-        <div className="grid gap-6 xl:grid-cols-[1.25fr_0.85fr]">
+        <div className="grid gap-8 xl:grid-cols-[1.3fr_0.7fr]">
           <div className="space-y-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-3">
-                  <h4 className="text-xl font-semibold">{selectedProviderConfig.label}</h4>
-                  <Badge
-                    className={cn('rounded-full border', selectedProviderState.badgeClassName)}
-                  >
+                  <h4 className="text-2xl font-semibold tracking-tight">{selectedProviderConfig.label}</h4>
+                  <Badge className={cn('rounded-full border', selectedProviderState.badgeClassName)}>
                     {selectedProviderState.label}
                   </Badge>
                 </div>
-                <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {selectedProviderConfig.description}
                 </p>
               </div>
@@ -552,8 +545,8 @@ export function AiConfiguration() {
               ) : null}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor={`${selectedProviderConfig.provider}-key`}>
+            <div className="space-y-3">
+              <Label htmlFor={`${selectedProviderConfig.provider}-key`} className="text-muted-foreground">
                 {selectedProviderConfig.keyLabel}
               </Label>
               <div className="relative">
@@ -562,10 +555,10 @@ export function AiConfiguration() {
                   type="password"
                   placeholder={
                     selectedProviderConfig.configured
-                      ? 'Stored securely. Paste a new key only if you want to replace it.'
+                      ? 'Stored securely. Paste a new key to replace.'
                       : `Enter your ${selectedProviderConfig.keyLabel.toLowerCase()}`
                   }
-                  className="h-12 rounded-2xl pr-10"
+                  className="h-12 rounded-[20px] bg-background/50 pr-10"
                   value={inputKeys[selectedProviderConfig.provider]}
                   onChange={(event) =>
                     setInputKeys((current) => ({
@@ -574,23 +567,18 @@ export function AiConfiguration() {
                     }))
                   }
                 />
-                <Key className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
+                <Key className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
               </div>
-              <p className="text-xs leading-5 text-muted-foreground">
-                {selectedProviderConfig.configured
-                  ? 'Your current key stays in place until you replace it with a new one.'
-                  : 'Keys are encrypted before they are stored in your workspace.'}
-              </p>
             </div>
 
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor={`${selectedProviderConfig.provider}-model`}>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <Label htmlFor={`${selectedProviderConfig.provider}-model`} className="text-muted-foreground">
                   Preferred model name
                 </Label>
                 <Input
                   id={`${selectedProviderConfig.provider}-model`}
-                  className="h-12 rounded-2xl"
+                  className="h-12 rounded-[20px] bg-background/50"
                   placeholder={`Leave blank to use ${selectedProviderConfig.defaultModel}`}
                   value={inputModels[selectedProviderConfig.provider]}
                   disabled={!configuration.compatibility.supportsPreferredModelName}
@@ -601,14 +589,9 @@ export function AiConfiguration() {
                     }))
                   }
                 />
-                <p className="text-xs leading-5 text-muted-foreground">
-                  {configuration.compatibility.supportsPreferredModelName
-                    ? 'Use the exact model id from your provider account if you want something other than the default.'
-                    : 'Saved model names will appear here after the latest AI settings upgrade finishes syncing.'}
-                </p>
               </div>
 
-              <div className="rounded-2xl border bg-background/80 p-4">
+              <div className="rounded-[24px] border bg-background/30 p-5 backdrop-blur-sm">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-amber-500" />
                   <p className="text-sm font-medium">Recommended models</p>
@@ -619,12 +602,8 @@ export function AiConfiguration() {
                       key={model.value}
                       type="button"
                       size="sm"
-                      variant={
-                        inputModels[selectedProviderConfig.provider] === model.value
-                          ? 'default'
-                          : 'outline'
-                      }
-                      className="rounded-full"
+                      variant={inputModels[selectedProviderConfig.provider] === model.value ? 'default' : 'outline'}
+                      className="rounded-full transition-all"
                       disabled={!configuration.compatibility.supportsPreferredModelName}
                       onClick={() =>
                         setInputModels((current) => ({
@@ -649,90 +628,65 @@ export function AiConfiguration() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button
                 variant="outline"
-                className="h-12 flex-1 rounded-2xl"
+                className="h-12 flex-1 rounded-[20px] bg-background/50 transition-all hover:scale-[1.02]"
                 onClick={() => handleTest(selectedProviderConfig)}
                 disabled={
                   testingProvider === selectedProviderConfig.provider ||
                   inputKeys[selectedProviderConfig.provider].trim().length === 0
                 }
               >
-                {testingProvider === selectedProviderConfig.provider ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Zap className="mr-2 h-4 w-4" />
-                )}
+                {testingProvider === selectedProviderConfig.provider ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
                 Test key
               </Button>
 
               <Button
-                className="h-12 flex-1 rounded-2xl"
+                className="h-12 flex-1 rounded-[20px] transition-all hover:scale-[1.02]"
                 onClick={() => handleSave(selectedProviderConfig)}
                 disabled={
                   savingProvider === selectedProviderConfig.provider ||
-                  (!selectedProviderConfig.configured &&
-                    inputKeys[selectedProviderConfig.provider].trim().length === 0)
+                  (!selectedProviderConfig.configured && inputKeys[selectedProviderConfig.provider].trim().length === 0)
                 }
               >
-                {savingProvider === selectedProviderConfig.provider ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
+                {savingProvider === selectedProviderConfig.provider ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 {selectedProviderConfig.configured ? 'Save changes' : 'Save provider'}
               </Button>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="rounded-[26px] border bg-background/88 p-5 shadow-sm">
-              <p className="text-sm font-medium">What Verto will use</p>
+          <div className="flex flex-col gap-4">
+            <div className="rounded-[28px] border bg-background/40 p-5 shadow-sm backdrop-blur-sm">
+              <p className="text-sm font-medium">Details</p>
               <div className="mt-4 space-y-4">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                    Model
-                  </p>
-                  <p className="mt-1 text-sm font-medium">
-                    {selectedProviderConfig.modelName || selectedProviderConfig.defaultModel}
-                  </p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Model</p>
+                  <p className="mt-1 text-sm font-medium">{selectedProviderConfig.modelName || selectedProviderConfig.defaultModel}</p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                    Validation
-                  </p>
-                  <p className="mt-1 text-sm font-medium">
-                    {configuration.compatibility.supportsValidationMetadata
-                      ? formatDate(selectedProviderConfig.validatedAt)
-                      : 'Available after sync'}
-                  </p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Validation</p>
+                  <p className="mt-1 text-sm font-medium">{configuration.compatibility.supportsValidationMetadata ? formatDate(selectedProviderConfig.validatedAt) : 'After sync'}</p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                    Last used
-                  </p>
-                  <p className="mt-1 text-sm font-medium">
-                    {configuration.compatibility.supportsLastUsedAt
-                      ? formatDate(selectedProviderConfig.lastUsedAt)
-                      : 'Available after sync'}
-                  </p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Last used</p>
+                  <p className="mt-1 text-sm font-medium">{configuration.compatibility.supportsLastUsedAt ? formatDate(selectedProviderConfig.lastUsedAt) : 'After sync'}</p>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-[26px] border bg-background/88 p-5 shadow-sm">
-              <p className="text-sm font-medium">Routing summary</p>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                {selectedProviderConfig.isDefault
-                  ? `${selectedProviderConfig.label} is currently your preferred provider.`
-                  : configuration.defaultProvider
-                    ? `${selectedProviderConfig.label} is available, but ${activeProviderLabel} is currently preferred.`
-                    : `${selectedProviderConfig.label} can be chosen automatically when it is your best working option.`}
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Badge variant="outline" className="rounded-full">
-                  {configuration.businessModel.byokActive ? 'BYOK active' : 'Hosted mode'}
+            <div className="rounded-[28px] border bg-background/40 p-5 shadow-sm backdrop-blur-sm">
+              <p className="text-sm font-medium">Routing state</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Badge variant="outline" className="rounded-full bg-background/50">
+                  {configuration.businessModel.byokActive ? 'BYOK' : 'Hosted'}
                 </Badge>
-                <Badge variant="outline" className="rounded-full">
-                  Fallback: {fallbackProviderLabel}
-                </Badge>
+                {selectedProviderConfig.isDefault && <Badge variant="outline" className="rounded-full bg-background/50">Preferred</Badge>}
               </div>
+              <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+                {selectedProviderConfig.isDefault
+                  ? 'Currently your preferred provider.'
+                  : configuration.defaultProvider
+                    ? 'Available, but another provider is preferred.'
+                    : 'Can be chosen automatically if it is the best option.'}
+              </p>
             </div>
           </div>
         </div>

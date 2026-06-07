@@ -106,7 +106,7 @@ const EditorLeftSidebar = (props: Props) => {
         <div className='w-full h-full flex flex-col bg-background/50 backdrop-blur-xl border-r border-border/50 relative'>
             <CustomDragLayer />
             {/* Header */}
-            <div className="px-5 py-4 flex items-center justify-between shrink-0 border-b border-border/50 bg-background/50 backdrop-blur-md z-10 sticky top-0">
+            <div className="px-5 py-4 pr-14 flex items-center justify-between shrink-0 border-b border-border/50 bg-background/50 backdrop-blur-md z-10 sticky top-0">
                 <span className='text-sm font-semibold tracking-tight'>Slides</span>
                 <div className="flex items-center gap-1">
                     <span className='text-xs font-medium px-2 py-1 bg-muted rounded-full text-muted-foreground'>{orderedSlides.length} slides</span>

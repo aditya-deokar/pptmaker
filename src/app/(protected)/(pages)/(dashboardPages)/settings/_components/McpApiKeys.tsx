@@ -64,6 +64,7 @@ import {
   type McpClientSetupExample,
 } from '@/lib/mcp-client-guide'
 import { cn } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
 
 function CodeSnippet({
   title,
@@ -117,22 +118,22 @@ function CopyValueCard({
 }: {
   label: string
   value: string
-  description: string
+  description?: string
   onCopy: () => void
   copied: boolean
 }) {
   return (
-    <div className="rounded-[22px] border bg-background/85 p-4 shadow-sm">
+    <div className="flex flex-col justify-between rounded-[24px] border bg-background/50 p-4 shadow-sm backdrop-blur-sm transition-all hover:border-foreground/20 hover:bg-background/80">
       <div className="flex items-start justify-between gap-3">
-        <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-          <p className="break-all font-mono text-sm text-foreground">{value}</p>
+        <div className="min-w-0 space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">{label}</p>
+          <p className="truncate font-mono text-sm text-foreground" title={value}>{value}</p>
         </div>
-        <Button variant="ghost" size="icon" onClick={onCopy} aria-label={`Copy ${label}`}>
+        <Button variant="ghost" size="icon" onClick={onCopy} aria-label={`Copy ${label}`} className="h-8 w-8 shrink-0">
           {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
         </Button>
       </div>
-      <p className="mt-3 text-sm leading-6 text-muted-foreground">{description}</p>
+      {description && <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{description}</p>}
     </div>
   )
 }
@@ -313,8 +314,51 @@ export function McpApiKeys() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[280px] items-center justify-center rounded-[28px] border bg-card/40">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div className="rounded-[32px] border bg-card/40 p-6 shadow-sm md:p-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-6 w-20 rounded-full" />
+              <Skeleton className="h-8 w-20 rounded-full" />
+            </div>
+          </div>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <Skeleton className="h-[104px] rounded-[24px]" />
+            <Skeleton className="h-[104px] rounded-[24px]" />
+            <Skeleton className="h-[104px] rounded-[24px]" />
+            <Skeleton className="h-[104px] rounded-[24px]" />
+          </div>
+        </div>
+
+        <div className="rounded-[32px] border bg-card/40 p-6 shadow-sm md:p-8">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-48" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+            <Skeleton className="h-10 w-full xl:w-[400px] rounded-2xl" />
+          </div>
+          <Skeleton className="mt-6 h-[200px] w-full rounded-[22px]" />
+        </div>
+
+        <div className="rounded-[32px] border bg-card/40 p-6 shadow-sm md:p-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-32" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+            <Skeleton className="h-10 w-32 rounded-full" />
+          </div>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <Skeleton className="h-[160px] rounded-[24px]" />
+            <Skeleton className="h-[160px] rounded-[24px]" />
+            <Skeleton className="h-[160px] rounded-[24px]" />
+          </div>
+        </div>
       </div>
     )
   }
@@ -413,149 +457,81 @@ export function McpApiKeys() {
         </DialogContent>
       </Dialog>
 
-      <section className="rounded-[30px] border bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(249,250,251,0.96))] p-6 shadow-sm">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-          <div className="space-y-3">
-            <Badge className="rounded-full bg-emerald-500/12 px-3 py-1 text-emerald-700 hover:bg-emerald-500/12">
-              Hosted MCP
-            </Badge>
-            <div className="space-y-2">
-              <h3 className="text-2xl font-semibold tracking-tight">Connect your AI client fast</h3>
-              <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                Generate a key, copy the hosted endpoint, and use one of the ready-made configs
-                below for Claude Code, Cursor, or another MCP client.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
+      <section className="rounded-[32px] border bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent)] p-6 shadow-sm backdrop-blur-xl md:p-8">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <h3 className="text-2xl font-semibold tracking-tight">Connection Details</h3>
+            <p className="text-sm text-muted-foreground">Endpoints and tokens for remote clients.</p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
               <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-700">
                 {activeKeys} active
               </Badge>
-              {revokedKeys > 0 ? (
+              {revokedKeys > 0 && (
                 <Badge variant="secondary" className="bg-amber-500/10 text-amber-700">
                   {revokedKeys} revoked
                 </Badge>
-              ) : null}
-              <Badge variant="outline">Remote HTTP recommended</Badge>
+              )}
             </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Button className="gap-2" onClick={() => setCreateOpen(true)}>
-              <Plus className="h-4 w-4" />
-              Generate key
-            </Button>
-            <Button variant="outline" asChild>
+            <Button size="sm" variant="outline" asChild className="rounded-full">
               <Link href={guideUrl} target="_blank" rel="noreferrer">
-                Full guide
-                <ArrowUpRight className="h-4 w-4" />
+                Docs <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
               </Link>
             </Button>
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-[26px] border bg-background/88 p-5 shadow-sm">
-            <p className="text-sm font-medium text-foreground">Quick connect</p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-              {[
-                {
-                  title: '1. Create a key',
-                  description: 'Use one key per device, IDE, or automation.',
-                  icon: KeyRound,
-                  accentClassName: 'bg-emerald-500/10 text-emerald-700',
-                },
-                {
-                  title: '2. Paste the endpoint',
-                  description: 'Point the client to the hosted URL on your domain.',
-                  icon: Globe,
-                  accentClassName: 'bg-sky-500/10 text-sky-700',
-                },
-                {
-                  title: '3. Add the Bearer token',
-                  description: 'Send the Verto key through the Authorization header.',
-                  icon: Shield,
-                  accentClassName: 'bg-amber-500/10 text-amber-700',
-                },
-              ].map((item) => (
-                <div key={item.title} className="rounded-2xl border bg-background/80 p-4">
-                  <div
-                    className={cn(
-                      'flex h-10 w-10 items-center justify-center rounded-2xl',
-                      item.accentClassName
-                    )}
-                  >
-                    <item.icon className="h-5 w-5" />
-                  </div>
-                  <p className="mt-4 font-medium text-foreground">{item.title}</p>
-                  <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                    {item.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <CopyValueCard
-              label="MCP endpoint"
-              value={endpointUrl}
-              description="Use this in remote MCP clients such as Claude Code, Cursor, or hosted connectors."
-              onCopy={() => copyText(endpointUrl, 'endpoint-url', 'MCP endpoint copied')}
-              copied={copiedId === 'endpoint-url'}
-            />
-            <CopyValueCard
-              label="Bearer header"
-              value={`Authorization: ${bearerHeader}`}
-              description="Remote HTTP clients should send your Verto key as a Bearer token."
-              onCopy={() =>
-                copyText(
-                  `Authorization: ${bearerHeader}`,
-                  'bearer-header',
-                  'Bearer header copied'
-                )
-              }
-              copied={copiedId === 'bearer-header'}
-            />
-            <CopyValueCard
-              label="Remote env var"
-              value={MCP_REMOTE_TOKEN_ENV_VAR}
-              description="Keep the raw key in an environment variable instead of hard-coding it into client JSON."
-              onCopy={() =>
-                copyText(MCP_REMOTE_TOKEN_ENV_VAR, 'remote-env', 'Environment variable name copied')
-              }
-              copied={copiedId === 'remote-env'}
-            />
-            <CopyValueCard
-              label="Discovery URL"
-              value={discoveryUrl}
-              description="Useful for discovery-aware clients and debugging protected-resource flows."
-              onCopy={() => copyText(discoveryUrl, 'discovery-url', 'Discovery URL copied')}
-              copied={copiedId === 'discovery-url'}
-            />
-          </div>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <CopyValueCard
+            label="MCP Endpoint"
+            value={endpointUrl}
+            onCopy={() => copyText(endpointUrl, 'endpoint-url', 'MCP endpoint copied')}
+            copied={copiedId === 'endpoint-url'}
+          />
+          <CopyValueCard
+            label="Bearer Header"
+            value={`Authorization: ${bearerHeader}`}
+            onCopy={() => copyText(`Authorization: ${bearerHeader}`, 'bearer-header', 'Bearer header copied')}
+            copied={copiedId === 'bearer-header'}
+          />
+          <CopyValueCard
+            label="Remote Env Var"
+            value={MCP_REMOTE_TOKEN_ENV_VAR}
+            onCopy={() => copyText(MCP_REMOTE_TOKEN_ENV_VAR, 'remote-env', 'Environment variable name copied')}
+            copied={copiedId === 'remote-env'}
+          />
+          <CopyValueCard
+            label="Discovery URL"
+            value={discoveryUrl}
+            onCopy={() => copyText(discoveryUrl, 'discovery-url', 'Discovery URL copied')}
+            copied={copiedId === 'discovery-url'}
+          />
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-[28px] border bg-card/85 p-5 shadow-sm">
-          <Tabs defaultValue={remoteSetupTabs[0]?.id ?? 'claude-code'} className="space-y-5">
+      <section className="rounded-[32px] border bg-card/40 p-6 shadow-sm backdrop-blur-xl md:p-8">
+        <Tabs defaultValue={remoteSetupTabs[0]?.id ?? 'claude-code'} className="space-y-6">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold">Quick setup</h3>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Pick the client you are actually using, then copy the config and move on.
+              <h3 className="text-xl font-semibold tracking-tight">Client Configurations</h3>
+              <p className="text-sm text-muted-foreground">
+                Copy a pre-made configuration for your client.
               </p>
             </div>
-
-            <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-2xl p-1">
+            <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1.5 rounded-2xl bg-background/50 p-1.5 xl:w-auto">
               {remoteSetupTabs.map((example) => (
-                <TabsTrigger key={example.id} value={example.id} className="rounded-xl px-4">
+                <TabsTrigger key={example.id} value={example.id} className="rounded-xl px-4 py-2">
                   {example.title}
                 </TabsTrigger>
               ))}
             </TabsList>
+          </div>
 
+          <div className="mt-2">
             {remoteSetupTabs.map((example) => (
-              <TabsContent key={example.id} value={example.id} className="mt-0">
+              <TabsContent key={example.id} value={example.id} className="mt-0 outline-none">
                 {example.type === 'code' && example.code ? (
                   <CodeSnippet
                     title={example.title}
@@ -579,212 +555,109 @@ export function McpApiKeys() {
                 ) : null}
               </TabsContent>
             ))}
-          </Tabs>
-        </div>
-
-        <div className="space-y-4">
-          <div className="rounded-[28px] border bg-card/85 p-5 shadow-sm">
-            <div className="flex items-center gap-2">
-              <Laptop className="h-4 w-4 text-sky-700" />
-              <p className="font-medium text-foreground">Local repo fallback</p>
-            </div>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Use stdio only when the client can launch the Verto repo locally. For the hosted app,
-              remote HTTP is the better default.
-            </p>
-
-            {localExample?.code ? (
-              <div className="mt-4">
-                <CodeSnippet
-                  title={localExample.title}
-                  description={localExample.description}
-                  code={localExample.code}
-                  language={localExample.language}
-                  onCopy={() =>
-                    copyText(localExample.code || '', 'snippet-local-stdio', 'Local stdio config copied')
-                  }
-                  copied={copiedId === 'snippet-local-stdio'}
-                />
-              </div>
-            ) : null}
-
-            <div className="mt-4 rounded-2xl border bg-background/80 p-4 text-sm leading-6 text-muted-foreground">
-              Pass{' '}
-              <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{MCP_STDIO_TOKEN_ENV_VAR}</code>{' '}
-              into the spawned process with the same Verto key you generated here.
-            </div>
           </div>
-
-          <div className="rounded-[28px] border bg-card/85 p-5 shadow-sm">
-            <div className="flex items-center gap-2">
-              <TriangleAlert className="h-4 w-4 text-amber-700" />
-              <p className="font-medium text-foreground">Before you test</p>
-            </div>
-            <div className="mt-4 space-y-3">
-              {MCP_STREAMABLE_HTTP_NOTES.map((note) => (
-                <div key={note} className="rounded-2xl border bg-background/80 p-4 text-sm leading-6 text-muted-foreground">
-                  {note}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        </Tabs>
       </section>
 
-      <section className="rounded-[28px] border bg-card/85 p-5 shadow-sm">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <h3 className="text-lg font-semibold">Your keys</h3>
-            <p className="text-sm leading-6 text-muted-foreground">
-              Revoke a key to disable it immediately. Delete it when you no longer need the record.
+      <section className="rounded-[32px] border bg-card/40 p-6 shadow-sm backdrop-blur-xl md:p-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold tracking-tight">Access Keys</h3>
+            <p className="text-sm text-muted-foreground">
+              Manage keys for your external clients.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-700">
-              {activeKeys} active
-            </Badge>
-            <Badge variant="outline">{keys.length} total</Badge>
-            <Button className="gap-2" onClick={() => setCreateOpen(true)}>
-              <Plus className="h-4 w-4" />
-              Generate key
-            </Button>
-          </div>
+          <Button className="w-full gap-2 rounded-full sm:w-auto" onClick={() => setCreateOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Generate key
+          </Button>
         </div>
 
         {keys.length === 0 ? (
-          <div className="mt-6 flex flex-col items-center justify-center rounded-[26px] border border-dashed py-14 text-center">
-            <div className="mb-4 rounded-full bg-muted p-4">
-              <Key className="h-8 w-8 text-muted-foreground" />
+          <div className="mt-8 flex flex-col items-center justify-center rounded-[24px] border border-dashed py-12 text-center bg-background/40">
+            <div className="mb-4 rounded-2xl bg-muted/50 p-4">
+              <Key className="h-6 w-6 text-muted-foreground" />
             </div>
-            <h4 className="text-lg font-medium">No MCP keys yet</h4>
-            <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-              Generate your first key, copy the hosted endpoint, and connect a client in a minute.
+            <h4 className="text-base font-medium">No keys generated</h4>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              Create a key to connect your AI client.
             </p>
-            <Button className="mt-5 gap-2" onClick={() => setCreateOpen(true)}>
-              <Plus className="h-4 w-4" />
-              Generate first key
-            </Button>
           </div>
         ) : (
-          <div className="mt-6 space-y-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {keys.map((key) => (
               <div
                 key={key.id}
                 className={cn(
-                  'rounded-[24px] border p-4 transition-all',
+                  'flex flex-col justify-between rounded-[24px] border p-5 transition-all',
                   key.isRevoked
-                    ? 'border-border/70 bg-muted/40 opacity-75'
-                    : 'border-border/70 bg-background/85 shadow-sm'
+                    ? 'border-border/50 bg-muted/20 opacity-70'
+                    : 'bg-background/50 shadow-sm hover:border-foreground/20 hover:shadow-md backdrop-blur-sm'
                 )}
               >
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  <div className="flex min-w-0 items-start gap-4">
-                    <div
-                      className={cn(
-                        'mt-1 rounded-2xl p-3',
-                        key.isRevoked
-                          ? 'bg-destructive/10 text-destructive'
-                          : 'bg-emerald-500/10 text-emerald-700'
-                      )}
-                    >
-                      <Key className="h-5 w-5" />
+                <div className="space-y-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={cn("shrink-0 rounded-xl p-2", key.isRevoked ? "bg-destructive/10 text-destructive" : "bg-emerald-500/10 text-emerald-700")}>
+                        <Key className="h-4 w-4" />
+                      </div>
+                      <span className="truncate font-medium text-foreground">{key.name}</span>
                     </div>
-
-                    <div className="min-w-0 space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="truncate font-medium text-foreground">{key.name}</span>
-                        {key.isRevoked ? (
-                          <Badge variant="destructive">Revoked</Badge>
-                        ) : (
-                          <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-700">
-                            Active
-                          </Badge>
-                        )}
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                        <code className="rounded bg-muted px-1.5 py-0.5 font-mono">
-                          {key.keyPrefix}........
-                        </code>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3.5 w-3.5" />
-                          Created {formatDate(key.createdAt)}
-                        </span>
-                        <span>Last used {formatDate(key.lastUsedAt)}</span>
-                      </div>
+                    {key.isRevoked && <Badge variant="destructive" className="shrink-0 text-[10px] px-1.5 py-0">Revoked</Badge>}
+                  </div>
+                  
+                  <div className="space-y-1.5 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono bg-muted/50 px-1.5 py-0.5 rounded text-[11px]">{key.keyPrefix}••••••••</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3 w-3" />
+                      <span>Created {formatDate(key.createdAt)}</span>
                     </div>
                   </div>
+                </div>
 
-                  <div className="flex shrink-0 items-center gap-2">
-                    {!key.isRevoked ? (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="border-amber-500/20 text-amber-700 hover:bg-amber-500/10 hover:text-amber-700"
-                            disabled={actionLoading === key.id}
-                          >
-                            {actionLoading === key.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Ban className="h-4 w-4" />
-                            )}
-                            Revoke
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Revoke API key</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This immediately disables the key &quot;{key.name}&quot;. Any MCP client
-                              using it will lose access until a new key is configured.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleRevoke(key.id)}>
-                              Revoke key
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    ) : null}
-
+                <div className="mt-5 flex items-center justify-end gap-2 border-t border-border/50 pt-4">
+                  {!key.isRevoked && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          disabled={actionLoading === key.id}
-                        >
-                          {actionLoading === key.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
-                          Delete
+                        <Button variant="ghost" size="sm" className="h-8 text-xs text-amber-600 hover:bg-amber-500/10 hover:text-amber-700" disabled={actionLoading === key.id}>
+                          {actionLoading === key.id ? <Loader2 className="mr-1.5 h-3 w-3 animate-spin" /> : <Ban className="mr-1.5 h-3 w-3" />}
+                          Revoke
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete API key</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Permanently delete the key &quot;{key.name}&quot;. This cannot be undone.
-                          </AlertDialogDescription>
+                          <AlertDialogTitle>Revoke API key</AlertDialogTitle>
+                          <AlertDialogDescription>This disables the key "{key.name}". Clients using it will lose access.</AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(key.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Delete permanently
-                          </AlertDialogAction>
+                          <AlertDialogAction onClick={() => handleRevoke(key.id)}>Revoke key</AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
-                  </div>
+                  )}
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive" disabled={actionLoading === key.id}>
+                        {actionLoading === key.id ? <Loader2 className="mr-1.5 h-3 w-3 animate-spin" /> : <Trash2 className="mr-1.5 h-3 w-3" />}
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete API key</AlertDialogTitle>
+                        <AlertDialogDescription>Permanently delete "{key.name}". This cannot be undone.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(key.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             ))}
