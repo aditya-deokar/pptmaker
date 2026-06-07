@@ -21,7 +21,7 @@ const EditorLeftSidebar = (props: Props) => {
     const { reorderSlides, addSlide, addSlideAtIndex } = useSlideStore();
     const slides = useSlideStore(state => state.slides);
     const [loading, setLoading] = useState(true);
-    const orderedSlides = [...slides].sort((a, b) => (a.slideOrder ?? 0) - (b.slideOrder ?? 0));
+    const orderedSlides = [...(slides || [])].sort((a, b) => (a.slideOrder ?? 0) - (b.slideOrder ?? 0));
 
     const moveSlide = (dragIndex: number, hoverIndex: number) => {
         reorderSlides(dragIndex, hoverIndex);

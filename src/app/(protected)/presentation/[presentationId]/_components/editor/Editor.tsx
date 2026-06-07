@@ -179,7 +179,7 @@ const Editor = ({ isEditable }: Props) => {
     slides,
   } = useSlideStore();
 
-  const orderedSlides = [...slides].sort((a, b) => (a.slideOrder ?? 0) - (b.slideOrder ?? 0));
+  const orderedSlides = [...(slides || [])].sort((a, b) => (a.slideOrder ?? 0) - (b.slideOrder ?? 0));
   const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
