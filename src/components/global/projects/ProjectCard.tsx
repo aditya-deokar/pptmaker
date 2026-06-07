@@ -15,7 +15,7 @@ import ThumnailPreview from './ThumnailPreview'
 import Link from 'next/link'
 import { useLayoutStore } from '@/store/useLayoutStore'
 import { cn } from '@/lib/utils'
-
+import { Trash2, RefreshCcw } from 'lucide-react'
 
 
 type Props = {
@@ -134,9 +134,9 @@ const ProjectCard = ({
         transition={{ layout: { duration: 0.4, ease: "easeOut" } }}
         style={{ borderRadius: 32 }}
         className={cn(
-          "w-full p-3 relative overflow-hidden border border-black/[0.03] dark:border-white/[0.05] bg-white/80 dark:bg-black/40 backdrop-blur-xl hover:border-black/10 dark:hover:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgba(255,255,255,0.01)] dark:hover:shadow-[0_8px_40px_rgba(255,255,255,0.03)] hover:-translate-y-1 z-0 transition-transform duration-500 ease-out",
+          "w-full p-4 relative overflow-hidden border border-black/[0.03] dark:border-white/[0.05] bg-white/80 dark:bg-black/40 backdrop-blur-xl hover:border-primary/10 dark:hover:border-primary/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgba(255,255,255,0.01)] dark:hover:shadow-[0_8px_40px_rgba(255,255,255,0.03)] hover:-translate-y-1 z-0 transition-transform duration-500 ease-out group-hover:bg-white dark:group-hover:bg-black/50",
           isList ? "flex flex-row items-center gap-4" : "flex flex-col gap-y-3",
-          isShowcase && "p-4 gap-y-4"
+          isShowcase && "p-5 gap-y-4"
         )}
         variants={itemVariants}
       >
@@ -157,10 +157,10 @@ const ProjectCard = ({
       </motion.div>
 
       <motion.div layout="position" transition={{ layout: { duration: 0.4, ease: "easeOut" } }} className={cn('z-10 px-2 pb-2 flex-1', isList ? "py-2" : "w-full")}>
-        <div className='space-y-1'>
-          <h3 className={cn('font-semibold text-primary line-clamp-1', isList ? "text-lg" : "text-base")}>{title}</h3>
-          <div className='flex w-full justify-between items-center gap-2'>
-            <p className='text-sm text-muted-foreground' suppressHydrationWarning>
+        <div className='flex flex-col justify-between h-full'>
+          <h3 className={cn('font-semibold text-foreground/90 line-clamp-1 mb-2', isList ? "text-xl" : "text-lg")}>{title}</h3>
+          <div className='flex w-full justify-between items-center gap-2 mt-auto'>
+            <p className='text-sm text-muted-foreground/80 font-medium' suppressHydrationWarning>
               {timeAgo(createdAt)}
             </p>
 
@@ -175,12 +175,12 @@ const ProjectCard = ({
                 handleOpen={() => setOpen(!open)}
               >
                 <Button
-                  size="sm"
-                  variant="default"
-                  // className="bg-background-80 dark:hover:bg-background-90"
+                  size="icon"
+                  variant="ghost"
+                  className="opacity-50 group-hover:opacity-100 transition-opacity hover:bg-green-100 hover:text-green-600 dark:hover:bg-green-900/30 dark:hover:text-green-500 rounded-full h-8 w-8"
                   disabled={loading}
                 >
-                  Recover
+                  <RefreshCcw className="w-4 h-4" />
                 </Button>
               </AlertDialogBox>
             ) : (
@@ -193,12 +193,12 @@ const ProjectCard = ({
                 handleOpen={() => setOpen(!open)}
               >
                 <Button
-                  size="sm"
-                  variant="outline"
-                  // className="bg-background-80 dark:hover:bg-background-90"
+                  size="icon"
+                  variant="ghost"
+                  className="opacity-50 group-hover:opacity-100 transition-opacity hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-500 rounded-full h-8 w-8"
                   disabled={loading}
                 >
-                  Delete
+                  <Trash2 className="w-4 h-4" />
                 </Button>
               </AlertDialogBox>
             )}

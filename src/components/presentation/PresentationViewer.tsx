@@ -97,16 +97,43 @@ function SlideCanvas({
   currentTheme,
   scale = 1,
   isMobile = false,
+  isScrollMode = false,
 }: {
   slide: Slide;
   currentTheme: Theme;
   scale?: number;
   isMobile?: boolean;
+  isScrollMode?: boolean;
 }) {
   const baseWidth = 960;
   const baseHeight = 540;
 
-    const tokens = resolveThemeTokens(currentTheme);
+  const tokens = resolveThemeTokens(currentTheme);
+
+  if (isScrollMode && !isMobile) {
+    return (
+      <div
+        style={{
+          backgroundColor: currentTheme.slideBackgroundColor || currentTheme.backgroundColor,
+          backgroundImage: currentTheme.gradientBackground,
+          color: currentTheme.fontColor,
+          fontFamily: tokens.headingFontFamily,
+          borderRadius: tokens.borderRadius,
+        }}
+        className="relative w-full max-w-[1000px] w-[90vw] mx-auto min-h-[560px] flex flex-col rounded-2xl shadow-[0_8px_40px_-8px_rgba(0,0,0,0.3)] transition-all duration-300 border border-white/5"
+      >
+        <div className="flex-1 w-full p-10 md:p-14 pointer-events-none select-none">
+          <MasterRecursiveComponent
+            content={slide.content}
+            onContentChange={() => {}}
+            isPreview={true}
+            isEditable={false}
+            slideId={slide.id}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -176,6 +203,7 @@ function ScrollSlide({
 
   return (
     <motion.div
+      id={`scroll-slide-${index}`}
       variants={containerVariants}
       initial="hidden"
       whileInView="visible"
@@ -188,6 +216,7 @@ function ScrollSlide({
         currentTheme={currentTheme}
         scale={isMobile ? 1 : scale * 0.9}
         isMobile={isMobile}
+        isScrollMode={true}
       />
     </motion.div>
   );
@@ -216,7 +245,7 @@ export default function PresentationViewer({
   const [transitionType, setTransitionType] =
     useState<TransitionType>("slide");
   const [presentationMode, setPresentationMode] =
-    useState<PresentationMode>("slide");
+    useState<PresentationMode>("scroll");
   const [mouseIdle, setMouseIdle] = useState(false);
 
   const currentSlideData = safeSlides[currentSlide];
@@ -260,11 +289,10 @@ export default function PresentationViewer({
   const handleNext = useCallback(() => {
     if (presentationMode === "scroll" && scrollContainerRef.current) {
       const nextSlide = Math.min(currentSlide + 1, safeSlides.length - 1);
-      const slideHeight = scrollContainerRef.current.offsetHeight;
-      scrollContainerRef.current.scrollTo({
-        top: nextSlide * slideHeight,
-        behavior: "smooth"
-      });
+      const targetElement = document.getElementById(`scroll-slide-${nextSlide}`);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
       return;
     }
     setCurrentSlide((previous) =>
@@ -275,11 +303,10 @@ export default function PresentationViewer({
   const handlePrev = useCallback(() => {
     if (presentationMode === "scroll" && scrollContainerRef.current) {
       const prevSlide = Math.max(currentSlide - 1, 0);
-      const slideHeight = scrollContainerRef.current.offsetHeight;
-      scrollContainerRef.current.scrollTo({
-        top: prevSlide * slideHeight,
-        behavior: "smooth"
-      });
+      const targetElement = document.getElementById(`scroll-slide-${prevSlide}`);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
       return;
     }
     setCurrentSlide((previous) => Math.max(previous - 1, 0));

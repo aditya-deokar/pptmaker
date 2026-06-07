@@ -32,10 +32,10 @@ export default function StreamableDetailsPanel({
   onOpenEditor,
 }: StreamableDetailsPanelProps) {
   return (
-    <aside className="w-64 xl:w-72 h-full border-l border-white/5 bg-black/40 backdrop-blur-3xl flex-shrink-0 flex flex-col relative z-20">
+    <aside className="w-64 xl:w-72 h-full border-l border-border/50 bg-background/40 backdrop-blur-3xl flex-shrink-0 flex flex-col relative z-20 shadow-[-8px_0_32px_-8px_rgba(0,0,0,0.05)]">
       {/* Panel header */}
-      <div className="px-5 py-4 border-b border-white/5 bg-white/[0.02]">
-        <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">
+      <div className="px-6 py-5 border-b border-border/50 bg-muted/5">
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
           Inspect
         </p>
       </div>
@@ -54,21 +54,21 @@ export default function StreamableDetailsPanel({
                 className="space-y-6"
               >
                 <div className="space-y-2">
-                  <span className="text-[9px] font-bold text-white/30 uppercase tracking-[0.15em]">Slide Name</span>
-                  <p className="text-sm font-semibold text-white/90 leading-tight">
+                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.15em]">Slide Name</span>
+                  <p className="text-sm font-semibold text-foreground leading-tight">
                     {activeSlide.slideName || 'Untitled Slide'}
                   </p>
                 </div>
 
                 <div className="space-y-3">
-                  <span className="text-[9px] font-bold text-white/30 uppercase tracking-[0.15em]">Properties</span>
+                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.15em]">Properties</span>
                   <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between p-2 rounded-xl bg-white/[0.03] border border-white/5">
-                      <div className="flex items-center gap-2 text-[11px] text-white/50">
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-muted/10 border border-border">
+                      <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                         <Sparkles className="h-3 w-3" />
                         <span>Layout</span>
                       </div>
-                      <span className="text-[10px] font-mono text-violet-400 bg-violet-400/10 px-2 py-0.5 rounded-lg border border-violet-400/20">
+                      <span className="text-[10px] font-mono text-primary bg-primary/10 px-2 py-0.5 rounded-lg border border-primary/20">
                         {activeSlide.type || 'standard'}
                       </span>
                     </div>
@@ -80,34 +80,36 @@ export default function StreamableDetailsPanel({
 
           {/* Status Engine */}
           <div className="space-y-4 pt-2">
-             <span className="text-[9px] font-bold text-white/30 uppercase tracking-[0.15em]">Engine Status</span>
+             <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.15em]">Engine Status</span>
             
-             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    {isStreaming ? (
-                      <div className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
-                      </div>
-                    ) : (
-                      <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                    )}
-                    <span className={cn(
-                      "text-[11px] font-bold tracking-wide uppercase",
-                      isStreaming ? "text-violet-400" : "text-emerald-400"
-                    )}>
-                      {isStreaming ? "Synthesizing" : "Operational"}
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-muted/20 to-muted/5 border border-border/50 space-y-4 shadow-sm relative overflow-hidden">
+               {/* Decorative glow */}
+               <div className="absolute -top-4 -right-4 w-16 h-16 bg-primary/10 rounded-full blur-xl pointer-events-none" />
+               <div className="flex items-center justify-between relative z-10">
+                 <div className="flex items-center gap-2.5">
+                   {isStreaming ? (
+                     <div className="relative flex h-2 w-2">
+                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                       <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                     </div>
+                   ) : (
+                     <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                   )}
+                   <span className={cn(
+                     "text-[11px] font-bold tracking-wide uppercase",
+                     isStreaming ? "text-primary" : "text-emerald-600 dark:text-emerald-500"
+                   )}>
+                     {isStreaming ? "Synthesizing" : "Operational"}
                     </span>
                   </div>
-                  <Badge variant="outline" className="text-[9px] font-mono border-white/10 text-white/40">
+                  <Badge variant="outline" className="text-[9px] font-mono border-border text-muted-foreground">
                     v2.1
                   </Badge>
                 </div>
 
                 <div className="flex items-center justify-between text-[10px]">
-                   <span className="text-white/40">Throughput</span>
-                   <span className="text-white/80 font-mono">{slides.length} nodes</span>
+                   <span className="text-muted-foreground">Throughput</span>
+                   <span className="text-foreground font-mono">{slides.length} nodes</span>
                 </div>
              </div>
           </div>
@@ -115,31 +117,31 @@ export default function StreamableDetailsPanel({
           {/* Style Configuration */}
           {currentTheme && (
             <div className="space-y-4 pt-2">
-              <span className="text-[9px] font-bold text-white/30 uppercase tracking-[0.15em]">Visual Identity</span>
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.15em]">Visual Identity</span>
               
-              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4">
+              <div className="p-4 rounded-2xl bg-muted/10 border border-border space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="flex -space-x-1.5">
                     {[currentTheme.accentColor, currentTheme.slideBackgroundColor, currentTheme.fontColor].map((c, i) => (
                       <div
                         key={i}
-                        className="w-6 h-6 rounded-full border-2 border-[#0a0a0a] shadow-xl"
+                        className="w-6 h-6 rounded-full border-2 border-background shadow-sm"
                         style={{ backgroundColor: c }}
                       />
                     ))}
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[11px] font-bold text-white/90">{currentTheme.name}</span>
-                    <span className="text-[9px] font-mono text-white/30 uppercase tracking-tighter">System Preset</span>
+                    <span className="text-[11px] font-bold text-foreground">{currentTheme.name}</span>
+                    <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-tighter">System Preset</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-2 rounded-xl bg-black/20 border border-white/5">
-                  <div className="flex items-center gap-2 text-[10px] text-white/40">
+                <div className="flex items-center justify-between p-2 rounded-xl bg-background/50 border border-border">
+                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                     <Palette className="h-3 w-3" />
                     <span>Typography</span>
                   </div>
-                  <span className="text-[10px] font-medium text-white/70">
+                  <span className="text-[10px] font-medium text-foreground">
                     {currentTheme.fontFamily?.split(',')[0]?.replace(/'/g, '')}
                   </span>
                 </div>
@@ -150,14 +152,14 @@ export default function StreamableDetailsPanel({
           {/* Slide Breakdown (Minimalist) */}
           {slides.length > 0 && (
             <div className="space-y-3 pt-2">
-              <span className="text-[9px] font-bold text-white/30 uppercase tracking-[0.15em]">Layout Matrix</span>
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.15em]">Layout Matrix</span>
               <div className="flex flex-wrap gap-1.5">
                 {Array.from(new Set(slides.map((s) => s.type)))
                   .filter(Boolean)
                   .map((type) => (
                     <div
                       key={type}
-                      className="text-[9px] px-2 py-1 font-bold text-white/50 bg-white/[0.04] border border-white/5 rounded-lg uppercase tracking-tight"
+                      className="text-[9px] px-2 py-1 font-bold text-muted-foreground bg-muted/30 border border-border rounded-lg uppercase tracking-tight"
                     >
                       {type}
                     </div>
@@ -168,17 +170,17 @@ export default function StreamableDetailsPanel({
         </div>
       </ScrollArea>
 
-      {/* Bottom Action (Apple Style) */}
+      {/* Bottom Action */}
       <AnimatePresence>
         {streamComplete && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-5 border-t border-white/5 bg-white/[0.01]"
+            className="p-5 border-t border-border bg-muted/10"
           >
             <Button
               onClick={onOpenEditor}
-              className="w-full bg-white text-black hover:bg-white/90 font-bold rounded-2xl h-12 shadow-[0_10px_30px_rgba(255,255,255,0.1)] transition-all active:scale-95"
+              className="w-full font-bold rounded-2xl h-12 shadow-sm transition-all active:scale-95"
             >
               <Edit3 className="h-4 w-4 mr-2" />
               Launch Editor

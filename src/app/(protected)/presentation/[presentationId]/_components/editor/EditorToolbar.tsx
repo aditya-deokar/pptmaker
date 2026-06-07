@@ -118,12 +118,12 @@ const EditorToolbar = ({ isEditable = true }: Props) => {
 
     // Default values map
     const defaultStyles: Record<string, { fontSize: string, fontWeight: string }> = {
-        heading1: { fontSize: '60px', fontWeight: '800' },
-        heading2: { fontSize: '48px', fontWeight: '700' },
-        heading3: { fontSize: '36px', fontWeight: '600' },
-        heading4: { fontSize: '30px', fontWeight: '500' },
-        title: { fontSize: '72px', fontWeight: '900' },
-        paragraph: { fontSize: '18px', fontWeight: '400' },
+        heading1: { fontSize: '32px', fontWeight: '800' },
+        heading2: { fontSize: '28px', fontWeight: '700' },
+        heading3: { fontSize: '24px', fontWeight: '600' },
+        heading4: { fontSize: '20px', fontWeight: '500' },
+        title: { fontSize: '40px', fontWeight: '900' },
+        paragraph: { fontSize: '16px', fontWeight: '400' },
     }
 
     const currentFontSize = selectedComponent ? (selectedComponent.fontSize || defaultStyles[selectedComponent.type]?.fontSize || '16px') : '16px'
@@ -132,7 +132,7 @@ const EditorToolbar = ({ isEditable = true }: Props) => {
     if (!isEditable) return null
 
     return (
-        <div className="absolute bottom-20 sm:bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 bg-background/95 backdrop-blur-sm border shadow-2xl rounded-full px-2 sm:px-4 py-1.5 sm:py-2 flex items-center gap-1 sm:gap-2 z-50 animate-in fade-in slide-in-from-bottom-4 max-w-[calc(100%-1rem)] sm:max-w-[90vw] overflow-x-auto scrollbar-none">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-background/95 backdrop-blur-sm border shadow-2xl rounded-full px-2 sm:px-4 py-1.5 sm:py-2 flex items-center gap-1 sm:gap-2 z-[100] animate-in fade-in slide-in-from-bottom-4 max-w-[calc(100%-1rem)] sm:max-w-[90vw] overflow-x-auto scrollbar-none">
 
             {/* Undo/Redo/Save Section */}
             <div className="flex items-center gap-1">

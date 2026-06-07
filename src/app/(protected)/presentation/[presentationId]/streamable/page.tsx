@@ -1,16 +1,11 @@
 'use client'
 
 // ─────────────────────────────────────────────────────
-// Streamable Viewer Page — Phase 5
+// Streamable Viewer Page
 //
-// The immersive full-screen viewer where users watch
-// their slides build in real-time via SSE streaming.
-//
-// Composed of modular sub-components:
-//   • StreamableHeader    — progress bar, status, CTA
-//   • StreamableSidebar   — thumbnail rail
-//   • StreamableSlidePreview — main slide canvas
-//   • StreamableDetailsPanel — right details sidebar
+// Full-screen viewer where users watch slides build
+// in real-time via SSE streaming. Images are resolved
+// server-side so slides arrive fully formed.
 // ─────────────────────────────────────────────────────
 
 import React, { useEffect, useState, useRef, useCallback } from 'react'
@@ -18,7 +13,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useSlideStore } from '@/store/useSlideStore'
 import { themes } from '@/lib/constants'
 import { getProjectById } from '@/actions/projects'
-import { patchStreamableImages } from '@/actions/streamable-generation'
+
 import { toast } from 'sonner'
 import { Slide } from '@/lib/types'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -30,6 +25,7 @@ import StreamableHeader from './_components/StreamableHeader'
 import StreamableSidebar from './_components/StreamableSidebar'
 import StreamableSlidePreview from './_components/StreamableSlidePreview'
 import StreamableDetailsPanel from './_components/StreamableDetailsPanel'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import {
   Sheet,
   SheetContent,
@@ -55,11 +51,11 @@ const ZoomControls = ({ autoFitScale }: { autoFitScale: number }) => {
   const currentScale = Math.round(transformState.scale * 100);
 
   return (
-    <div className="absolute top-3 right-3 lg:top-auto lg:bottom-6 lg:right-6 z-50 flex items-center gap-1 bg-black/80 backdrop-blur-xl border border-white/10 p-1 rounded-full shadow-2xl scale-90 sm:scale-100">
+    <div className="absolute top-3 right-3 lg:top-auto lg:bottom-8 lg:right-8 z-50 flex items-center gap-1 bg-card/60 backdrop-blur-2xl border shadow-sm p-1 rounded-full scale-90 sm:scale-100">
       <Button
         variant="ghost"
         size="icon"
-        className="h-7 w-7 sm:h-8 sm:w-8 rounded-full text-white/70 hover:text-white hover:bg-white/10"
+        className="h-7 w-7 sm:h-8 sm:w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50"
         onClick={() => zoomOut(0.2)}
       >
         <ZoomOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -68,13 +64,13 @@ const ZoomControls = ({ autoFitScale }: { autoFitScale: number }) => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <div
-            className="px-1.5 sm:px-2 min-w-[40px] sm:min-w-[50px] text-center text-[10px] sm:text-xs font-medium text-white/90 cursor-pointer select-none hover:text-white"
+            className="px-1.5 sm:px-2 min-w-[40px] sm:min-w-[50px] text-center text-[10px] sm:text-xs font-medium text-foreground cursor-pointer select-none hover:text-primary"
             title="Change zoom level"
           >
             {currentScale}%
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="center" side="top" className="w-32 bg-black/90 border-white/10 text-white backdrop-blur-xl">
+        <DropdownMenuContent align="center" side="top" className="w-32 rounded-2xl bg-card/90 backdrop-blur-xl">
           {[25, 50, 75, 100, 150, 200].map(preset => (
             <DropdownMenuItem 
               key={preset} 
@@ -82,15 +78,15 @@ const ZoomControls = ({ autoFitScale }: { autoFitScale: number }) => {
                   const newScale = preset / 100;
                   centerView(newScale);
               }} 
-              className="cursor-pointer hover:bg-white/10 focus:bg-white/10"
+              className="cursor-pointer rounded-xl"
             >
               {preset}%
             </DropdownMenuItem>
           ))}
-          <div className="h-px w-full bg-white/10 my-1" />
+          <div className="h-px w-full bg-border my-1" />
           <DropdownMenuItem 
             onClick={() => centerView(autoFitScale)} 
-            className="cursor-pointer hover:bg-white/10 focus:bg-white/10 text-primary"
+            className="cursor-pointer rounded-xl font-medium text-primary"
           >
             Fit to screen
           </DropdownMenuItem>
@@ -100,16 +96,16 @@ const ZoomControls = ({ autoFitScale }: { autoFitScale: number }) => {
       <Button
         variant="ghost"
         size="icon"
-        className="h-7 w-7 sm:h-8 sm:w-8 rounded-full text-white/70 hover:text-white hover:bg-white/10"
+        className="h-7 w-7 sm:h-8 sm:w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50"
         onClick={() => zoomIn(0.2)}
       >
         <ZoomIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
       </Button>
-      <div className="w-px h-3 sm:h-4 bg-white/10 mx-0.5 sm:mx-1" />
+      <div className="w-px h-3 sm:h-4 bg-border mx-0.5 sm:mx-1" />
       <Button
         variant="ghost"
         size="icon"
-        className="h-7 w-7 sm:h-8 sm:w-8 rounded-full text-white/70 hover:text-white hover:bg-white/10"
+        className="h-7 w-7 sm:h-8 sm:w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50"
         onClick={() => centerView(autoFitScale)}
         title="Auto-fit"
       >
@@ -131,7 +127,6 @@ export default function StreamableViewerPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [localSlides, setLocalSlides] = useState<Slide[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
-  const [isResolvingImages, setIsResolvingImages] = useState(false)
   const [streamStatus, setStreamStatus] = useState('')
   const [streamProgress, setStreamProgress] = useState(0)
   const [streamComplete, setStreamComplete] = useState(false)
@@ -271,21 +266,8 @@ export default function StreamableViewerPage() {
               }
               if (event.type === 'complete') {
                 setIsStreaming(false)
-                setStreamProgress(95)
-                setStreamStatus('Resolving images...')
-                setIsResolvingImages(true)
 
-                try {
-                  const patchResult = await patchStreamableImages(presentationId)
-                  if (patchResult.status === 200 && patchResult.data) {
-                    console.log(`[Streamable] Image patch: ${patchResult.data.message}`)
-                  }
-                } catch (patchErr) {
-                  console.warn('[Streamable] Image patching failed (non-fatal):', patchErr)
-                }
-
-                setIsResolvingImages(false)
-
+                // Refresh from DB to pick up final saved state
                 const res = await getProjectById(presentationId)
                 if (res?.status === 200 && res.data?.slides) {
                   const slides = JSON.parse(JSON.stringify(res.data.slides))
@@ -324,21 +306,18 @@ export default function StreamableViewerPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#030303]">
+      <div className="flex items-center justify-center h-screen bg-background text-foreground">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center gap-6"
         >
-          <div className="relative">
-            <div className="absolute -inset-4 rounded-full bg-violet-500/10 blur-2xl animate-pulse" />
-            <div className="relative p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-3xl shadow-2xl">
-              <Loader2 className="w-10 h-10 animate-spin text-violet-500" />
-            </div>
+          <div className="relative p-6 rounded-[32px] bg-card/40 border shadow-sm backdrop-blur-xl">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
-          <div className="text-center space-y-1">
-            <p className="text-sm font-semibold text-white/90">Initializing Immersive Engine</p>
-            <p className="text-[11px] text-white/40 uppercase tracking-widest font-medium">Preparing slide canvas...</p>
+          <div className="text-center space-y-1.5">
+            <p className="text-sm font-semibold">Loading presentation</p>
+            <p className="text-xs text-muted-foreground">Preparing canvas...</p>
           </div>
         </motion.div>
       </div>
@@ -346,17 +325,14 @@ export default function StreamableViewerPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#030303] text-white selection:bg-violet-500/30 overflow-hidden font-outfit">
-      {/* ── Immersive Background ── */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-violet-600/10 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-fuchsia-600/10 blur-[120px]" />
-        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-blue-600/5 blur-[100px]" />
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
+    <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden font-outfit">
+      {/* ── Subtle Background ── */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(var(--primary-rgb),0.03),transparent_50%)]" />
       </div>
 
       <StreamableHeader
-        isStreaming={isStreaming || isResolvingImages}
+        isStreaming={isStreaming}
         streamComplete={streamComplete}
         streamStatus={streamStatus}
         streamProgress={streamProgress}
@@ -390,10 +366,15 @@ export default function StreamableViewerPage() {
         </AnimatePresence>
 
         {/* ── Center Canvas ── */}
-        <main className="flex-1 flex flex-col min-w-0 relative">
+        <main className="flex-1 flex flex-col min-w-0 relative bg-muted/10 overflow-hidden">
+          {/* Subtle Background Pattern */}
+          <div 
+            className="absolute inset-0 pointer-events-none opacity-[0.03] z-0"
+            style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '32px 32px' }}
+          />
           <div
             ref={containerRef}
-            className="flex-1 overflow-hidden relative group"
+            className="flex-1 overflow-hidden relative group z-10"
           >
             {autoFitScale > 0 && (
               <TransformWrapper
@@ -412,60 +393,62 @@ export default function StreamableViewerPage() {
                   <motion.div
                     layout
                     transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-                    className="relative"
+                    className="relative w-full h-full flex items-center justify-center"
                   >
-                    <StreamableSlidePreview
-                      activeSlide={activeSlide}
-                      scale={1}
-                      isStreaming={isStreaming}
-                      streamStatus={streamStatus}
-                      currentTheme={currentTheme}
-                      onNavigateCreate={handleNavigateCreate}
-                    />
+                    <ErrorBoundary>
+                      <StreamableSlidePreview
+                        activeSlide={activeSlide}
+                        scale={1}
+                        isStreaming={isStreaming}
+                        streamStatus={streamStatus}
+                        currentTheme={currentTheme}
+                        onNavigateCreate={handleNavigateCreate}
+                      />
+                    </ErrorBoundary>
                   </motion.div>
                 </TransformComponent>
               </TransformWrapper>
             )}
 
-            {/* Sidebar Toggle Buttons (Canva Style) */}
-            <div className="absolute top-1/2 -translate-y-1/2 left-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            {/* Sidebar Toggle Buttons */}
+            <div className="absolute top-1/2 -translate-y-1/2 left-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
                <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="icon" 
                 onClick={() => setIsSidebarsOpen(s => !s)}
-                className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-full hover:bg-white/10"
+                className="rounded-full h-10 w-10 bg-background/50 backdrop-blur-xl shadow-sm hover:bg-background/80"
                >
-                 <PanelLeft className={cn("w-4 h-4 transition-transform", !isSidebarsOpen && "rotate-180")} />
+                 <PanelLeft className={cn("w-4 h-4 transition-transform text-foreground", !isSidebarsOpen && "rotate-180")} />
                </Button>
             </div>
           </div>
 
-          {/* ── Navigation Controls (Apple Grade) ── */}
+          {/* ── Navigation Controls ── */}
           {orderedSlides.length > 0 && (
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40">
-              <div className="flex items-center gap-6 bg-black/60 backdrop-blur-2xl px-6 py-3 rounded-full border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all hover:border-white/20">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-40">
+              <div className="flex items-center gap-6 bg-background/80 backdrop-blur-3xl px-6 py-3 rounded-full border border-border/50 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.1)] transition-all hover:bg-background/95 hover:shadow-[0_8px_32px_-4px_rgba(0,0,0,0.15)]">
                 <Button
                   variant="ghost"
                   size="icon"
                   disabled={activeSlideIdx === 0}
                   onClick={() => setActiveSlideIdx((i) => Math.max(0, i - 1))}
-                  className="rounded-full h-10 w-10 text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-20"
+                  className="rounded-full h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-muted/50 disabled:opacity-30"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
 
-                <div className="flex items-center gap-2">
-                   <span className="text-xs font-bold tracking-widest text-violet-400 uppercase w-4 text-center">
+                <div className="flex items-center gap-3">
+                   <span className="text-xs font-semibold text-foreground w-4 text-center">
                     {activeSlideIdx + 1}
                   </span>
-                  <div className="w-24 h-1 bg-white/10 rounded-full overflow-hidden">
+                  <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden">
                     <motion.div 
-                      className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500"
+                      className="h-full bg-primary"
                       initial={{ width: 0 }}
                       animate={{ width: `${((activeSlideIdx + 1) / orderedSlides.length) * 100}%` }}
                     />
                   </div>
-                  <span className="text-xs font-bold tracking-widest text-white/30 uppercase w-4 text-center">
+                  <span className="text-xs font-semibold text-muted-foreground w-4 text-center">
                     {orderedSlides.length}
                   </span>
                 </div>
@@ -475,7 +458,7 @@ export default function StreamableViewerPage() {
                   size="icon"
                   disabled={activeSlideIdx >= orderedSlides.length - 1}
                   onClick={() => setActiveSlideIdx((i) => Math.min(orderedSlides.length - 1, i + 1))}
-                  className="rounded-full h-10 w-10 text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-20"
+                  className="rounded-full h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-muted/50 disabled:opacity-30"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </Button>

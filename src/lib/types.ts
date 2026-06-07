@@ -38,6 +38,7 @@ export interface ContentItem {
   color?: string;
   textAlign?: string;
   icon?: string;
+  label?: string;
 }
 
 export type ContentType =

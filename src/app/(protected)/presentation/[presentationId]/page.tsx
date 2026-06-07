@@ -19,19 +19,26 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { Layers, LayoutTemplate, PanelLeft, PanelRight } from 'lucide-react'
+import { PanelLeft, PanelRight, PanelLeftClose, PanelRightClose, Maximize2, Minimize2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import PresentationSkeleton from './_components/PresentationSkeleton'
+import { cn } from '@/lib/utils'
 
 type Props = {}
 
 const page = (props: Props) => {
 
-
   const { currentTheme, setCurrentTheme, setProject, setSlides } = useSlideStore();
   const params = useParams();
   const { setTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
+
+  // Sidebar toggle states
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
+
+  const isZenMode = !leftSidebarOpen && !rightSidebarOpen;
 
 
   useEffect(() => {
@@ -64,9 +71,7 @@ const page = (props: Props) => {
         setIsLoading(false);
       }
 
-
     })()
-
 
   }, [])
 
@@ -84,19 +89,75 @@ const page = (props: Props) => {
         </div>
 
         <div className='flex-1 flex gap-1.5 sm:gap-2 min-h-0 w-full mx-auto font-sans z-0'>
-          {/* Floating Left Sidebar — hidden on small/md, full on lg */}
-          <div className='hidden lg:block lg:w-72 xl:w-80 h-full rounded-xl bg-background/80 backdrop-blur-md shadow-sm border overflow-hidden flex-shrink-0 transition-all duration-200'>
-            <EditorLeftSidebar />
+          {/* Floating Left Sidebar */}
+          <div className={cn(
+            'hidden lg:flex flex-col h-full rounded-xl bg-background/80 backdrop-blur-md shadow-sm border overflow-hidden flex-shrink-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] relative',
+            leftSidebarOpen ? 'w-72 xl:w-80' : 'w-12 cursor-pointer hover:bg-muted/50 items-center py-6'
+          )}
+          onClick={() => { if (!leftSidebarOpen) setLeftSidebarOpen(true); }}
+          >
+            {/* Expanded State */}
+            <div className={cn(
+              "absolute top-0 left-0 w-72 xl:w-80 h-full transition-opacity duration-300", 
+              leftSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            )}>
+              <Button 
+                variant="ghost" size="icon" 
+                className="absolute top-3 right-3 z-50 w-8 h-8 rounded-full bg-background/50 backdrop-blur-md hover:bg-muted"
+                onClick={(e) => { e.stopPropagation(); setLeftSidebarOpen(false); }}
+              >
+                <PanelLeftClose className="w-4 h-4 text-muted-foreground" />
+              </Button>
+              <EditorLeftSidebar />
+            </div>
+
+            {/* Collapsed State */}
+            {!leftSidebarOpen && (
+              <div className="flex flex-col items-center gap-6 text-muted-foreground opacity-60 hover:opacity-100 transition-opacity">
+                <PanelLeft className="w-5 h-5" />
+                <span className="text-xs font-semibold tracking-widest uppercase [writing-mode:vertical-rl] rotate-180">
+                  Slides
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Main Canvas Area — takes all remaining space */}
+          {/* Main Canvas Area */}
           <div className='flex-1 h-full rounded-xl bg-muted/30 border overflow-hidden relative shadow-inner min-w-0'>
             <Editor isEditable={true} />
           </div>
 
-          {/* Floating Right Sidebar — hidden on small/md, narrow on lg, full on xl */}
-          <div className='hidden lg:block lg:w-64 xl:w-80 h-full rounded-xl bg-background/80 backdrop-blur-md shadow-sm border overflow-hidden flex-shrink-0 transition-all duration-200'>
-            <EditorSlidebar />
+          {/* Floating Right Sidebar */}
+          <div className={cn(
+            'hidden lg:flex flex-col h-full rounded-xl bg-background/80 backdrop-blur-md shadow-sm border overflow-hidden flex-shrink-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] relative',
+            rightSidebarOpen ? 'w-64 xl:w-80' : 'w-12 cursor-pointer hover:bg-muted/50 items-center py-6'
+          )}
+          onClick={() => { if (!rightSidebarOpen) setRightSidebarOpen(true); }}
+          >
+            {/* Expanded State */}
+            <div className={cn(
+              "absolute top-0 left-0 w-64 xl:w-80 h-full transition-opacity duration-300", 
+              rightSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            )}>
+              <Button 
+                variant="ghost" size="icon" 
+                className="absolute top-3 right-3 z-50 w-8 h-8 rounded-full bg-background/50 backdrop-blur-md hover:bg-muted"
+                onClick={(e) => { e.stopPropagation(); setRightSidebarOpen(false); }}
+              >
+                <PanelRightClose className="w-4 h-4 text-muted-foreground" />
+              </Button>
+              <EditorSlidebar />
+            </div>
+
+            {/* Collapsed State */}
+            {!rightSidebarOpen && (
+              <div className="flex flex-col items-center gap-6 text-muted-foreground opacity-60 hover:opacity-100 transition-opacity">
+                <PanelRight className="w-5 h-5" />
+                <span className="text-xs font-semibold tracking-widest uppercase [writing-mode:vertical-rl] rotate-180">
+                  Properties
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

@@ -116,13 +116,13 @@ export default function StreamableSlidePreview({
               <div className="relative w-24 h-24">
                 {/* Outer ring */}
                 <motion.div
-                  className="absolute inset-0 rounded-full border-2 border-violet-500/20"
+                  className="absolute inset-0 rounded-full border-2 border-primary/20"
                   animate={{ rotate: 360 }}
                   transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
                 />
                 {/* Middle ring */}
                 <motion.div
-                  className="absolute inset-2 rounded-full border-2 border-dashed border-fuchsia-500/20"
+                  className="absolute inset-2 rounded-full border-2 border-dashed border-primary/20"
                   animate={{ rotate: -360 }}
                   transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
                 />
@@ -132,8 +132,8 @@ export default function StreamableSlidePreview({
                   animate={{ scale: [1, 1.15, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <div className="p-5 rounded-2xl bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20 backdrop-blur-sm">
-                    <Sparkles className="h-8 w-8 text-violet-500" />
+                  <div className="p-5 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 backdrop-blur-sm">
+                    <Sparkles className="h-8 w-8 text-primary" />
                   </div>
                 </motion.div>
 
@@ -141,7 +141,7 @@ export default function StreamableSlidePreview({
                 {[0, 1, 2].map((i) => (
                   <motion.div
                     key={i}
-                    className="absolute w-2 h-2 rounded-full bg-violet-500"
+                    className="absolute w-2 h-2 rounded-full bg-primary"
                     style={{ top: '50%', left: '50%' }}
                     animate={{
                       x: [
@@ -183,7 +183,7 @@ export default function StreamableSlidePreview({
                 {[0, 1, 2].map((i) => (
                   <motion.div
                     key={i}
-                    className="w-1.5 h-1.5 rounded-full bg-violet-500/40"
+                    className="w-1.5 h-1.5 rounded-full bg-primary/40"
                     animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1, 0.8] }}
                     transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
                   />

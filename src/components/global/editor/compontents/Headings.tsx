@@ -112,7 +112,7 @@ const createHeading = (
 
 const Heading1 = createHeading(
   'Heading1',
-  'text-[clamp(1.5rem,6cqw,3.75rem)] font-extrabold mb-4 tracking-[-0.02em]',
+  'text-[clamp(1.5rem,4cqw,2.5rem)] font-extrabold mb-4 tracking-[-0.02em]',
   {
     useAccentColor: true,
     showAccentLine: true,
@@ -123,25 +123,25 @@ const Heading1 = createHeading(
 
 const Heading2 = createHeading(
   'Heading2',
-  'text-[clamp(1.25rem,5cqw,3rem)] font-bold mb-3 tracking-[-0.015em]',
+  'text-[clamp(1.25rem,3cqw,2rem)] font-bold mb-3 tracking-[-0.015em]',
   { useAccentColor: false }
 )
 
 const Heading3 = createHeading(
   'Heading3',
-  'text-[clamp(1.1rem,4cqw,2.25rem)] font-semibold mb-2 tracking-[-0.01em]',
+  'text-[clamp(1rem,2.5cqw,1.5rem)] font-semibold mb-2 tracking-[-0.01em]',
   { useAccentColor: false }
 )
 
 const Heading4 = createHeading(
   'Heading4',
-  'text-[clamp(1rem,3cqw,1.875rem)] font-medium mb-2 tracking-normal',
+  'text-[clamp(0.875rem,2cqw,1.25rem)] font-medium mb-2 tracking-normal',
   { useAccentColor: false }
 )
 
 const Title = createHeading(
   'Title',
-  'text-[clamp(2rem,8cqw,4.5rem)] font-black mb-6 tracking-[-0.03em]',
+  'text-[clamp(1.75rem,5cqw,3rem)] font-black mb-6 tracking-[-0.03em]',
   {
     useAccentColor: true,
     showAccentLine: true,
