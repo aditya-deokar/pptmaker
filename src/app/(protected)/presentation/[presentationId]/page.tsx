@@ -61,7 +61,15 @@ const page = (props: Props) => {
         setProject(res.data);
         console.log(res.data)
 
-        setSlides(JSON.parse(JSON.stringify(res.data.slides)))
+        const dbSlides = res.data.slides ? JSON.parse(JSON.stringify(res.data.slides)) : [];
+        const localSlides = useSlideStore.getState().slides || [];
+        
+        if (dbSlides.length > 0) {
+          setSlides(dbSlides);
+        } else if (localSlides.length === 0) {
+          setSlides([]);
+        }
+        // If dbSlides is empty/null but localSlides has content, we preserve the local slides.
 
       } catch (error) {
         toast.error('Error', {

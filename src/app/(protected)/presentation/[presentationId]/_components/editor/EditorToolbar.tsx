@@ -56,7 +56,7 @@ const EditorToolbar = ({ isEditable = true }: Props) => {
     const [isSaving, setIsSaving] = useState(false)
 
     // Find the selected component
-    const currentSlideData = slides[currentSlide]
+    const currentSlideData = (slides || [])[currentSlide]
 
     const findComponent = (content: ContentItem): ContentItem | null => {
         if (content.id === selectedComponentId) {

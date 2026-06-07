@@ -20,7 +20,7 @@ export function CustomDragLayer() {
         return null
     }
 
-    const orderedSlides = [...slides].sort((a, b) => (a.slideOrder ?? 0) - (b.slideOrder ?? 0))
+    const orderedSlides = [...(slides || [])].sort((a, b) => (a.slideOrder ?? 0) - (b.slideOrder ?? 0))
     const slide = orderedSlides[item.index]
 
     if (!slide) return null;
