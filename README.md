@@ -44,7 +44,7 @@ What makes the project interesting is that it is not just a slide generator. It 
 | Surface | URL |
 | --- | --- |
 | Live app | [https://verto.ai.aditya-deokar.me](https://verto.ai.aditya-deokar.me) |
-| Hosted MCP endpoint | [https://verto.ai.aditya-deokar.me/api/mcp](https://verto.ai.aditya-deokar.me/api/mcp) |
+| Hosted MCP endpoint | [https://verto.ai.aditya-deokar.me/mcp](https://verto.ai.aditya-deokar.me/mcp) |
 | MCP discovery URL | [https://verto.ai.aditya-deokar.me/.well-known/oauth-protected-resource](https://verto.ai.aditya-deokar.me/.well-known/oauth-protected-resource) |
 | Hosted MCP setup guide | [https://verto.ai.aditya-deokar.me/docs/mcp/04-usage-guide](https://verto.ai.aditya-deokar.me/docs/mcp/04-usage-guide) |
 
@@ -128,7 +128,7 @@ flowchart LR
 sequenceDiagram
     participant Client as MCP Client
     participant Settings as Settings UI
-    participant MCP as /api/mcp
+    participant MCP as /mcp
     participant Tools as Presentation tools
     participant DB as PostgreSQL
 

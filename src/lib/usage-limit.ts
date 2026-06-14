@@ -42,15 +42,19 @@ export async function getUserUsageDetails(userId: string) {
 /**
  * Checks if a user is within their limit and increments the count.
  */
-export async function checkAndIncrementUsage(userId: string) {
+export async function checkAndIncrementUsage(
+  userId: string,
+  options?: { limitOverride?: number }
+) {
   const { usage, limit, isUnlimited } = await getUserUsageDetails(userId);
+  const effectiveLimit = options?.limitOverride ?? limit;
 
-  if (!isUnlimited && usage >= limit) {
+  if (!isUnlimited && usage >= effectiveLimit) {
     return { 
       success: false, 
-      error: `Usage limit reached (${usage}/${limit}). Upgrade or add an API key to continue.`,
+      error: `Usage limit reached (${usage}/${effectiveLimit}). Upgrade or add an API key to continue.`,
       usage,
-      limit
+      limit: effectiveLimit
     };
   }
 
@@ -60,5 +64,5 @@ export async function checkAndIncrementUsage(userId: string) {
     data: { usageCount: { increment: 1 } },
   });
 
-  return { success: true, usage: usage + 1, limit };
+  return { success: true, usage: usage + 1, limit: effectiveLimit };
 }

@@ -12,6 +12,12 @@ import { createMcpServer } from '../server';
 import { registerAllTools } from '../tools/registry';
 import { registerAllResources } from '../resources/registry';
 import { setTransportType } from '../tools/presentation/index';
+import { resolveAuth } from '../auth/middleware';
+import { buildWwwAuthenticateChallenge } from '../auth/oauth-config';
+import {
+  getRequiredScopesForTool,
+  hasRequiredScopes,
+} from '../auth/scopes';
 
 import '../tools/presentation/index';
 import '../resources/presentations';
@@ -93,16 +99,114 @@ function applyCorsHeaders(request: Request, response: Response): Response {
   });
 }
 
-function jsonResponse(request: Request, status: number, body: unknown): Response {
+function jsonResponse(
+  request: Request,
+  status: number,
+  body: unknown,
+  extraHeaders?: HeadersInit
+): Response {
   return applyCorsHeaders(
     request,
     new Response(JSON.stringify(body), {
       status,
       headers: {
         'Content-Type': 'application/json',
+        ...(extraHeaders ?? {}),
       },
     })
   );
+}
+
+function requestHeadersToRecord(request: Request): Record<string, string | undefined> {
+  const record: Record<string, string | undefined> = {};
+  request.headers.forEach((value, key) => {
+    record[key] = value;
+  });
+  return record;
+}
+
+function getJsonRpcId(body: unknown): unknown {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return null;
+  }
+
+  return (body as { id?: unknown }).id ?? null;
+}
+
+function getToolNameFromBody(body: unknown): string | null {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return null;
+  }
+
+  const message = body as {
+    method?: unknown;
+    params?: { name?: unknown };
+  };
+
+  if (message.method !== 'tools/call' || typeof message.params?.name !== 'string') {
+    return null;
+  }
+
+  return message.params.name;
+}
+
+async function guardHttpAuthorization(
+  request: Request,
+  body: unknown
+): Promise<Response | null> {
+  const headers = requestHeadersToRecord(request);
+  const authHeader = headers.authorization ?? headers.Authorization;
+  const toolName = getToolNameFromBody(body);
+  const requiredScopes = toolName ? getRequiredScopesForTool(toolName) : [];
+  const hasBearer = authHeader?.startsWith('Bearer ') ?? false;
+
+  if (!toolName && !hasBearer) {
+    return null;
+  }
+
+  const auth = await resolveAuth('http', headers);
+  const challenge = buildWwwAuthenticateChallenge({
+    requestUrl: request.url,
+    scopes: requiredScopes,
+    error: auth ? 'insufficient_scope' : 'invalid_token',
+    errorDescription: auth
+      ? 'Reconnect Verto AI and grant the required scope.'
+      : 'Sign in to Verto AI or reconnect this app.',
+  });
+
+  if (!auth) {
+    return jsonResponse(
+      request,
+      401,
+      {
+        jsonrpc: '2.0',
+        error: {
+          code: -32004,
+          message: 'Authentication required for this MCP request.',
+        },
+        id: getJsonRpcId(body),
+      },
+      { 'WWW-Authenticate': challenge }
+    );
+  }
+
+  if (!hasRequiredScopes(auth, requiredScopes)) {
+    return jsonResponse(
+      request,
+      403,
+      {
+        jsonrpc: '2.0',
+        error: {
+          code: -32005,
+          message: `This OAuth connection needs the following scope: ${requiredScopes.join(' ')}.`,
+        },
+        id: getJsonRpcId(body),
+      },
+      { 'WWW-Authenticate': challenge }
+    );
+  }
+
+  return null;
 }
 
 function validateJsonDepth(value: unknown, maxDepth: number, depth = 0): boolean {
@@ -315,6 +419,11 @@ export async function handlePost(request: Request): Promise<Response> {
     }
 
     const { request: normalizedRequest, body } = await parseRequestBody(request);
+    const authGuardResponse = await guardHttpAuthorization(request, body);
+    if (authGuardResponse) {
+      return authGuardResponse;
+    }
+
     const sessionId = normalizedRequest.headers.get('mcp-session-id');
     let session: HttpSession | undefined;
 
@@ -370,11 +479,14 @@ export async function handleGet(request: Request): Promise<Response> {
   const sessionId = request.headers.get('mcp-session-id');
   if (!sessionId) {
     const env = validateMcpEnv();
+    const endpoint = new URL(request.url).pathname;
     return jsonResponse(request, 200, {
       name: env.MCP_SERVER_NAME,
       version: env.MCP_SERVER_VERSION,
       protocol_version: MCP_PROTOCOL_VERSION,
-      endpoint: '/api/mcp',
+      endpoint,
+      primary_endpoint: '/mcp',
+      legacy_endpoint: '/api/mcp',
       capabilities: ['tools', 'resources', 'logging'],
       transports: ['streamable-http'],
     });

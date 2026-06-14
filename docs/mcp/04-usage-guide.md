@@ -3,7 +3,7 @@
 This document describes the **current MCP server implementation** in this repository and the recommended client setup for the hosted Verto AI deployment:
 
 - App: `https://verto.ai.aditya-deokar.me`
-- MCP endpoint: `https://verto.ai.aditya-deokar.me/api/mcp`
+- MCP endpoint: `https://verto.ai.aditya-deokar.me/mcp`
 - Discovery URL: `https://verto.ai.aditya-deokar.me/.well-known/oauth-protected-resource`
 - Public guide page: `https://verto.ai.aditya-deokar.me/docs/mcp/04-usage-guide`
 
@@ -20,14 +20,15 @@ Use **stdio** only when:
 For most users of the hosted Verto AI product, the setup should be:
 
 1. Generate a Verto AI MCP key in Settings
-2. Add the hosted URL `https://verto.ai.aditya-deokar.me/api/mcp`
+2. Add the hosted URL `https://verto.ai.aditya-deokar.me/mcp`
 3. Send the key as `Authorization: Bearer vk_live_...`
 
 ## What This MCP Server Exposes
 
 ### Transport
 
-- `Streamable HTTP` at `/api/mcp`
+- `Streamable HTTP` at `/mcp`
+- legacy Streamable HTTP at `/api/mcp`
 - `stdio` via `src/mcp/transport/stdio.ts`
 
 ### Authentication
@@ -46,16 +47,16 @@ This matters because the current hosted HTTP implementation is **session-based**
 
 The codebase currently implements the following HTTP behavior:
 
-- `GET /api/mcp`
+- `GET /mcp`
   - returns MCP server metadata when no session ID is present
   - acts as a lightweight health/discovery endpoint
-- `POST /api/mcp`
+- `POST /mcp`
   - accepts MCP JSON-RPC requests
   - creates a session when the first request is `initialize`
   - rejects non-initialize requests that do not include a valid session ID
-- `DELETE /api/mcp`
+- `DELETE /mcp`
   - closes the current session
-- `OPTIONS /api/mcp`
+- `OPTIONS /mcp`
   - supports CORS preflight
 
 ### Important implication
@@ -148,7 +149,7 @@ For Claude custom connectors, the connection comes from **Anthropic's cloud infr
 Recommended command:
 
 ```bash
-claude mcp add --transport http verto-ai https://verto.ai.aditya-deokar.me/api/mcp \
+claude mcp add --transport http verto-ai https://verto.ai.aditya-deokar.me/mcp \
   --header "Authorization: Bearer ${VERTO_MCP_KEY}"
 ```
 
@@ -172,7 +173,7 @@ Add a remote MCP server to `.cursor/mcp.json` or `~/.cursor/mcp.json`:
 {
   "mcpServers": {
     "verto-ai": {
-      "url": "https://verto.ai.aditya-deokar.me/api/mcp",
+      "url": "https://verto.ai.aditya-deokar.me/mcp",
       "headers": {
         "Authorization": "Bearer ${env:VERTO_MCP_KEY}"
       }
@@ -190,7 +191,7 @@ If a client accepts a Streamable HTTP server entry in JSON:
   "mcpServers": {
     "verto-ai": {
       "type": "streamable-http",
-      "url": "https://verto.ai.aditya-deokar.me/api/mcp",
+      "url": "https://verto.ai.aditya-deokar.me/mcp",
       "headers": {
         "Authorization": "Bearer ${VERTO_MCP_KEY}"
       }
@@ -205,7 +206,7 @@ For Claude's remote connector flow:
 
 1. Open `Customize > Connectors`
 2. Choose `Add custom connector`
-3. Paste `https://verto.ai.aditya-deokar.me/api/mcp`
+3. Paste `https://verto.ai.aditya-deokar.me/mcp`
 4. Complete the auth flow if prompted
 5. Enable the connector in the conversation where you want Verto AI tools available
 
@@ -237,7 +238,7 @@ Only use this if you are running the repository locally.
 ### Health check
 
 ```bash
-curl https://verto.ai.aditya-deokar.me/api/mcp
+curl https://verto.ai.aditya-deokar.me/mcp
 ```
 
 Expected result:
@@ -270,7 +271,7 @@ So a direct `tools/list` POST is not a correct representation of the real transp
 
 Check:
 
-- the URL is exactly `https://verto.ai.aditya-deokar.me/api/mcp`
+- the URL is exactly `https://verto.ai.aditya-deokar.me/mcp`
 - the client is using MCP, not plain REST
 - the key is being sent as a Bearer token
 - the client supports remote HTTP MCP properly

@@ -407,13 +407,14 @@ Resources provide **read-only context** that agents can use to inform their tool
 
 | Transport | Use Case | Endpoint |
 |-----------|----------|----------|
-| **Streamable HTTP** | Production, remote clients, web-based agents | `POST /api/mcp` |
+| **Streamable HTTP** | Production, remote clients, web-based agents | `POST /mcp` |
 | **stdio** | Local development, IDE integrations (Cursor, Claude Desktop) | `npx verto-mcp-server` |
 
 ### 6.2 Streamable HTTP Configuration
 
 ```
-Endpoint: /api/mcp
+Endpoint: /mcp
+Legacy endpoint: /api/mcp
 Methods: GET (SSE stream), POST (JSON-RPC messages)
 Protocol: JSON-RPC 2.0 over HTTP
 Session: Stateful with Mcp-Session-Id header

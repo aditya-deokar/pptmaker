@@ -6,6 +6,7 @@
  */
 
 export type UserTier = 'free' | 'pro' | 'enterprise';
+export type AuthMethod = 'api_key' | 'clerk_session' | 'oauth';
 
 /**
  * Authenticated user context passed to every MCP tool handler.
@@ -20,4 +21,12 @@ export interface AuthContext {
   email: string;
   /** Subscription tier — controls rate limits and feature access */
   tier: UserTier;
+  /** How this request was authenticated. */
+  authMethod: AuthMethod;
+  /** OAuth scopes granted to this request. API key and Clerk session auth receive all MCP scopes. */
+  scopes: string[];
+  /** OAuth client ID when authenticated through account linking. */
+  clientId?: string;
+  /** OAuth resource/audience when authenticated through account linking. */
+  resource?: string;
 }

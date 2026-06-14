@@ -11,6 +11,7 @@ import { compare } from 'bcryptjs';
 import prisma from '@/lib/prisma';
 import type { AuthContext, UserTier } from './types';
 import { SubscriptionStatus } from '@/generated/prisma';
+import { getAllMcpOAuthScopes } from './scopes';
 
 /** API key prefix for identification: vk_live_xxx or vk_dev_xxx */
 const API_KEY_PREFIX_REGEX = /^vk_(live|dev)_/;
@@ -69,6 +70,8 @@ export async function validateApiKey(apiKey: string): Promise<AuthContext | null
       clerkId: candidate.user.clerkId,
       email: candidate.user.email,
       tier,
+      authMethod: 'api_key',
+      scopes: getAllMcpOAuthScopes(),
     };
   }
 

@@ -7,6 +7,7 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mc
 import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import type { ServerNotification, ServerRequest } from '@modelcontextprotocol/sdk/types.js';
 import { resolveAuth } from '../auth/middleware';
+import { hasRequiredScopes } from '../auth/scopes';
 import { RESOURCE_URIS } from '../config/constants';
 import {
   generationRunToMcpResponse,
@@ -50,7 +51,7 @@ function registerGenerationProgressResource(server: McpServer): void {
   const template = new ResourceTemplate(RESOURCE_URIS.GENERATION_PROGRESS, {
     list: async (extra) => {
       const auth = await resolveResourceAuth(extra);
-      if (!auth) {
+      if (!auth || !hasRequiredScopes(auth, ['presentations:generate'])) {
         return { resources: [] };
       }
 
@@ -83,14 +84,15 @@ function registerGenerationProgressResource(server: McpServer): void {
       const auth = await resolveResourceAuth(extra);
       const runId = typeof variables.runId === 'string' ? variables.runId : '';
 
-      if (!auth) {
+      if (!auth || !hasRequiredScopes(auth, ['presentations:generate'])) {
         return {
           contents: [
             {
               uri: RESOURCE_URIS.GENERATION_PROGRESS.replace('{runId}', runId),
               mimeType: 'application/json',
               text: JSON.stringify({
-                error: 'Authentication required to read generation progress.',
+                error:
+                  'Authentication with presentations:generate scope is required to read generation progress.',
               }),
             },
           ],

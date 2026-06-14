@@ -64,6 +64,7 @@ export const ERROR_CODES = {
 
 // ─── Limits ────────────────────────────────────────────────────
 export const LIMITS = {
+  OAUTH_CONNECTED_GENERATION_LIMIT: 15,
   MAX_PERMANENT_DELETE_BATCH: 20,
   MAX_OUTLINES: 30,
   MAX_TOPIC_LENGTH: 500,

@@ -13,18 +13,39 @@ import { mcpError, type McpToolResponse } from './response';
  * LLM-friendly: every error includes a suggestion for what to do next.
  */
 export const Errors = {
-  unauthorized(): McpToolResponse {
+  unauthorized(wwwAuthenticate?: string): McpToolResponse {
     return mcpError(
       ERROR_CODES.UNAUTHORIZED,
       'Authentication required. Provide a valid API key or sign in.',
+      undefined,
+      undefined,
+      wwwAuthenticate
+        ? { 'mcp/www_authenticate': wwwAuthenticate }
+        : undefined,
     );
   },
 
-  forbidden(resource = 'resource'): McpToolResponse {
+  forbidden(resource = 'resource', wwwAuthenticate?: string): McpToolResponse {
     return mcpError(
       ERROR_CODES.FORBIDDEN,
       `You do not have permission to access this ${resource}.`,
       `Verify the ${resource} ID and ensure you are the owner.`,
+      undefined,
+      wwwAuthenticate
+        ? { 'mcp/www_authenticate': wwwAuthenticate }
+        : undefined,
+    );
+  },
+
+  insufficientScope(requiredScopes: readonly string[], wwwAuthenticate?: string): McpToolResponse {
+    return mcpError(
+      ERROR_CODES.FORBIDDEN,
+      `This OAuth connection needs the following scope: ${requiredScopes.join(' ')}.`,
+      'Reconnect Verto AI and grant the requested permission.',
+      { required_scopes: requiredScopes },
+      wwwAuthenticate
+        ? { 'mcp/www_authenticate': wwwAuthenticate }
+        : undefined,
     );
   },
 

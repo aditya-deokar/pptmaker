@@ -45,7 +45,12 @@ export async function handlePresentationGenerate(
     wait_timeout_ms,
   } = args;
 
-  const usageCheck = await checkAndIncrementUsage(auth.userId);
+  const usageCheck = await checkAndIncrementUsage(
+    auth.userId,
+    auth.authMethod === 'oauth'
+      ? { limitOverride: LIMITS.OAUTH_CONNECTED_GENERATION_LIMIT }
+      : undefined
+  );
   if (!usageCheck.success) {
     return Errors.usageLimitExceeded(usageCheck.usage, usageCheck.limit);
   }

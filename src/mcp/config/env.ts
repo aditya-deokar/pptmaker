@@ -17,6 +17,12 @@ const mcpEnvSchema = z.object({
   MCP_MAX_JSON_DEPTH: z.coerce.number().int().positive().default(20),
   DATABASE_URL: z.string().min(1),
   NEXT_PUBLIC_APP_URL: z.string().url().optional().default('http://localhost:3000'),
+  MCP_PUBLIC_ENDPOINT: z.string().url().optional(),
+  OAUTH_ISSUER: z.string().url().optional(),
+  OAUTH_ALLOWED_CLIENTS: z.string().optional().default(''),
+  OAUTH_ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
+  OAUTH_REFRESH_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(60 * 60 * 24 * 30),
+  OAUTH_AUTH_CODE_TTL_SECONDS: z.coerce.number().int().positive().default(600),
 });
 
 export type McpEnv = z.infer<typeof mcpEnvSchema>;

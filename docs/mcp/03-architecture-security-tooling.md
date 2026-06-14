@@ -21,7 +21,7 @@ graph TB
 
     subgraph Transport["Transport Layer"]
         STDIO[stdio Transport]
-        HTTP[Streamable HTTP<br/>/api/mcp]
+        HTTP[Streamable HTTP<br/>/mcp]
     end
 
     subgraph MCPServer["MCP Server (src/mcp/)"]
@@ -61,7 +61,7 @@ graph TB
 ### 1.2 Request Flow (Streamable HTTP)
 
 ```
-Client POST /api/mcp
+Client POST /mcp
   → Next.js API Route Handler
     → Session validation (Mcp-Session-Id)
     → Auth middleware (API key or Clerk)

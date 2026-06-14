@@ -243,10 +243,11 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/server/stre
 ```
 
 **Acceptance Criteria**:
-- [ ] `/api/mcp` endpoint responds to MCP JSON-RPC messages
+- [ ] `/mcp` endpoint responds to MCP JSON-RPC messages
+- [ ] `/api/mcp` remains available as a legacy compatibility endpoint
 - [ ] Added to Clerk middleware's public route matcher
 - [ ] CORS configured for allowed origins
-- [ ] Health check: `GET /api/mcp` returns server info
+- [ ] Health check: `GET /mcp` returns server info
 
 ---
 
@@ -641,7 +642,8 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhook(.*)",
   "/api/inngest(.*)",
   "/api/mobile-design/inngest(.*)",
-  "/api/mcp(.*)",           // ← ADD THIS
+  "/mcp(.*)",               // primary MCP endpoint
+  "/api/mcp(.*)",           // legacy compatibility endpoint
   "/features(.*)",
   "/",
 ]);
