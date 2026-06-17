@@ -82,6 +82,58 @@ function badRequest(message: string): Response {
   );
 }
 
+function serverError(message: string): Response {
+  return Response.json(
+    {
+      error: 'server_error',
+      error_description: message,
+    },
+    {
+      status: 500,
+      headers: {
+        'Cache-Control': 'no-store',
+        Pragma: 'no-cache',
+      },
+    }
+  );
+}
+
+function getErrorSummary(error: unknown): Record<string, string> {
+  if (!error || typeof error !== 'object') {
+    return { type: typeof error };
+  }
+
+  const record = error as Record<string, unknown>;
+  return {
+    name: error instanceof Error ? error.name : 'UnknownError',
+    code: typeof record.code === 'string' ? record.code : 'UNKNOWN',
+  };
+}
+
+function isSafeOAuthRedirectUri(value: string | null | undefined): boolean {
+  if (!value) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value);
+    if (url.hash) {
+      return false;
+    }
+
+    if (url.protocol === 'https:') {
+      return true;
+    }
+
+    return (
+      url.protocol === 'http:'
+      && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
 function redirectWithOAuthError(
   redirectUri: string,
   error: string,
@@ -96,6 +148,30 @@ function redirectWithOAuthError(
   }
 
   return Response.redirect(url);
+}
+
+function handleAuthorizeException(
+  error: unknown,
+  params: AuthorizationParams,
+  stage: 'get' | 'post'
+): Response {
+  console.error('[OAuth] Authorization request failed', {
+    stage,
+    ...getErrorSummary(error),
+  });
+
+  if (isSafeOAuthRedirectUri(params.redirectUri)) {
+    return redirectWithOAuthError(
+      params.redirectUri!,
+      'server_error',
+      'Verto AI could not complete OAuth authorization. Please try reconnecting.',
+      params.state
+    );
+  }
+
+  return serverError(
+    'Verto AI could not complete OAuth authorization. Please try reconnecting.'
+  );
 }
 
 function redirectToSignIn(request: Request): Response {
@@ -249,63 +325,83 @@ function consentPage(
 
 export async function GET(request: Request): Promise<Response> {
   const params = paramsFromSearch(new URL(request.url).searchParams);
-  const validation = await validateAuthorizationParams(request, params);
-  if ('errorResponse' in validation) {
-    return validation.errorResponse;
-  }
 
-  const user = await resolveCurrentOAuthUser();
-  if (!user) {
-    return redirectToSignIn(request);
-  }
+  try {
+    const validation = await validateAuthorizationParams(request, params);
+    if ('errorResponse' in validation) {
+      return validation.errorResponse;
+    }
 
-  return consentPage(
-    request,
-    params,
-    validation.client.clientName || validation.client.clientId,
-    user.email,
-    validation.scopes
-  );
+    const user = await resolveCurrentOAuthUser();
+    if (!user) {
+      return redirectToSignIn(request);
+    }
+
+    return consentPage(
+      request,
+      params,
+      validation.client.clientName || validation.client.clientId,
+      user.email,
+      validation.scopes
+    );
+  } catch (error) {
+    return handleAuthorizeException(error, params, 'get');
+  }
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const formData = await request.formData();
-  const decision = formData.get('decision');
-  const params = paramsFromFormData(formData);
-  const validation = await validateAuthorizationParams(request, params);
-  if ('errorResponse' in validation) {
-    return validation.errorResponse;
+  let params: AuthorizationParams = {
+    responseType: null,
+    clientId: null,
+    redirectUri: null,
+    scope: null,
+    state: null,
+    codeChallenge: null,
+    codeChallengeMethod: null,
+    resource: null,
+  };
+
+  try {
+    const formData = await request.formData();
+    const decision = formData.get('decision');
+    params = paramsFromFormData(formData);
+    const validation = await validateAuthorizationParams(request, params);
+    if ('errorResponse' in validation) {
+      return validation.errorResponse;
+    }
+
+    const user = await resolveCurrentOAuthUser();
+    if (!user) {
+      return redirectToSignIn(request);
+    }
+
+    if (decision !== 'allow') {
+      return redirectWithOAuthError(
+        params.redirectUri!,
+        'access_denied',
+        'The user canceled the Verto AI connection.',
+        params.state
+      );
+    }
+
+    const code = await issueAuthorizationCode({
+      userId: user.id,
+      clientId: params.clientId!,
+      redirectUri: params.redirectUri!,
+      scopes: validation.scopes,
+      resource: params.resource!,
+      codeChallenge: params.codeChallenge!,
+      codeChallengeMethod: params.codeChallengeMethod!,
+    });
+
+    const redirectUri = new URL(params.redirectUri!);
+    redirectUri.searchParams.set('code', code);
+    if (params.state) {
+      redirectUri.searchParams.set('state', params.state);
+    }
+
+    return Response.redirect(redirectUri);
+  } catch (error) {
+    return handleAuthorizeException(error, params, 'post');
   }
-
-  const user = await resolveCurrentOAuthUser();
-  if (!user) {
-    return redirectToSignIn(request);
-  }
-
-  if (decision !== 'allow') {
-    return redirectWithOAuthError(
-      params.redirectUri!,
-      'access_denied',
-      'The user canceled the Verto AI connection.',
-      params.state
-    );
-  }
-
-  const code = await issueAuthorizationCode({
-    userId: user.id,
-    clientId: params.clientId!,
-    redirectUri: params.redirectUri!,
-    scopes: validation.scopes,
-    resource: params.resource!,
-    codeChallenge: params.codeChallenge!,
-    codeChallengeMethod: params.codeChallengeMethod!,
-  });
-
-  const redirectUri = new URL(params.redirectUri!);
-  redirectUri.searchParams.set('code', code);
-  if (params.state) {
-    redirectUri.searchParams.set('state', params.state);
-  }
-
-  return Response.redirect(redirectUri);
 }
