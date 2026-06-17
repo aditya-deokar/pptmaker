@@ -1,11 +1,18 @@
-import { validateOAuthClient } from '@/mcp/auth/oauth-clients';
+import {
+  validateOAuthClient,
+  type OAuthClientInfo,
+} from '@/mcp/auth/oauth-clients';
 import {
   getMcpResourceUrl,
   isExpectedMcpResource,
 } from '@/mcp/auth/oauth-config';
 import { issueAuthorizationCode } from '@/mcp/auth/oauth-tokens';
 import { resolveCurrentOAuthUser } from '@/mcp/auth/oauth-users';
-import { parseRequestedScopes, scopeString } from '@/mcp/auth/scopes';
+import {
+  parseRequestedScopes,
+  scopeString,
+  type McpOAuthScope,
+} from '@/mcp/auth/scopes';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -20,6 +27,10 @@ interface AuthorizationParams {
   codeChallengeMethod: string | null;
   resource: string | null;
 }
+
+type AuthorizationValidationResult =
+  | { errorResponse: Response }
+  | { client: OAuthClientInfo; scopes: McpOAuthScope[] };
 
 function escapeHtml(value: string): string {
   return value
@@ -96,7 +107,7 @@ function redirectToSignIn(request: Request): Response {
 async function validateAuthorizationParams(
   request: Request,
   params: AuthorizationParams
-) {
+): Promise<AuthorizationValidationResult> {
   if (!params.clientId || !params.redirectUri) {
     return { errorResponse: badRequest('client_id and redirect_uri are required.') };
   }

@@ -44,6 +44,9 @@ function getTierLimits(tier: UserTier) {
 export interface RateLimitResult {
   ok: boolean;
   retryAfterSeconds?: number;
+  limit?: number;
+  remaining?: number;
+  resetAfterSeconds?: number;
   release?: () => void;
 }
 
@@ -63,6 +66,9 @@ export function acquireRateLimit(auth: AuthContext): RateLimitResult {
     return {
       ok: false,
       retryAfterSeconds: Math.ceil(retryAfterMs / 1000),
+      limit: limits.requestsPerMinute,
+      remaining: 0,
+      resetAfterSeconds: Math.ceil(retryAfterMs / 1000),
     };
   }
 
@@ -70,6 +76,9 @@ export function acquireRateLimit(auth: AuthContext): RateLimitResult {
     return {
       ok: false,
       retryAfterSeconds: 1,
+      limit: limits.concurrentTools,
+      remaining: 0,
+      resetAfterSeconds: 1,
     };
   }
 
@@ -78,6 +87,9 @@ export function acquireRateLimit(auth: AuthContext): RateLimitResult {
 
   return {
     ok: true,
+    limit: limits.requestsPerMinute,
+    remaining: Math.max(0, limits.requestsPerMinute - bucket.timestamps.length),
+    resetAfterSeconds: 60,
     release: () => {
       const current = buckets.get(key);
       if (!current) {

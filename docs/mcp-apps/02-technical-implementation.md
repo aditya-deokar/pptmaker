@@ -1,6 +1,6 @@
 # Technical Implementation Guide
 
-Last updated: 2026-06-14
+Last updated: 2026-06-16
 
 This guide explains how to move the current Verto MCP server from "works as a custom MCP server" to "ready for ChatGPT Apps and Claude Connectors Directory review."
 
@@ -45,12 +45,14 @@ Good existing pieces:
 - Public `/mcp` endpoint is implemented and `/api/mcp` remains available as a legacy endpoint.
 - Public well-known protected resource metadata advertises the MCP resource, auth server issuer, bearer header support, scopes, docs URL, and legacy endpoint.
 - Presentation tools now include review-grade titles and annotations.
+- OAuth account linking is implemented with a first-party authorization server backed by Clerk login.
+- OAuth tokens are opaque random values stored only as SHA-256 hashes, so JWT/JWKS is not required for v1.
+- MCP Apps UI has started with two static, self-contained resources for generation progress and deck preview.
 
 Missing or incomplete pieces for public app distribution:
 
-- OAuth 2.1 authorization flow.
-- Authorization server metadata and token endpoints.
-- MCP Apps UI resources.
+- Live OAuth validation with ChatGPT developer mode and Claude custom connector.
+- Richer MCP Apps UI build pipeline if static widgets become too limited.
 - Submission-grade docs, screenshots, test account, and privacy terms.
 
 ## 3. Recommended Target Architecture
@@ -69,7 +71,8 @@ flowchart TB
     AuthMeta["/.well-known/oauth-authorization-server"]
     OAuthAuthorize["/oauth/authorize"]
     OAuthToken["/oauth/token"]
-    JWKS["/oauth/jwks.json"]
+    Revoke["/oauth/revoke"]
+    Register["/oauth/register"]
     UIResources["ui:// resources served by MCP"]
   end
 
@@ -87,7 +90,8 @@ flowchart TB
   ProtectedMeta --> AuthMeta
   AuthMeta --> OAuthAuthorize
   OAuthAuthorize --> Clerk
-  OAuthToken --> JWKS
+  OAuthToken --> Revoke
+  AuthMeta --> Register
   MCPRoute --> ToolHandlers
   ToolHandlers --> Prisma
   ToolHandlers --> Generation
@@ -150,6 +154,7 @@ Recommended values:
 | `presentation_get` | true | false | false |
 | `presentation_create` | false | false | false |
 | `presentation_generate` | false | false | true if it calls external AI/image APIs, else false |
+| `presentation_generation_status` | true | false | false |
 | `presentation_update_slides` | false | false | false |
 | `presentation_update_theme` | false | false | false |
 | `presentation_publish` | false | false | true because it creates an externally reachable share URL |
@@ -164,11 +169,18 @@ Phase 2 uses the installed SDK's `registerTool(...)` config API instead of the d
 
 Goal: let users click "Connect Verto AI", sign in, consent, and return to ChatGPT/Claude with an access token.
 
-Current state:
+Implementation status:
 
-- API key auth exists and can stay for local/custom usage.
+- API key auth remains available for local/custom usage.
 - `/.well-known/oauth-protected-resource` exists through `src/proxy.ts`.
-- Protected resource metadata now advertises the MCP resource, `authorization_servers`, bearer header support, and supported scopes. The full OAuth authorization server flow still belongs to Phase 3.
+- `/.well-known/oauth-authorization-server` is available through `src/proxy.ts`.
+- `/oauth/authorize` validates clients, resource, scopes, state, and PKCE, then uses Clerk login plus a Verto consent screen.
+- `/oauth/token` supports `authorization_code` and `refresh_token` grants.
+- `/oauth/revoke` revokes access or refresh tokens.
+- `/oauth/register` supports lightweight Dynamic Client Registration.
+- Client ID Metadata Documents are supported when the `client_id` is an HTTPS metadata URL.
+- MCP HTTP bearer validation accepts OAuth access tokens first, then legacy API keys.
+- Tool calls enforce OAuth scopes before running handlers.
 
 Minimum OAuth endpoints:
 
@@ -178,17 +190,16 @@ Minimum OAuth endpoints:
 | `/.well-known/oauth-authorization-server` or `/.well-known/openid-configuration` | Tells clients where authorize/token/JWKS endpoints live. |
 | `/oauth/authorize` | User login and consent screen. |
 | `/oauth/token` | Exchanges authorization code for access/refresh tokens. |
-| `/oauth/jwks.json` | Public signing keys if JWT access tokens are used. |
+| `/oauth/jwks.json` | Not used in v1 because access tokens are opaque rather than JWTs. |
 | `/oauth/revoke` | Optional but recommended token revocation. |
+| `/oauth/register` | Dynamic Client Registration for clients that do not use CIMD/static registration. |
 
-Recommended implementation strategy:
+Chosen implementation strategy:
 
-1. Use an established identity provider if possible.
-2. Keep Clerk as the Verto login/session provider.
-3. Either:
-   - verify whether Clerk can act as the OAuth authorization server for this exact MCP flow, or
-   - use Auth0, WorkOS, Cognito, Okta, or another IdP as the OAuth server, or
-   - implement a small first-party OAuth server that uses Clerk only for the login step.
+1. Keep Clerk as the Verto login/session provider.
+2. Use Verto as the first-party OAuth authorization server.
+3. Store auth codes, access tokens, and refresh tokens as hashes in Postgres.
+4. Use opaque access tokens instead of JWTs for simple revocation and no public signing-key surface in v1.
 
 Token requirements:
 
@@ -220,6 +231,15 @@ But for app directory submission, OAuth should be the primary flow.
 ### Phase 4: Add MCP Apps UI
 
 Goal: make Verto feel like an app inside ChatGPT/Claude, not only a tool API.
+
+Implementation status:
+
+- Started with static self-contained HTML resources in `src/mcp/apps`.
+- Registered resources from `src/mcp/resources/app-ui.ts`.
+- `presentation_generate` points to `ui://verto/generation-progress.html`.
+- `presentation_get` points to `ui://verto/deck-preview.html`.
+- Tool responses still return JSON text fallback.
+- Vite and `@modelcontextprotocol/ext-apps` are deferred until the widgets need a heavier build pipeline.
 
 Use the MCP Apps standard first:
 
@@ -284,7 +304,7 @@ Security requirements:
 
 Goal: avoid timeouts while still giving users progress.
 
-The current `presentation_generate` tool waits up to `LIMITS.GENERATION_TIMEOUT_MS` (120 seconds). Keep the pattern where the tool can return a `RUNNING` status plus `progress_resource_uri`.
+The current `presentation_generate` tool waits up to `LIMITS.GENERATION_DEFAULT_WAIT_TIMEOUT_MS` (25 seconds) by default and allows callers to request up to `LIMITS.GENERATION_TIMEOUT_MS` (120 seconds). Keep the pattern where the tool can return a `RUNNING` status plus `progress_resource_uri`.
 
 Recommended behavior:
 
@@ -301,9 +321,18 @@ Recommended behavior:
 }
 ```
 
-5. UI widget and follow-up tools can poll or refresh progress.
+5. UI widget and `presentation_generation_status` can poll or refresh progress.
 
-### Phase 6: Test With Real Hosts
+Phase 5 implementation status:
+
+- `presentation_generate` creates a durable run ID immediately.
+- The run is marked `RUNNING` before the long-running pipeline starts.
+- Timeout responses include a shared generation status payload and do not start duplicate work.
+- `presentation_generation_status` reads status for the authenticated owner only.
+- `verto://generation/{runId}/progress` returns the same shared status payload.
+- Telemetry logs generation start, completion, failure, timeout-as-running, and status reads.
+
+### Phase 7: Test With Real Hosts
 
 Required validation:
 
@@ -329,6 +358,22 @@ Soft-delete the test deck.
 Recover the test deck.
 Permanently delete the test deck only after I confirm.
 ```
+
+### Phase 6: Security, Privacy, And Observability
+
+Implementation status:
+
+- Ownership checks are verified for every presentation read/write path.
+- OAuth scope checks are enforced before tool handlers run.
+- Permanent delete remains isolated and requires `confirm: true`.
+- Tool audit logs include operation type, auth method, scope count, destructive/public-share flags, latency, and response size.
+- Audit logging redacts secrets and high-risk user-content fields.
+- Generation telemetry redacts topic text.
+- Slide-heavy responses are capped and report truncation metadata.
+- `/mcp/health` and `/api/mcp/health` expose coarse production health.
+- `GET /mcp` advertises health, rate-limit, output-limit, and privacy metadata.
+
+See `docs/mcp-apps/06-security-privacy-observability.md` for the ownership matrix and prompt-injection tests.
 
 ## 5. Environment Variables And Credentials
 

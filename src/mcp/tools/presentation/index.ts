@@ -11,6 +11,11 @@ import type {
   ToolCallback,
 } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
+import {
+  createToolUiMeta,
+  MCP_APP_UI_RESOURCE_URIS,
+  type McpAppUiResourceUri,
+} from '../../apps/constants';
 import { registerToolPlugin } from '../registry';
 import { TOOL_NAMES, PAGINATION, LIMITS } from '../../config/constants';
 import { Errors } from '../_shared/errors';
@@ -39,10 +44,12 @@ import { handlePresentationUpdateTheme } from './update-theme';
 import { handlePresentationPublish } from './publish';
 import { handlePresentationUnpublish } from './unpublish';
 import { handlePresentationGenerate } from './generate';
+import { handlePresentationGenerationStatus } from './generation-status';
 
 interface PresentationToolMetadata {
   title: string;
   annotations: ToolAnnotations;
+  uiResourceUri?: McpAppUiResourceUri;
 }
 
 const PRESENTATION_TOOL_METADATA: Record<
@@ -60,6 +67,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
   [TOOL_NAMES.PRESENTATION_GET]: {
     title: 'Get presentation',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.DECK_PREVIEW,
     annotations: {
       readOnlyHint: true,
       destructiveHint: false,
@@ -141,11 +149,22 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
   [TOOL_NAMES.PRESENTATION_GENERATE]: {
     title: 'Generate presentation',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.GENERATION_PROGRESS,
     annotations: {
       readOnlyHint: false,
       destructiveHint: false,
       idempotentHint: false,
       openWorldHint: true,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_GENERATION_STATUS]: {
+    title: 'Get generation status',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.GENERATION_PROGRESS,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
     },
   },
 };
@@ -170,6 +189,7 @@ function registerPresentationTool<TInputSchema extends Record<string, z.ZodTypeA
       description,
       inputSchema,
       annotations: metadata.annotations,
+      _meta: createToolUiMeta(metadata.uiResourceUri),
     },
     callback
   );
@@ -419,12 +439,23 @@ function registerPresentationTools(server: McpServer): void {
       outlines: z.array(z.string().min(1).max(LIMITS.MAX_TITLE_LENGTH)).max(LIMITS.MAX_OUTLINES).optional()
         .describe('Optional pre-defined slide outlines. If omitted, AI generates outlines automatically.'),
       wait_timeout_ms: z.number().int().min(1000).max(LIMITS.GENERATION_TIMEOUT_MS).optional()
-        .describe(`How long to wait for completion before returning RUNNING. Defaults to ${LIMITS.GENERATION_TIMEOUT_MS} ms.`),
+        .describe(`How long to wait for completion before returning RUNNING. Defaults to ${LIMITS.GENERATION_DEFAULT_WAIT_TIMEOUT_MS} ms and maxes at ${LIMITS.GENERATION_TIMEOUT_MS} ms.`),
     },
     handlePresentationGenerate
   );
 
-  console.error('[MCP] Presentation plugin: 11 tools registered (2 read, 8 mutation, 1 generation)');
+  registerPresentationTool(
+    server,
+    TOOL_NAMES.PRESENTATION_GENERATION_STATUS,
+    'Get the current status of a tracked presentation generation run. Use this after presentation_generate returns RUNNING instead of starting a duplicate generation.',
+    {
+      generation_run_id: z.string().min(1)
+        .describe('Generation run ID returned by presentation_generate.'),
+    },
+    handlePresentationGenerationStatus
+  );
+
+  console.error('[MCP] Presentation plugin: 12 tools registered (3 read, 8 mutation, 1 generation)');
 }
 
 registerToolPlugin({

@@ -65,12 +65,15 @@ export const Errors = {
     );
   },
 
-  rateLimited(retryAfterSeconds: number): McpToolResponse {
+  rateLimited(
+    retryAfterSeconds: number,
+    details?: Record<string, unknown>
+  ): McpToolResponse {
     return mcpError(
       ERROR_CODES.RATE_LIMITED,
       `Rate limit exceeded. Try again in ${retryAfterSeconds} seconds.`,
       `Wait ${retryAfterSeconds} seconds before making another request.`,
-      { retry_after_seconds: retryAfterSeconds },
+      { retry_after_seconds: retryAfterSeconds, ...(details ?? {}) },
     );
   },
 
@@ -82,11 +85,12 @@ export const Errors = {
     );
   },
 
-  generationFailed(detail?: string): McpToolResponse {
+  generationFailed(detail?: string, details?: Record<string, unknown>): McpToolResponse {
     return mcpError(
       ERROR_CODES.GENERATION_FAILED,
       `Presentation generation failed.${detail ? ` ${detail}` : ''}`,
       'Try again with a different topic or simplified outlines.',
+      details,
     );
   },
 

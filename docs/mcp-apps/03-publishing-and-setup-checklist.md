@@ -1,6 +1,6 @@
 # Publishing And Setup Checklist
 
-Last updated: 2026-06-14
+Last updated: 2026-06-17
 
 This checklist is the practical launch path for getting Verto AI into ChatGPT and Claude.
 
@@ -8,17 +8,18 @@ This checklist is the practical launch path for getting Verto AI into ChatGPT an
 
 ### Engineering
 
-- [ ] Public production domain selected: `https://verto.ai.aditya-deokar.me`.
-- [ ] Public MCP endpoint available at `https://verto.ai.aditya-deokar.me/mcp`.
-- [ ] Existing `https://verto.ai.aditya-deokar.me/api/mcp` remains available or redirects safely.
-- [ ] `/.well-known/oauth-protected-resource` returns complete metadata.
-- [ ] OAuth authorization server metadata is available.
-- [ ] OAuth authorize/token/JWKS endpoints work.
-- [ ] Bearer access tokens are validated on every MCP HTTP request.
-- [ ] Every MCP tool has `title` and annotations.
+- [x] Public production domain selected: `https://verto.ai.aditya-deokar.me`.
+- [x] Public MCP endpoint available at `https://verto.ai.aditya-deokar.me/mcp`.
+- [x] Existing `https://verto.ai.aditya-deokar.me/api/mcp` remains available or redirects safely.
+- [x] `/.well-known/oauth-protected-resource` returns complete metadata.
+- [x] OAuth authorization server metadata is available.
+- [x] OAuth authorize/token/revoke/register endpoints are implemented.
+- [x] JWKS is not required for v1 because OAuth access tokens are opaque.
+- [x] Bearer access tokens are validated on MCP HTTP tool calls.
+- [x] Every MCP tool has `title` and annotations.
 - [ ] Every write/destructive tool enforces ownership and confirmation rules.
-- [ ] MCP Apps UI resources render with strict CSP.
-- [ ] Text-only fallback responses work when UI is unavailable.
+- [x] MCP Apps UI resources are registered with strict no-external-domain CSP metadata.
+- [x] Text-only fallback responses work when UI is unavailable.
 - [ ] MCP Inspector can initialize, list tools, list resources, and call every tool.
 
 ### Product And Legal
@@ -38,14 +39,23 @@ This checklist is the practical launch path for getting Verto AI into ChatGPT an
 
 ### Security
 
-- [ ] Threat model reviewed.
-- [ ] Prompt injection test prompts created.
-- [ ] Logs redact PII and secrets.
-- [ ] Rate limiting is enabled.
-- [ ] Permanent deletion has explicit confirmation.
-- [ ] Token audience and scopes are enforced.
-- [ ] Disconnect/revoke path exists.
-- [ ] External links are allowlisted where required.
+- [x] Threat model reviewed.
+- [x] Prompt injection test prompts created.
+- [x] Logs redact PII and secrets.
+- [x] Rate limiting is enabled.
+- [x] Permanent deletion has explicit confirmation.
+- [x] Token audience and scopes are enforced.
+- [x] Disconnect/revoke path exists.
+- [x] External links are allowlisted where required.
+
+### Automated Phase 7 Checks
+
+- [x] Local MCP contract checks are available through `npm run mcp:phase7:checks`.
+- [x] Focused MCP/OAuth TypeScript validation is available through `npm run mcp:phase7:typecheck`.
+- [x] Combined Phase 7 validation is available through `npm run mcp:phase7`.
+- [ ] Production deployment has passed the combined Phase 7 validation.
+- [ ] Production deployment has passed `npx prisma validate --schema prisma/schema.prisma`.
+- [ ] Production deployment has passed `npm run build`.
 
 ## 2. ChatGPT Setup And Submission
 
@@ -85,7 +95,7 @@ OpenAI submission fields to prepare:
 | Support contact | support email |
 | MCP server URL | `https://verto.ai.aditya-deokar.me/mcp` |
 | OAuth info | Authorization server/client registration details |
-| Tool information | 11 presentation tools with annotations |
+| Tool information | 12 presentation tools with annotations |
 | Screenshots | 3-5 screenshots showing generation, preview, publish flow |
 | Test prompts/responses | Use the test prompt list below |
 | Localization | English first unless more languages are ready |

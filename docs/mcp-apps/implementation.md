@@ -1,6 +1,6 @@
 # Phase-Wise Implementation Plan: Verto AI MCP Apps
 
-Last updated: 2026-06-14
+Last updated: 2026-06-17
 
 Status: review draft. Do not implement until this plan is approved.
 
@@ -197,6 +197,7 @@ Purpose: make the existing tool list acceptable for ChatGPT and Claude review.
 | `presentation_get` | yes | no | Can include slide JSON. |
 | `presentation_create` | no | no | Creates a new deck. |
 | `presentation_generate` | no | no | Creates a deck through AI generation. |
+| `presentation_generation_status` | yes | no | Checks a tracked generation run without starting a duplicate generation. |
 | `presentation_update_slides` | no | no | Replaces all slides, but not destructive deletion. |
 | `presentation_update_theme` | no | no | Changes presentation appearance. |
 | `presentation_publish` | no | no | Creates public share URL. |
@@ -231,27 +232,38 @@ Purpose: replace API-key copy/paste with real "Connect Verto AI" account linking
 
 ### Tasks
 
-- [ ] Finalize OAuth provider strategy from Phase 0.
-- [ ] Implement or configure authorization server metadata:
+- [x] Finalize OAuth provider strategy from Phase 0.
+- [x] Implement or configure authorization server metadata:
   - `/.well-known/oauth-authorization-server`
   - Optional: `/.well-known/openid-configuration`
-- [ ] Implement authorization endpoint:
+- [x] Implement authorization endpoint:
   - `/oauth/authorize`
   - Handles login, consent, scopes, redirect URI validation, state, PKCE.
-- [ ] Implement token endpoint:
+- [x] Implement token endpoint:
   - `/oauth/token`
   - Exchanges authorization code for access token and refresh token.
-- [ ] Implement JWKS endpoint if JWT access tokens are used:
+- [x] Implement JWKS endpoint if JWT access tokens are used:
   - `/oauth/jwks.json`
-- [ ] Implement token validation for MCP requests.
-- [ ] Add scope checks inside MCP auth context.
-- [ ] Keep existing API key validation for:
+  - Not required for v1 because Phase 3 uses opaque access tokens stored as SHA-256 hashes instead of JWTs.
+- [x] Implement token validation for MCP requests.
+- [x] Add scope checks inside MCP auth context.
+- [x] Keep existing API key validation for:
   - local stdio
   - MCP Inspector during early development
   - custom clients that cannot use OAuth
-- [ ] Add disconnect/revoke support:
+- [x] Add disconnect/revoke support:
   - `/oauth/revoke` or equivalent account disconnect path.
-- [ ] Add database models if self-issuing auth codes/refresh tokens.
+- [x] Add database models if self-issuing auth codes/refresh tokens.
+
+### Implementation Notes
+
+- Verto now uses a first-party OAuth authorization server backed by Clerk login.
+- Access tokens and refresh tokens are opaque random values; only SHA-256 hashes are stored.
+- Dynamic Client Registration is available at `/oauth/register`.
+- Client ID Metadata Documents are supported for clients that use a URL as `client_id`.
+- OAuth bearer validation runs before legacy MCP API-key validation.
+- Existing API keys and Clerk-session access remain available for local and custom-client usage.
+- OAuth-connected generation uses the approved 15-generation launch allowance.
 
 ### Suggested Scopes
 
@@ -298,30 +310,40 @@ Purpose: make Verto feel like an app inside ChatGPT and Claude, not just a backe
 
 ### Tasks
 
-- [ ] Add UI build setup.
-- [ ] Add `@modelcontextprotocol/ext-apps` if needed.
+- [x] Add UI build setup.
+  - Started with static self-contained HTML widget resources under `src/mcp/apps`.
+  - Vite/single-file bundling remains a later enhancement if the widgets grow.
+- [x] Add `@modelcontextprotocol/ext-apps` if needed.
+  - Not needed for the current static resource foundation.
 - [ ] Add Vite single-file widget build if not already available.
-- [ ] Create UI folder structure:
+- [x] Create UI folder structure:
 
 ```text
-src/mcp-apps/
-  generation-progress/
-  deck-preview/
-  shared/
+src/mcp/apps/
+  constants.ts
+  widgets.ts
 ```
 
-- [ ] Create generated UI output folder:
+- [x] Create generated UI output folder:
 
 ```text
-src/mcp/generated-ui/
+No generated folder yet. Static v1 widgets are emitted from TypeScript HTML helpers.
 ```
 
-- [ ] Register MCP Apps resources:
+- [x] Register MCP Apps resources:
   - `ui://verto/generation-progress.html`
   - `ui://verto/deck-preview.html`
-- [ ] Attach UI metadata to relevant tools.
-- [ ] Add strict UI CSP metadata.
-- [ ] Ensure every UI-enabled tool still returns text fallback.
+- [x] Attach UI metadata to relevant tools.
+- [x] Add strict UI CSP metadata.
+- [x] Ensure every UI-enabled tool still returns text fallback.
+
+### Implementation Notes
+
+- `presentation_generate` advertises `ui://verto/generation-progress.html`.
+- `presentation_get` advertises `ui://verto/deck-preview.html`.
+- The descriptors include both portable UI metadata and OpenAI-compatible `openai/outputTemplate`.
+- Widgets are self-contained HTML/CSS/JS and do not receive tokens or secrets.
+- Existing JSON text responses remain the fallback for hosts without UI support.
 
 ### UI 1: Generation Progress
 
@@ -384,17 +406,27 @@ Purpose: make `presentation_generate` reliable inside hosted AI clients.
 
 ### Tasks
 
-- [ ] Review current `presentation_generate` timeout behavior.
-- [ ] Ensure generation creates a durable run ID immediately.
-- [ ] Return `RUNNING` plus `progress_resource_uri` before host timeout.
-- [ ] Ensure progress resource works for the authenticated user only.
-- [ ] Add clearer errors for generation failure.
-- [ ] Add telemetry:
+- [x] Review current `presentation_generate` timeout behavior.
+- [x] Ensure generation creates a durable run ID immediately.
+- [x] Return `RUNNING` plus `progress_resource_uri` before host timeout.
+- [x] Ensure progress resource works for the authenticated user only.
+- [x] Add clearer errors for generation failure.
+- [x] Add telemetry:
   - run started
   - run completed
   - run failed
   - timeout returned as running
-- [ ] Confirm free/pro usage limits are enforced consistently.
+- [x] Confirm free/pro usage limits are enforced consistently.
+
+### Implementation Notes
+
+- `presentation_generate` now creates a generation run immediately and marks it `RUNNING` before the pipeline starts.
+- The default MCP wait timeout is `25_000` ms, with an explicit max of `120_000` ms.
+- If the run is still active at the wait timeout, the tool returns `RUNNING`, `generation_run_id`, `progress_resource_uri`, and next actions.
+- `presentation_generation_status` lets ChatGPT/Claude check progress in follow-up turns without starting duplicate generations.
+- The progress resource returns the same shared status payload as the status tool.
+- Generation telemetry logs `run_created`, `run_started`, `run_completed`, `run_failed`, `timeout_returned_running`, and `status_read`.
+- OAuth-connected generation still uses the approved 15-generation launch allowance.
 
 ### Acceptance Criteria
 
@@ -425,15 +457,27 @@ Purpose: pass app review and avoid dangerous production behavior.
 
 ### Tasks
 
-- [ ] Add or verify ownership checks on every read/write.
-- [ ] Add scope checks per tool.
-- [ ] Add rate limit headers or documented rate limit errors where practical.
-- [ ] Review logging for PII and secrets.
-- [ ] Add audit records for write/destructive tools.
-- [ ] Ensure permanent delete is impossible without explicit confirmation.
-- [ ] Add prompt-injection test cases.
-- [ ] Add output-size guardrails for slide-heavy responses.
-- [ ] Add production health check behavior.
+- [x] Add or verify ownership checks on every read/write.
+- [x] Add scope checks per tool.
+- [x] Add rate limit headers or documented rate limit errors where practical.
+- [x] Review logging for PII and secrets.
+- [x] Add audit records for write/destructive tools.
+- [x] Ensure permanent delete is impossible without explicit confirmation.
+- [x] Add prompt-injection test cases.
+- [x] Add output-size guardrails for slide-heavy responses.
+- [x] Add production health check behavior.
+
+### Implementation Notes
+
+- Tool ownership behavior is documented in `docs/mcp-apps/06-security-privacy-observability.md`.
+- Tool audit logs now include operation type, auth method, scope count, destructive/public-share flags, latency, and response size.
+- Audit logs redact secrets and high-risk user-content fields.
+- Generation telemetry redacts topic text and records only operational generation fields.
+- `presentation_get`, `presentation_update_slides`, and completed generation responses cap slide payloads and report truncation metadata.
+- `GET /mcp` advertises health, rate-limit, output-limit, and privacy metadata.
+- `/mcp/health` and `/api/mcp/health` return production health status.
+- Rate-limit tool errors include retry timing and limit metadata.
+- Prompt-injection tests are captured in `docs/mcp-apps/06-security-privacy-observability.md`.
 
 ### Acceptance Criteria
 
@@ -457,14 +501,23 @@ Purpose: prove the integration works before app-store submission.
 
 ### Tasks
 
-- [ ] Add unit tests for auth helpers and scope checks.
-- [ ] Add unit tests for tool metadata/annotations.
-- [ ] Add integration tests for key MCP flows if practical.
-- [ ] Build a reviewer test account with real sample decks.
+- [x] Add automated tests for auth helpers and scope checks.
+- [x] Add automated tests for tool metadata/annotations.
+- [x] Add automated integration checks for key MCP flows that can run without live host credentials.
+- [x] Document reviewer test account setup with real sample deck requirements.
+- [ ] Populate the reviewer test account with real sample decks.
 - [ ] Run MCP Inspector against `/mcp`.
 - [ ] Run ChatGPT developer mode test.
 - [ ] Run Claude custom connector test.
-- [ ] Document all test prompts and expected behavior.
+- [x] Document all test prompts and expected behavior.
+
+### Implementation Notes
+
+- Added `npm run mcp:phase7:checks` for repo-native MCP contract checks.
+- Added `npm run mcp:phase7:typecheck` for focused TypeScript validation over MCP, OAuth, resources, UI, and app-hosting routes.
+- Added `npm run mcp:phase7` to run both checks.
+- Added `docs/mcp-apps/07-testing-plan.md` with manual MCP Inspector, ChatGPT developer mode, Claude custom connector, OAuth, safety, reviewer account, and evidence-capture steps.
+- Live-client validation remains open until it is run against the deployed production URL with `adityadeokar80@gmail.com`.
 
 ### Test Prompt Set
 

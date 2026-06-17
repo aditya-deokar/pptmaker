@@ -168,6 +168,11 @@ export const MCP_GUIDE_TOOLS: McpGuideTool[] = [
     description:
       "Run Verto AI's long-running generation pipeline and track progress.",
   },
+  {
+    name: TOOL_NAMES.PRESENTATION_GENERATION_STATUS,
+    description:
+      'Check a generation run returned by presentation_generate without starting a duplicate run.',
+  },
 ]
 
 export const MCP_GUIDE_RESOURCES: McpGuideResource[] = [

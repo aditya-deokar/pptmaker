@@ -177,19 +177,24 @@ export async function exchangeAuthorizationCode(
     return null;
   }
 
-  const tokenResponse = await issueTokenPair({
+  const codeUpdate = await prisma.mcpOAuthAuthorizationCode.updateMany({
+    where: {
+      id: code.id,
+      usedAt: null,
+    },
+    data: { usedAt: new Date() },
+  });
+
+  if (codeUpdate.count !== 1) {
+    return null;
+  }
+
+  return issueTokenPair({
     userId: code.userId,
     clientId: code.clientId,
     scopes: code.scopes,
     resource: code.resource,
   });
-
-  await prisma.mcpOAuthAuthorizationCode.update({
-    where: { id: code.id },
-    data: { usedAt: new Date() },
-  });
-
-  return tokenResponse;
 }
 
 export async function refreshAccessToken(

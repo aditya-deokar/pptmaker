@@ -1,6 +1,6 @@
 # Verto AI MCP Apps: Beginner Overview
 
-Last updated: 2026-06-14
+Last updated: 2026-06-17
 
 This folder explains how to turn the existing Verto AI MCP server into a public ChatGPT app and Claude connector/app.
 
@@ -51,9 +51,9 @@ These are the biggest gaps before Verto AI can be listed publicly.
 
 | Blocker | Why it matters | Current repo status | Required result |
 | --- | --- | --- | --- |
-| OAuth 2.1 user auth | Public ChatGPT and Claude listings need a real user authorization flow for private user data and write actions. | Bearer API keys exist. Protected resource metadata exists. Full OAuth server flow does not appear complete. | User clicks Connect, signs in to Verto, grants scopes, and ChatGPT/Claude receives an access token. |
+| OAuth 2.1 user auth | Public ChatGPT and Claude listings need a real user authorization flow for private user data and write actions. | Implemented in Phase 3 with first-party OAuth, Clerk login, opaque tokens, PKCE, DCR/CIMD, revoke, and scope checks. | Validate live in ChatGPT developer mode and Claude custom connector. |
 | Tool annotations | Reviewers require tools to declare whether they read, write, or destroy data. | Implemented with `registerTool(...)` metadata in Phase 2. | Keep the tool review matrix aligned with code before submission. |
-| Interactive MCP Apps UI | ChatGPT Apps and Claude MCP Apps can render interactive UI in chat. This is the app-like experience. | Existing server exposes tools/resources, not app UI resources. | Add at least a generation progress/deck preview UI resource linked from key tools. |
+| Interactive MCP Apps UI | ChatGPT Apps and Claude MCP Apps can render interactive UI in chat. This is the app-like experience. | Started in Phase 4 with static `ui://` generation progress and deck preview resources. | Validate rendering in ChatGPT/Claude, then add richer widgets if needed. |
 | Submission assets | App directories need logo, description, screenshots, privacy policy, support contact, and test prompts. | Product docs exist, but no dedicated app submission packet. | Prepare final metadata and reviewer test account. |
 | Review-grade safety | App stores reject vague tools, prompt-injection patterns, broken tools, or risky destructive actions. | Tool descriptions are decent but need review annotations and tighter policy checks. | Pass MCP Inspector, ChatGPT developer mode, Claude custom connector, and review checklist. |
 
@@ -107,6 +107,8 @@ Claude:
 | `03-publishing-and-setup-checklist.md` | Step-by-step ChatGPT and Claude setup, credentials, testing, and submission checklist. |
 | `04-research-notes-and-sources.md` | Research summary with source links used to build this plan. |
 | `05-tool-review-matrix.md` | Tool titles, review annotations, and safety notes for app submission. |
+| `06-security-privacy-observability.md` | Phase 6 hardening notes, ownership matrix, prompt-injection tests, and validation checklist. |
+| `07-testing-plan.md` | Phase 7 automated checks, MCP Inspector steps, ChatGPT developer mode steps, Claude custom connector steps, and reviewer prompt matrix. |
 
 ## Source Highlights
 

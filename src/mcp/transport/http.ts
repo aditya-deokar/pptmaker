@@ -6,7 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
-import { MCP_PROTOCOL_VERSION } from '../config/constants';
+import { LIMITS, MCP_PROTOCOL_VERSION } from '../config/constants';
 import { validateMcpEnv } from '../config/env';
 import { createMcpServer } from '../server';
 import { registerAllTools } from '../tools/registry';
@@ -24,6 +24,7 @@ import '../resources/presentations';
 import '../resources/templates';
 import '../resources/themes';
 import '../resources/generation-progress';
+import '../resources/app-ui';
 
 interface HttpSession {
   server: McpServer;
@@ -52,7 +53,7 @@ function getAllowedOrigins(): string[] {
   const env = validateMcpEnv();
   const configured = env.MCP_ALLOWED_ORIGINS
     .split(',')
-    .map((origin) => origin.trim())
+    .map((origin: string) => origin.trim())
     .filter(Boolean);
 
   if (configured.length > 0) {
@@ -89,8 +90,14 @@ function applyCorsHeaders(request: Request, response: Response): Response {
     'Access-Control-Allow-Headers',
     'Content-Type, Accept, Authorization, MCP-Session-Id, MCP-Protocol-Version, Last-Event-ID'
   );
-  headers.set('Access-Control-Expose-Headers', 'MCP-Session-Id');
+  headers.set(
+    'Access-Control-Expose-Headers',
+    'MCP-Session-Id, WWW-Authenticate, Retry-After, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset'
+  );
   headers.set('Access-Control-Max-Age', '86400');
+  headers.set('Cache-Control', 'no-store');
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('Referrer-Policy', 'no-referrer');
 
   return new Response(response.body, {
     status: response.status,
@@ -489,6 +496,32 @@ export async function handleGet(request: Request): Promise<Response> {
       legacy_endpoint: '/api/mcp',
       capabilities: ['tools', 'resources', 'logging'],
       transports: ['streamable-http'],
+      health_endpoint: `${endpoint.replace(/\/$/, '')}/health`,
+      rate_limits: {
+        free_requests_per_minute: 30,
+        default_requests_per_minute: env.MCP_RATE_LIMIT_RPM,
+        default_concurrent_tools: env.MCP_RATE_LIMIT_CONCURRENT,
+        rate_limit_errors_include: [
+          'retry_after_seconds',
+          'limit',
+          'remaining',
+          'reset_after_seconds',
+        ],
+      },
+      output_limits: {
+        max_response_slides: LIMITS.MAX_RESPONSE_SLIDES,
+        max_response_slide_bytes: LIMITS.MAX_RESPONSE_SLIDE_BYTES,
+        truncated_responses_include: [
+          'slides_truncated',
+          'slides_returned',
+          'slides_total',
+          'truncation_reason',
+        ],
+      },
+      privacy: {
+        audit_logs_redact_user_content: true,
+        audit_logs_redact_secrets: true,
+      },
     });
   }
 

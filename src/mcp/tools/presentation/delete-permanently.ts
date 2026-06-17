@@ -43,10 +43,10 @@ export async function handlePresentationDeletePermanently(
   const ownedIds = ownedProjects.map((p) => p.id);
 
   // Log which IDs were not owned (for audit clarity)
-  const skippedIds = presentation_ids.filter((id) => !ownedIds.includes(id));
+  const skippedIds = presentation_ids.filter((id: string) => !ownedIds.includes(id));
   if (skippedIds.length > 0) {
     console.error(
-      `[MCP] presentation_delete_permanently: skipped ${skippedIds.length} IDs not owned by user ${auth.userId}`
+      `[MCP] presentation_delete_permanently: skipped ${skippedIds.length} non-owned IDs`
     );
   }
 
@@ -56,10 +56,6 @@ export async function handlePresentationDeletePermanently(
       id: { in: ownedIds },
     },
   });
-
-  console.error(
-    `[MCP] presentation_delete_permanently: user=${auth.userId} deleted=${result.count} ids=${ownedIds.join(',')}`
-  );
 
   return mcpSuccess({
     deleted_count: result.count,

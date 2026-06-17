@@ -12,6 +12,7 @@ This matrix is the review source of truth for Verto AI's presentation MCP tools.
 | `presentation_get` | Get presentation | yes | no | yes | no | Reads one owned presentation; can include full slide JSON. |
 | `presentation_create` | Create presentation | no | no | no | no | Creates a new owned presentation from title and outlines. |
 | `presentation_generate` | Generate presentation | no | no | no | yes | Runs AI generation and may call model/image providers through Verto's backend. |
+| `presentation_generation_status` | Get generation status | yes | no | yes | no | Reads a generation run owned by the authenticated user; use after `presentation_generate` returns `RUNNING`. |
 | `presentation_update_slides` | Replace presentation slides | no | no | yes | no | Replaces all slides, so clients should call `presentation_get` first. |
 | `presentation_update_theme` | Update presentation theme | no | no | yes | no | Applies an existing Verto theme. |
 | `presentation_publish` | Publish presentation | no | no | yes | yes | Creates or returns a public share URL. |

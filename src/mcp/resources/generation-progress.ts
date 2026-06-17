@@ -10,9 +10,10 @@ import { resolveAuth } from '../auth/middleware';
 import { hasRequiredScopes } from '../auth/scopes';
 import { RESOURCE_URIS } from '../config/constants';
 import {
-  generationRunToMcpResponse,
+  buildGenerationStatusResponse,
   getGenerationRunForMcp,
 } from '../lib/presentation-generation-runs';
+import { logGenerationTelemetry } from '../lib/generation-telemetry';
 import { getCurrentTransport } from '../lib/transport-context';
 import { registerResourcePlugin } from './registry';
 
@@ -114,21 +115,25 @@ function registerGenerationProgressResource(server: McpServer): void {
         };
       }
 
+      logGenerationTelemetry('status_read', {
+        runId: run.id,
+        userId: auth.userId,
+        authMethod: auth.authMethod,
+        topic: run.topic,
+        status: run.status,
+        progress: run.progress,
+        projectId: run.projectId,
+        error: run.error,
+      });
+
+      const statusPayload = buildGenerationStatusResponse(run);
+
       return {
         contents: [
           {
             uri: RESOURCE_URIS.GENERATION_PROGRESS.replace('{runId}', run.id),
             mimeType: 'application/json',
-            text: JSON.stringify({
-              generation_run: generationRunToMcpResponse(run),
-              next_actions: run.projectId
-                ? [
-                    'Use presentation_get with the returned presentation_id to inspect the generated slides.',
-                  ]
-                : [
-                    'Re-read this resource to follow progress.',
-                  ],
-            }),
+            text: JSON.stringify(statusPayload),
           },
         ],
       };

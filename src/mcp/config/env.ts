@@ -2,7 +2,7 @@
  * MCP Server Environment Configuration
  */
 
-import { z } from 'zod';
+import { z, type ZodIssue } from 'zod';
 import { MCP_SERVER_NAME, MCP_SERVER_VERSION } from './constants';
 
 const mcpEnvSchema = z.object({
@@ -38,7 +38,7 @@ export function validateMcpEnv(): McpEnv {
 
   if (!result.success) {
     const formatted = result.error.issues
-      .map((issue) => `  - ${issue.path.join('.')}: ${issue.message}`)
+      .map((issue: ZodIssue) => `  - ${issue.path.join('.')}: ${issue.message}`)
       .join('\n');
 
     console.error(`\n[MCP] Invalid environment configuration\n${formatted}\n`);

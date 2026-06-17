@@ -81,7 +81,7 @@ The Verto MCP app solves this by making Verto's presentation workflow available 
 
 ### 7.2 MCP Tools
 
-The first release should expose the existing 11 presentation tools:
+The first release should expose the presentation tools:
 
 | Tool | Type | Required annotation |
 | --- | --- | --- |
@@ -89,6 +89,7 @@ The first release should expose the existing 11 presentation tools:
 | `presentation_get` | Read | `readOnlyHint: true` |
 | `presentation_create` | Write | `readOnlyHint: false`, `destructiveHint: false` |
 | `presentation_generate` | Write/long-running | `readOnlyHint: false`, `destructiveHint: false` |
+| `presentation_generation_status` | Read/status | `readOnlyHint: true`, `destructiveHint: false` |
 | `presentation_update_slides` | Write | `readOnlyHint: false`, `destructiveHint: false` |
 | `presentation_update_theme` | Write | `readOnlyHint: false`, `destructiveHint: false` |
 | `presentation_publish` | Write/external sharing | `readOnlyHint: false`, `destructiveHint: false`, user-visible consent recommended |
