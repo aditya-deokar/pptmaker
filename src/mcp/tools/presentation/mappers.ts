@@ -11,6 +11,7 @@
  */
 
 import type { Project } from '@/generated/prisma';
+import { LIMITS } from '../../config/constants';
 
 /**
  * MCP-safe presentation response shape.
@@ -29,11 +30,62 @@ export interface PresentationMCPResponse {
   share_url: string | null;
   outlines: string[];
   slides?: unknown[];
+  slides_returned?: number;
+  slides_total?: number;
+  slides_truncated?: boolean;
+  slide_payload_bytes?: number;
+  truncation_reason?: string;
 }
 
 interface MapperOptions {
   includeSlides?: boolean;
   baseUrl?: string;
+}
+
+function getJsonByteLength(value: unknown): number {
+  try {
+    return Buffer.byteLength(JSON.stringify(value), 'utf8');
+  } catch {
+    return 0;
+  }
+}
+
+export function limitSlidesForMcp(slides: unknown[]): {
+  slides: unknown[];
+  slidesReturned: number;
+  slidesTotal: number;
+  slidesTruncated: boolean;
+  slidePayloadBytes: number;
+  truncationReason?: string;
+} {
+  const selectedSlides: unknown[] = [];
+  let payloadBytes = 2;
+  let truncationReason: string | undefined;
+
+  for (const slide of slides) {
+    if (selectedSlides.length >= LIMITS.MAX_RESPONSE_SLIDES) {
+      truncationReason = `Response is limited to ${LIMITS.MAX_RESPONSE_SLIDES} slides.`;
+      break;
+    }
+
+    const nextBytes = getJsonByteLength([...selectedSlides, slide]);
+    if (nextBytes > LIMITS.MAX_RESPONSE_SLIDE_BYTES) {
+      truncationReason = `Slide payload is limited to ${LIMITS.MAX_RESPONSE_SLIDE_BYTES} bytes.`;
+      break;
+    }
+
+    selectedSlides.push(slide);
+    payloadBytes = nextBytes;
+  }
+
+  return {
+    slides: selectedSlides,
+    slidesReturned: selectedSlides.length,
+    slidesTotal: slides.length,
+    slidesTruncated: selectedSlides.length < slides.length,
+    slidePayloadBytes: payloadBytes,
+    truncationReason,
+  };
 }
 
 /**
@@ -47,6 +99,10 @@ export function projectToPresentation(
 
   const slidesArray = Array.isArray(project.slides) ? project.slides : [];
 
+  const limitedSlides = options?.includeSlides
+    ? limitSlidesForMcp(slidesArray)
+    : null;
+
   return {
     id: project.id,
     title: project.title,
@@ -59,7 +115,18 @@ export function projectToPresentation(
     published_at: project.publishedAt?.toISOString() ?? null,
     share_url: project.isPublished ? `${baseUrl}/share/${project.id}` : null,
     outlines: project.outlines,
-    ...(options?.includeSlides ? { slides: slidesArray } : {}),
+    ...(limitedSlides
+      ? {
+          slides: limitedSlides.slides,
+          slides_returned: limitedSlides.slidesReturned,
+          slides_total: limitedSlides.slidesTotal,
+          slides_truncated: limitedSlides.slidesTruncated,
+          slide_payload_bytes: limitedSlides.slidePayloadBytes,
+          ...(limitedSlides.truncationReason
+            ? { truncation_reason: limitedSlides.truncationReason }
+            : {}),
+        }
+      : {}),
   };
 }
 

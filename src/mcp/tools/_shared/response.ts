@@ -14,6 +14,7 @@ export interface McpToolResponse {
   [key: string]: unknown;
   content: Array<{ type: 'text'; text: string }>;
   isError?: boolean;
+  _meta?: Record<string, unknown>;
 }
 
 /**
@@ -55,7 +56,8 @@ export function mcpError(
   code: string,
   message: string,
   suggestion?: string,
-  details?: Record<string, unknown>
+  details?: Record<string, unknown>,
+  meta?: Record<string, unknown>
 ): McpToolResponse {
   return {
     content: [
@@ -68,5 +70,6 @@ export function mcpError(
       },
     ],
     isError: true,
+    ...(meta ? { _meta: meta } : {}),
   };
 }

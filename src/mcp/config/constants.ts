@@ -40,6 +40,7 @@ export const TOOL_NAMES = {
   PRESENTATION_UNPUBLISH: 'presentation_unpublish',
   // AI Generation
   PRESENTATION_GENERATE: 'presentation_generate',
+  PRESENTATION_GENERATION_STATUS: 'presentation_generation_status',
 } as const;
 
 // ─── Resource URIs ─────────────────────────────────────────────
@@ -64,10 +65,14 @@ export const ERROR_CODES = {
 
 // ─── Limits ────────────────────────────────────────────────────
 export const LIMITS = {
+  OAUTH_CONNECTED_GENERATION_LIMIT: 15,
   MAX_PERMANENT_DELETE_BATCH: 20,
   MAX_OUTLINES: 30,
   MAX_TOPIC_LENGTH: 500,
   MAX_TITLE_LENGTH: 200,
   MAX_ADDITIONAL_CONTEXT_LENGTH: 2000,
+  MAX_RESPONSE_SLIDES: 40,
+  MAX_RESPONSE_SLIDE_BYTES: 200_000,
+  GENERATION_DEFAULT_WAIT_TIMEOUT_MS: 25_000,
   GENERATION_TIMEOUT_MS: 120_000, // 2 minutes
 } as const;

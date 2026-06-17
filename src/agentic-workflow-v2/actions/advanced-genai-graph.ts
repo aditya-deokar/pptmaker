@@ -195,12 +195,12 @@ export async function generateAdvancedPresentation(
   console.log("═══════════════════════════════════════════════════════════");
   console.log("🚀 ADVANCED AGENTIC PRESENTATION GENERATION STARTED");
   console.log("═══════════════════════════════════════════════════════════");
-  console.log(`📝 Topic: ${topic}`);
-  console.log(`👤 User: ${userId}`);
+  console.log(`📝 Topic: [REDACTED_USER_CONTENT], length=${topic.length}`);
+  console.log(`👤 User: [REDACTED_INTERNAL_ID]`);
   console.log(`🎨 Theme: ${themePreference}`);
   if (projectId) console.log(`📦 Existing Project ID: ${projectId}`);
   if (additionalContext) {
-    console.log(`📎 Context: ${additionalContext.slice(0, 100)}...`);
+    console.log(`📎 Context: [REDACTED_USER_CONTENT], length=${additionalContext.length}`);
   }
   console.log("═══════════════════════════════════════════════════════════\n");
 

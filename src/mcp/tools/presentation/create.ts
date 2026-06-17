@@ -40,7 +40,9 @@ export async function handlePresentationCreate(
   }
 
   // Extract outline titles in order
-  const outlineTitles = outlines.map((o) => o.title);
+  const outlineTitles = outlines.map(
+    (outline: PresentationCreateInput['outlines'][number]) => outline.title
+  );
 
   // Create the project
   const project = await prisma.project.create({

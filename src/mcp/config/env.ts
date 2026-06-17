@@ -2,7 +2,7 @@
  * MCP Server Environment Configuration
  */
 
-import { z } from 'zod';
+import { z, type ZodIssue } from 'zod';
 import { MCP_SERVER_NAME, MCP_SERVER_VERSION } from './constants';
 
 const mcpEnvSchema = z.object({
@@ -17,6 +17,12 @@ const mcpEnvSchema = z.object({
   MCP_MAX_JSON_DEPTH: z.coerce.number().int().positive().default(20),
   DATABASE_URL: z.string().min(1),
   NEXT_PUBLIC_APP_URL: z.string().url().optional().default('http://localhost:3000'),
+  MCP_PUBLIC_ENDPOINT: z.string().url().optional(),
+  OAUTH_ISSUER: z.string().url().optional(),
+  OAUTH_ALLOWED_CLIENTS: z.string().optional().default(''),
+  OAUTH_ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
+  OAUTH_REFRESH_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(60 * 60 * 24 * 30),
+  OAUTH_AUTH_CODE_TTL_SECONDS: z.coerce.number().int().positive().default(600),
 });
 
 export type McpEnv = z.infer<typeof mcpEnvSchema>;
@@ -32,7 +38,7 @@ export function validateMcpEnv(): McpEnv {
 
   if (!result.success) {
     const formatted = result.error.issues
-      .map((issue) => `  - ${issue.path.join('.')}: ${issue.message}`)
+      .map((issue: ZodIssue) => `  - ${issue.path.join('.')}: ${issue.message}`)
       .join('\n');
 
     console.error(`\n[MCP] Invalid environment configuration\n${formatted}\n`);

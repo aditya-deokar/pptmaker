@@ -39,6 +39,7 @@ export function createMcpServer(): McpServer {
         "2. Use 'presentation_get' to read a specific presentation (with slides)",
         "3. Use 'presentation_create' to create a new empty presentation",
         "4. Use 'presentation_generate' for AI-powered generation (takes 30-90s)",
+        "   If it returns RUNNING, use 'presentation_generation_status' to check progress",
         "5. Use 'presentation_update_slides' or 'presentation_update_theme' to modify",
         "6. Use 'presentation_publish' to make a presentation publicly shareable",
         '',
@@ -51,7 +52,8 @@ export function createMcpServer(): McpServer {
         '- presentation_delete performs a soft-delete (recoverable via presentation_recover)',
         '- presentation_delete_permanently requires confirm: true — IRREVERSIBLE',
         '- presentation_update_slides replaces ALL slides — GET first, then modify',
-        '- presentation_generate is a long-running operation (30-90 seconds)',
+        '- presentation_generate is a long-running operation and may return RUNNING before completion',
+        '- presentation_generation_status checks a generation run without starting a duplicate run',
       ].join('\n'),
     }
   );

@@ -14,6 +14,7 @@ import '../resources/presentations';
 import '../resources/templates';
 import '../resources/themes';
 import '../resources/generation-progress';
+import '../resources/app-ui';
 
 async function main(): Promise<void> {
   setTransportType('stdio');

@@ -8,6 +8,7 @@
 import type { AuthContext } from './types';
 import { validateApiKey } from './api-key';
 import { resolveClerkSession } from './clerk-session';
+import { validateOAuthAccessToken } from './oauth-tokens';
 
 export type TransportType = 'stdio' | 'http';
 
@@ -51,8 +52,7 @@ async function resolveHttpAuth(
   const authHeader = headers?.['authorization'] ?? headers?.['Authorization'];
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.slice(7);
-    const ctx = await validateApiKey(token);
-    if (ctx) return ctx;
+    return (await validateOAuthAccessToken(token)) ?? validateApiKey(token);
   }
 
   // 2. Fall back to Clerk session (for browser-based clients)

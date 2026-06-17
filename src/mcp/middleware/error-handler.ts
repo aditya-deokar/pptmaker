@@ -7,11 +7,17 @@
 
 import type { McpToolResponse } from '../tools/_shared/response';
 import { Errors } from '../tools/_shared/errors';
-import { logAuditEntry, createTimer, createTraceId } from './audit-logger';
+import {
+  logAuditEntry,
+  createTimer,
+  createTraceId,
+  estimateResponseSizeBytes,
+} from './audit-logger';
 import type { AuthContext } from '../auth/types';
 import type { TransportType } from '../auth/middleware';
 import type { McpRequestContext } from './request-context';
 import { acquireRateLimit } from './rate-limiter';
+import { getToolSecurityPolicy } from '../security/tool-policy';
 
 /**
  * Tool handler function signature.
@@ -43,9 +49,24 @@ export function withErrorBoundary<TArgs = Record<string, unknown>>(
       traceId,
     };
     const rateLimit = acquireRateLimit(auth);
+    const toolPolicy = getToolSecurityPolicy(toolName);
+    const baseAuditFields = {
+      auth_method: auth.authMethod,
+      oauth_client_id: auth.clientId,
+      scope_count: auth.scopes.length,
+      operation: toolPolicy.operation,
+      reads_user_data: toolPolicy.readsUserData,
+      writes_user_data: toolPolicy.writesUserData,
+      destructive: toolPolicy.destructive,
+      creates_public_url: toolPolicy.createsPublicUrl,
+    };
 
     if (!rateLimit.ok) {
-      const result = Errors.rateLimited(rateLimit.retryAfterSeconds ?? 1);
+      const result = Errors.rateLimited(rateLimit.retryAfterSeconds ?? 1, {
+        limit: rateLimit.limit,
+        remaining: rateLimit.remaining,
+        reset_after_seconds: rateLimit.resetAfterSeconds,
+      });
 
       logAuditEntry(
         {
@@ -61,6 +82,8 @@ export function withErrorBoundary<TArgs = Record<string, unknown>>(
           session_id: executionContext.sessionId,
           request_id: executionContext.requestId,
           request_size_bytes: executionContext.requestSizeBytes,
+          response_size_bytes: estimateResponseSizeBytes(result),
+          ...baseAuditFields,
           error_code: 'RATE_LIMITED',
         },
         result
@@ -86,6 +109,8 @@ export function withErrorBoundary<TArgs = Record<string, unknown>>(
           session_id: executionContext.sessionId,
           request_id: executionContext.requestId,
           request_size_bytes: executionContext.requestSizeBytes,
+          response_size_bytes: estimateResponseSizeBytes(result),
+          ...baseAuditFields,
         },
         result
       );
@@ -112,6 +137,8 @@ export function withErrorBoundary<TArgs = Record<string, unknown>>(
           session_id: executionContext.sessionId,
           request_id: executionContext.requestId,
           request_size_bytes: executionContext.requestSizeBytes,
+          response_size_bytes: estimateResponseSizeBytes(result),
+          ...baseAuditFields,
           error_code: 'INTERNAL_ERROR',
         },
         result

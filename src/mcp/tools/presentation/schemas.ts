@@ -99,7 +99,12 @@ export const presentationGenerateSchema = z.object({
   outlines: z.array(z.string().min(1).max(LIMITS.MAX_TITLE_LENGTH)).max(LIMITS.MAX_OUTLINES).optional()
     .describe('Optional pre-defined slide outlines. If omitted, AI generates outlines automatically.'),
   wait_timeout_ms: z.number().int().min(1000).max(LIMITS.GENERATION_TIMEOUT_MS).optional()
-    .describe(`How long to wait for completion before returning RUNNING. Defaults to ${LIMITS.GENERATION_TIMEOUT_MS} ms.`),
+    .describe(`How long to wait for completion before returning RUNNING. Defaults to ${LIMITS.GENERATION_DEFAULT_WAIT_TIMEOUT_MS} ms and maxes at ${LIMITS.GENERATION_TIMEOUT_MS} ms.`),
+});
+
+export const presentationGenerationStatusSchema = z.object({
+  generation_run_id: z.string().min(1)
+    .describe('Generation run ID returned by presentation_generate.'),
 });
 
 // ─── Schema Types ──────────────────────────────────────────────
@@ -115,3 +120,4 @@ export type PresentationUpdateThemeInput = z.infer<typeof presentationUpdateThem
 export type PresentationPublishInput = z.infer<typeof presentationPublishSchema>;
 export type PresentationUnpublishInput = z.infer<typeof presentationUnpublishSchema>;
 export type PresentationGenerateInput = z.infer<typeof presentationGenerateSchema>;
+export type PresentationGenerationStatusInput = z.infer<typeof presentationGenerationStatusSchema>;

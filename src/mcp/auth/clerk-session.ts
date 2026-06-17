@@ -9,6 +9,7 @@ import { auth } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
 import type { AuthContext, UserTier } from './types';
 import { SubscriptionStatus } from '@/generated/prisma';
+import { getAllMcpOAuthScopes } from './scopes';
 
 /**
  * Resolve AuthContext from the current Clerk session (HTTP transport).
@@ -45,6 +46,8 @@ export async function resolveClerkSession(): Promise<AuthContext | null> {
       clerkId: user.clerkId,
       email: user.email,
       tier,
+      authMethod: 'clerk_session',
+      scopes: getAllMcpOAuthScopes(),
     };
   } catch {
     return null;

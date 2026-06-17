@@ -6,11 +6,25 @@
  */
 
 import { z } from 'zod';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type {
+  McpServer,
+  ToolCallback,
+} from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
+import {
+  createToolUiMeta,
+  MCP_APP_UI_RESOURCE_URIS,
+  type McpAppUiResourceUri,
+} from '../../apps/constants';
 import { registerToolPlugin } from '../registry';
 import { TOOL_NAMES, PAGINATION, LIMITS } from '../../config/constants';
 import { Errors } from '../_shared/errors';
 import { resolveAuth, type TransportType } from '../../auth/middleware';
+import { buildWwwAuthenticateChallenge } from '../../auth/oauth-config';
+import {
+  getRequiredScopesForTool,
+  hasRequiredScopes,
+} from '../../auth/scopes';
 import { withErrorBoundary, type ToolHandler } from '../../middleware/error-handler';
 import {
   createRequestContext,
@@ -30,20 +44,156 @@ import { handlePresentationUpdateTheme } from './update-theme';
 import { handlePresentationPublish } from './publish';
 import { handlePresentationUnpublish } from './unpublish';
 import { handlePresentationGenerate } from './generate';
+import { handlePresentationGenerationStatus } from './generation-status';
 
-import type {
-  PresentationListInput,
-  PresentationGetInput,
-  PresentationCreateInput,
-  PresentationDeleteInput,
-  PresentationRecoverInput,
-  PresentationDeletePermanentlyInput,
-  PresentationUpdateSlidesInput,
-  PresentationUpdateThemeInput,
-  PresentationPublishInput,
-  PresentationUnpublishInput,
-  PresentationGenerateInput,
-} from './schemas';
+interface PresentationToolMetadata {
+  title: string;
+  annotations: ToolAnnotations;
+  uiResourceUri?: McpAppUiResourceUri;
+}
+
+const PRESENTATION_TOOL_METADATA: Record<
+  (typeof TOOL_NAMES)[keyof typeof TOOL_NAMES],
+  PresentationToolMetadata
+> = {
+  [TOOL_NAMES.PRESENTATION_LIST]: {
+    title: 'List presentations',
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_GET]: {
+    title: 'Get presentation',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.DECK_PREVIEW,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_CREATE]: {
+    title: 'Create presentation',
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_DELETE]: {
+    title: 'Soft-delete presentation',
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_RECOVER]: {
+    title: 'Recover presentation',
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_DELETE_PERMANENTLY]: {
+    title: 'Permanently delete presentations',
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_UPDATE_SLIDES]: {
+    title: 'Replace presentation slides',
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_UPDATE_THEME]: {
+    title: 'Update presentation theme',
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_PUBLISH]: {
+    title: 'Publish presentation',
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_UNPUBLISH]: {
+    title: 'Unpublish presentation',
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_GENERATE]: {
+    title: 'Generate presentation',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.GENERATION_PROGRESS,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_GENERATION_STATUS]: {
+    title: 'Get generation status',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.GENERATION_PROGRESS,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+};
+
+function registerPresentationTool<TInputSchema extends Record<string, z.ZodTypeAny>>(
+  server: McpServer,
+  toolName: (typeof TOOL_NAMES)[keyof typeof TOOL_NAMES],
+  description: string,
+  inputSchema: TInputSchema,
+  handler: ToolHandler<z.infer<z.ZodObject<TInputSchema>>>
+): void {
+  const metadata = PRESENTATION_TOOL_METADATA[toolName];
+  const callback = createToolCallback<z.infer<z.ZodObject<TInputSchema>>>(
+    toolName,
+    handler
+  ) as ToolCallback<TInputSchema>;
+
+  server.registerTool(
+    toolName,
+    {
+      title: metadata.title,
+      description,
+      inputSchema,
+      annotations: metadata.annotations,
+      _meta: createToolUiMeta(metadata.uiResourceUri),
+    },
+    callback
+  );
+}
 
 function resolveToolTransport(): TransportType {
   return getCurrentTransport();
@@ -61,9 +211,16 @@ function createToolCallback<TArgs>(
     const transport = resolveToolTransport();
     const requestContext = createRequestContext(transport, extra, args);
     const auth = await resolveAuth(transport, requestContext.headers);
+    const requiredScopes = getRequiredScopesForTool(toolName);
 
     if (!auth) {
-      const result = Errors.unauthorized();
+      const result = Errors.unauthorized(
+        buildWwwAuthenticateChallenge({
+          scopes: requiredScopes,
+          error: 'invalid_token',
+          errorDescription: 'Sign in to Verto AI or reconnect this app.',
+        })
+      );
       logAuditEntry(
         {
           timestamp: new Date().toISOString(),
@@ -85,6 +242,36 @@ function createToolCallback<TArgs>(
       return result;
     }
 
+    if (!hasRequiredScopes(auth, requiredScopes)) {
+      const result = Errors.insufficientScope(
+        requiredScopes,
+        buildWwwAuthenticateChallenge({
+          scopes: requiredScopes,
+          error: 'insufficient_scope',
+          errorDescription: 'Reconnect Verto AI and grant the required scope.',
+        })
+      );
+      logAuditEntry(
+        {
+          timestamp: new Date().toISOString(),
+          trace_id: createTraceId(),
+          user_id: auth.userId,
+          tool_name: toolName,
+          tool_input: args,
+          status: 'error',
+          latency_ms: 0,
+          transport,
+          client_info: requestContext.clientInfo,
+          session_id: requestContext.sessionId,
+          request_id: requestContext.requestId,
+          request_size_bytes: requestContext.requestSizeBytes,
+          error_code: 'INSUFFICIENT_SCOPE',
+        },
+        result
+      );
+      return result;
+    }
+
     const wrapped = withErrorBoundary(
       toolName,
       handler,
@@ -97,7 +284,8 @@ function createToolCallback<TArgs>(
 }
 
 function registerPresentationTools(server: McpServer): void {
-  server.tool(
+  registerPresentationTool(
+    server,
     TOOL_NAMES.PRESENTATION_LIST,
     'List all presentations owned by the authenticated user. Returns metadata only (no slide content) for token efficiency. Supports cursor-based pagination, sorting, and optional inclusion of soft-deleted items.',
     {
@@ -112,13 +300,11 @@ function registerPresentationTools(server: McpServer): void {
       sort_order: z.enum(['asc', 'desc']).default('desc')
         .describe('Sort direction.'),
     },
-    createToolCallback<PresentationListInput>(
-      TOOL_NAMES.PRESENTATION_LIST,
-      handlePresentationList
-    )
+    handlePresentationList
   );
 
-  server.tool(
+  registerPresentationTool(
+    server,
     TOOL_NAMES.PRESENTATION_GET,
     'Get a single presentation by ID. Returns full metadata and optionally the complete slide JSON. Set include_slides to false for metadata-only (saves tokens).',
     {
@@ -127,13 +313,11 @@ function registerPresentationTools(server: McpServer): void {
       include_slides: z.boolean().default(true)
         .describe('If true, includes the full slide JSON content. Set to false for metadata-only.'),
     },
-    createToolCallback<PresentationGetInput>(
-      TOOL_NAMES.PRESENTATION_GET,
-      handlePresentationGet
-    )
+    handlePresentationGet
   );
 
-  server.tool(
+  registerPresentationTool(
+    server,
     TOOL_NAMES.PRESENTATION_CREATE,
     'Create a new presentation with a title and slide outlines. Each outline becomes a slide placeholder. Returns the created presentation with metadata. Usage limits are enforced.',
     {
@@ -149,39 +333,33 @@ function registerPresentationTools(server: McpServer): void {
       request_id: z.string().uuid().optional()
         .describe('Client-generated UUID for idempotent creation.'),
     },
-    createToolCallback<PresentationCreateInput>(
-      TOOL_NAMES.PRESENTATION_CREATE,
-      handlePresentationCreate
-    )
+    handlePresentationCreate
   );
 
-  server.tool(
+  registerPresentationTool(
+    server,
     TOOL_NAMES.PRESENTATION_DELETE,
     'Soft-delete a presentation. The presentation can be recovered later using presentation_recover. Idempotent: calling on an already-deleted presentation returns success.',
     {
       presentation_id: z.string().min(1)
         .describe('ID of the presentation to soft-delete.'),
     },
-    createToolCallback<PresentationDeleteInput>(
-      TOOL_NAMES.PRESENTATION_DELETE,
-      handlePresentationDelete
-    )
+    handlePresentationDelete
   );
 
-  server.tool(
+  registerPresentationTool(
+    server,
     TOOL_NAMES.PRESENTATION_RECOVER,
     'Recover a soft-deleted presentation, restoring it to active status. Idempotent: calling on an active presentation returns success.',
     {
       presentation_id: z.string().min(1)
         .describe('ID of the soft-deleted presentation to recover.'),
     },
-    createToolCallback<PresentationRecoverInput>(
-      TOOL_NAMES.PRESENTATION_RECOVER,
-      handlePresentationRecover
-    )
+    handlePresentationRecover
   );
 
-  server.tool(
+  registerPresentationTool(
+    server,
     TOOL_NAMES.PRESENTATION_DELETE_PERMANENTLY,
     'PERMANENTLY delete presentations from the database. This action CANNOT be undone. Requires confirm: true to proceed. Only deletes presentations you own. Maximum 20 IDs per call.',
     {
@@ -190,13 +368,11 @@ function registerPresentationTools(server: McpServer): void {
       confirm: z.literal(true)
         .describe('Must be exactly true to confirm permanent deletion. Prevents accidental data loss.'),
     },
-    createToolCallback<PresentationDeletePermanentlyInput>(
-      TOOL_NAMES.PRESENTATION_DELETE_PERMANENTLY,
-      handlePresentationDeletePermanently
-    )
+    handlePresentationDeletePermanently
   );
 
-  server.tool(
+  registerPresentationTool(
+    server,
     TOOL_NAMES.PRESENTATION_UPDATE_SLIDES,
     'Replace ALL slides in a presentation with the provided Slide[] array. This is a FULL REPLACEMENT - not a patch. Always use presentation_get first to read current slides, modify the array, then call this tool with the complete updated array.',
     {
@@ -211,13 +387,11 @@ function registerPresentationTools(server: McpServer): void {
         className: z.string().optional(),
       })).describe('The complete Slide[] array. Replaces all existing slides.'),
     },
-    createToolCallback<PresentationUpdateSlidesInput>(
-      TOOL_NAMES.PRESENTATION_UPDATE_SLIDES,
-      handlePresentationUpdateSlides
-    )
+    handlePresentationUpdateSlides
   );
 
-  server.tool(
+  registerPresentationTool(
+    server,
     TOOL_NAMES.PRESENTATION_UPDATE_THEME,
     "Change the visual theme of a presentation. Use the 'verto://themes' resource to browse valid theme names before calling this tool.",
     {
@@ -226,39 +400,33 @@ function registerPresentationTools(server: McpServer): void {
       theme_name: z.string().min(1)
         .describe("Name of the theme to apply. Use the 'verto://themes' resource for valid names."),
     },
-    createToolCallback<PresentationUpdateThemeInput>(
-      TOOL_NAMES.PRESENTATION_UPDATE_THEME,
-      handlePresentationUpdateTheme
-    )
+    handlePresentationUpdateTheme
   );
 
-  server.tool(
+  registerPresentationTool(
+    server,
     TOOL_NAMES.PRESENTATION_PUBLISH,
     'Make a presentation publicly shareable via a unique share URL. Idempotent: calling on an already-published presentation returns the existing share URL.',
     {
       presentation_id: z.string().min(1)
         .describe('ID of the presentation to publish.'),
     },
-    createToolCallback<PresentationPublishInput>(
-      TOOL_NAMES.PRESENTATION_PUBLISH,
-      handlePresentationPublish
-    )
+    handlePresentationPublish
   );
 
-  server.tool(
+  registerPresentationTool(
+    server,
     TOOL_NAMES.PRESENTATION_UNPUBLISH,
     'Remove public access from a presentation. The share URL will no longer work. Idempotent: calling on an already-unpublished presentation returns success.',
     {
       presentation_id: z.string().min(1)
         .describe('ID of the presentation to unpublish.'),
     },
-    createToolCallback<PresentationUnpublishInput>(
-      TOOL_NAMES.PRESENTATION_UNPUBLISH,
-      handlePresentationUnpublish
-    )
+    handlePresentationUnpublish
   );
 
-  server.tool(
+  registerPresentationTool(
+    server,
     TOOL_NAMES.PRESENTATION_GENERATE,
     'Generate a presentation with Verto AI using the advanced multi-agent pipeline. Creates a tracked generation run, waits for completion up to the configured timeout, and returns either the completed presentation or a RUNNING status with a progress resource URI.',
     {
@@ -271,15 +439,23 @@ function registerPresentationTools(server: McpServer): void {
       outlines: z.array(z.string().min(1).max(LIMITS.MAX_TITLE_LENGTH)).max(LIMITS.MAX_OUTLINES).optional()
         .describe('Optional pre-defined slide outlines. If omitted, AI generates outlines automatically.'),
       wait_timeout_ms: z.number().int().min(1000).max(LIMITS.GENERATION_TIMEOUT_MS).optional()
-        .describe(`How long to wait for completion before returning RUNNING. Defaults to ${LIMITS.GENERATION_TIMEOUT_MS} ms.`),
+        .describe(`How long to wait for completion before returning RUNNING. Defaults to ${LIMITS.GENERATION_DEFAULT_WAIT_TIMEOUT_MS} ms and maxes at ${LIMITS.GENERATION_TIMEOUT_MS} ms.`),
     },
-    createToolCallback<PresentationGenerateInput>(
-      TOOL_NAMES.PRESENTATION_GENERATE,
-      handlePresentationGenerate
-    )
+    handlePresentationGenerate
   );
 
-  console.error('[MCP] Presentation plugin: 11 tools registered (2 read, 8 mutation, 1 generation)');
+  registerPresentationTool(
+    server,
+    TOOL_NAMES.PRESENTATION_GENERATION_STATUS,
+    'Get the current status of a tracked presentation generation run. Use this after presentation_generate returns RUNNING instead of starting a duplicate generation.',
+    {
+      generation_run_id: z.string().min(1)
+        .describe('Generation run ID returned by presentation_generate.'),
+    },
+    handlePresentationGenerationStatus
+  );
+
+  console.error('[MCP] Presentation plugin: 12 tools registered (3 read, 8 mutation, 1 generation)');
 }
 
 registerToolPlugin({

@@ -208,7 +208,7 @@ export default function McpUsageGuidePage() {
           <SectionHeading
             eyebrow="Server Analysis"
             title="How the hosted Verto AI MCP server behaves"
-            description="This guide is based on the current application code. The server is mounted at `/api/mcp`, uses Streamable HTTP over JSON-RPC, supports Bearer-token auth, and exposes presentation tools plus read-only resources."
+            description="This guide is based on the current application code. The server is mounted at `/mcp` with `/api/mcp` kept as a legacy endpoint, uses Streamable HTTP over JSON-RPC, supports Bearer-token auth, and exposes presentation tools plus read-only resources."
           />
 
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
@@ -222,7 +222,7 @@ export default function McpUsageGuidePage() {
               <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
                 <div className="rounded-2xl border bg-muted/30 p-4">
                   <p className="font-medium text-foreground">1. Health and discovery</p>
-                  <p><code className="rounded bg-background px-1.5 py-0.5 text-xs">GET /api/mcp</code> returns server metadata and transport details.</p>
+                  <p><code className="rounded bg-background px-1.5 py-0.5 text-xs">GET /mcp</code> returns server metadata and transport details.</p>
                 </div>
                 <div className="rounded-2xl border bg-muted/30 p-4">
                   <p className="font-medium text-foreground">2. Initialize first</p>
@@ -234,7 +234,7 @@ export default function McpUsageGuidePage() {
                 </div>
                 <div className="rounded-2xl border bg-muted/30 p-4">
                   <p className="font-medium text-foreground">4. Close when finished</p>
-                  <p><code className="rounded bg-background px-1.5 py-0.5 text-xs">DELETE /api/mcp</code> closes the MCP session cleanly.</p>
+                  <p><code className="rounded bg-background px-1.5 py-0.5 text-xs">DELETE /mcp</code> closes the MCP session cleanly.</p>
                 </div>
               </CardContent>
             </Card>

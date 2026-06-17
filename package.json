@@ -14,7 +14,10 @@
     "start": "next start",
     "lint": "next lint",
     "mcp:dev": "npx tsx src/mcp/transport/stdio.ts",
-    "mcp:inspect": "npx @modelcontextprotocol/inspector npx tsx src/mcp/transport/stdio.ts"
+    "mcp:inspect": "npx @modelcontextprotocol/inspector npx tsx src/mcp/transport/stdio.ts",
+    "mcp:phase7:checks": "node scripts/mcp-apps/phase7-checks.mjs",
+    "mcp:phase7:typecheck": "node scripts/mcp-apps/focused-typecheck.mjs",
+    "mcp:phase7": "npm run mcp:phase7:checks && npm run mcp:phase7:typecheck"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.14",

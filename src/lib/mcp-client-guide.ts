@@ -7,7 +7,8 @@ import {
 const FALLBACK_PUBLIC_APP_URL = 'https://verto.ai.aditya-deokar.me'
 
 export const MCP_DOCS_PATH = '/docs/mcp/04-usage-guide'
-export const MCP_HTTP_PATH = '/api/mcp'
+export const MCP_HTTP_PATH = '/mcp'
+export const MCP_LEGACY_HTTP_PATH = '/api/mcp'
 export const MCP_DISCOVERY_PATH = '/.well-known/oauth-protected-resource'
 export { MCP_PROTOCOL_VERSION }
 
@@ -166,6 +167,11 @@ export const MCP_GUIDE_TOOLS: McpGuideTool[] = [
     name: TOOL_NAMES.PRESENTATION_GENERATE,
     description:
       "Run Verto AI's long-running generation pipeline and track progress.",
+  },
+  {
+    name: TOOL_NAMES.PRESENTATION_GENERATION_STATUS,
+    description:
+      'Check a generation run returned by presentation_generate without starting a duplicate run.',
   },
 ]
 
