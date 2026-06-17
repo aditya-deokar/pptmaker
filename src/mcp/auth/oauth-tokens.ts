@@ -36,13 +36,13 @@ interface ExchangeAuthorizationCodeInput {
   clientId: string;
   redirectUri: string;
   codeVerifier: string;
-  resource: string;
+  resource?: string | null;
 }
 
 interface RefreshAccessTokenInput {
   refreshToken: string;
   clientId: string;
-  resource: string;
+  resource?: string | null;
 }
 
 function nowPlusSeconds(seconds: number): Date {
@@ -164,13 +164,17 @@ export async function exchangeAuthorizationCode(
     where: { codeHash: hashOAuthToken(input.code) },
   });
 
+  const requestedResource = input.resource
+    ? normalizeResourceUri(input.resource)
+    : normalizeResourceUri(code?.resource ?? getMcpResourceUrl());
+
   if (
     !code
     || code.usedAt
     || code.expiresAt <= new Date()
     || code.clientId !== input.clientId
     || code.redirectUri !== input.redirectUri
-    || normalizeResourceUri(code.resource) !== normalizeResourceUri(input.resource)
+    || normalizeResourceUri(code.resource) !== requestedResource
     || code.codeChallengeMethod !== 'S256'
     || !verifyPkceS256(input.codeVerifier, code.codeChallenge)
   ) {
@@ -204,12 +208,16 @@ export async function refreshAccessToken(
     where: { tokenHash: hashOAuthToken(input.refreshToken) },
   });
 
+  const requestedResource = input.resource && refreshToken
+    ? normalizeResourceUri(input.resource)
+    : normalizeResourceUri(refreshToken?.resource ?? getMcpResourceUrl());
+
   if (
     !refreshToken
     || refreshToken.revokedAt
     || refreshToken.expiresAt <= new Date()
     || refreshToken.clientId !== input.clientId
-    || normalizeResourceUri(refreshToken.resource) !== normalizeResourceUri(input.resource)
+    || normalizeResourceUri(refreshToken.resource) !== requestedResource
   ) {
     return null;
   }

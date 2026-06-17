@@ -550,28 +550,38 @@ Purpose: prepare everything reviewers and users will see.
 
 ### Tasks
 
-- [ ] Finalize app name:
+- [x] Finalize app name:
   - `Verto AI`
-- [ ] Finalize tagline:
+- [x] Finalize tagline:
   - `Create and edit AI presentations from chat`
-- [ ] Finalize short description.
-- [ ] Finalize long description.
-- [ ] Prepare logo/icon.
-- [ ] Prepare 3-5 screenshots:
+- [x] Finalize short description.
+- [x] Finalize long description.
+- [x] Prepare logo/icon requirements and export checklist.
+- [x] Prepare 3-5 screenshots plan:
   - generation prompt result
   - progress UI
   - deck preview UI
   - publish/share result
   - optional theme edit result
-- [ ] Publish docs page:
+- [x] Prepare docs page drafts:
   - "Connect Verto AI to ChatGPT"
   - "Connect Verto AI to Claude"
+- [ ] Publish docs pages on the Verto website.
+- [ ] Export final owned logo/icon assets.
+- [ ] Capture final screenshots from ChatGPT developer mode and Claude custom connector.
 - [ ] Publish privacy policy and terms links.
 - [ ] Prepare support contact.
-- [ ] Prepare reviewer test account.
-- [ ] Prepare reviewer instructions.
-- [ ] Prepare data handling answers.
-- [ ] Prepare policy/compliance answers.
+- [ ] Populate reviewer test account.
+- [x] Prepare reviewer instructions.
+- [x] Prepare data handling answers.
+- [x] Prepare policy/compliance answers.
+
+### Implementation Notes
+
+- Added `docs/mcp-apps/08-product-submission-packet.md` as the copy-paste source for ChatGPT and Claude submission fields.
+- Added `docs/mcp-apps/submission-assets/README.md` with screenshot/icon/evidence naming conventions.
+- The packet includes listing copy, OAuth details, tool summary, reviewer prompts, reviewer instructions, data handling answers, compliance answers, public help article drafts, and owner submission steps.
+- External owner tasks remain open because they require production access or business decisions: final owned logo export, screenshot capture, privacy/terms/support URLs, published help pages, and populated reviewer account.
 
 ### Acceptance Criteria
 
