@@ -51,6 +51,27 @@ function isAllowedRedirectUri(value: string): boolean {
   }
 }
 
+function isClientMetadataDocumentUrl(clientId: string): boolean {
+  try {
+    const url = new URL(clientId);
+    return url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+function getErrorSummary(error: unknown): Record<string, string> {
+  if (!error || typeof error !== 'object') {
+    return { type: typeof error };
+  }
+
+  const record = error as Record<string, unknown>;
+  return {
+    name: error instanceof Error ? error.name : 'UnknownError',
+    code: typeof record.code === 'string' ? record.code : 'UNKNOWN',
+  };
+}
+
 function parseStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
@@ -131,11 +152,16 @@ async function fetchClientMetadata(clientId: string): Promise<OAuthClientInfo | 
     const metadata = await response.json() as Record<string, unknown>;
     const metadataClientId = metadata.client_id;
     const redirectUris = parseStringArray(metadata.redirect_uris);
+    const tokenEndpointAuthMethod = metadata.token_endpoint_auth_method;
 
     if (
       typeof metadataClientId !== 'string'
       || metadataClientId !== clientId
       || redirectUris.length === 0
+      || (
+        typeof tokenEndpointAuthMethod === 'string'
+        && tokenEndpointAuthMethod !== 'none'
+      )
     ) {
       return null;
     }
@@ -153,6 +179,20 @@ async function fetchClientMetadata(clientId: string): Promise<OAuthClientInfo | 
   }
 }
 
+async function findDynamicOAuthClient(clientId: string) {
+  try {
+    return await prisma.mcpOAuthClient.findFirst({
+      where: {
+        clientId,
+        revokedAt: null,
+      },
+    });
+  } catch (error) {
+    console.error('[OAuth] Dynamic client lookup failed', getErrorSummary(error));
+    return null;
+  }
+}
+
 export async function validateOAuthClient(
   clientId: string,
   redirectUri: string
@@ -161,12 +201,26 @@ export async function validateOAuthClient(
     return null;
   }
 
-  const dynamicClient = await prisma.mcpOAuthClient.findFirst({
-    where: {
-      clientId,
-      revokedAt: null,
-    },
-  });
+  const staticClient = parseStaticClients().find(
+    (client) => client.client_id === clientId
+  );
+
+  if (isClientMetadataDocumentUrl(clientId)) {
+    const metadataClient = await fetchClientMetadata(clientId);
+    if (metadataClient) {
+      return metadataClient.redirectUris.includes(redirectUri) ? metadataClient : null;
+    }
+
+    return staticClient?.redirect_uris.includes(redirectUri)
+      ? {
+          clientId,
+          clientName: staticClient.client_name,
+          redirectUris: staticClient.redirect_uris,
+        }
+      : null;
+  }
+
+  const dynamicClient = await findDynamicOAuthClient(clientId);
 
   if (dynamicClient) {
     return dynamicClient.redirectUris.includes(redirectUri)
@@ -177,10 +231,6 @@ export async function validateOAuthClient(
         }
       : null;
   }
-
-  const staticClient = parseStaticClients().find(
-    (client) => client.client_id === clientId
-  );
 
   if (staticClient) {
     return staticClient.redirect_uris.includes(redirectUri)

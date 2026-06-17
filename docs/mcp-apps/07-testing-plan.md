@@ -39,6 +39,7 @@ Recommended local validation order:
 ```bash
 npm run mcp:phase7
 npx prisma validate --schema prisma/schema.prisma
+npm run db:migrate:deploy
 npm run build
 ```
 
@@ -75,7 +76,7 @@ Required deployment settings:
 | Setting | Required value or behavior |
 | --- | --- |
 | `NEXT_PUBLIC_APP_URL` | `https://verto.ai.aditya-deokar.me` |
-| `DATABASE_URL` | Production database with MCP OAuth migrations applied. |
+| `DATABASE_URL` | Production database with MCP OAuth migrations applied by `npm run db:migrate:deploy` or the hosting equivalent. |
 | Clerk env vars | Production Clerk keys and sign-in working on the public domain. |
 | MCP allowed origins | Include ChatGPT, Claude, Verto domain, and local development origins as needed. |
 | OAuth issuer/resource | Issuer and resource should resolve to the production Verto domain. |
@@ -270,7 +271,29 @@ Save these artifacts for Phase 8 submission:
   - tool call result
   - UI or fallback result
 
-## 11. Phase 7 Exit Gate
+## 11. ChatGPT OAuth 500 Troubleshooting
+
+If ChatGPT redirects to `/oauth/authorize` and the browser shows `HTTP ERROR 500`, check these in order:
+
+1. Verify ChatGPT's `client_id` metadata document is reachable. The `client_id` can be a URL like `https://chatgpt.com/oauth/.../client.json?token_endpoint_auth_method=none`.
+2. Verify the metadata document has:
+   - `client_id` exactly matching the full URL, including query string.
+   - `redirect_uris` containing the exact ChatGPT redirect URI.
+   - `token_endpoint_auth_method` set to `none`.
+3. Confirm the deployed Verto app includes the ChatGPT metadata-client validation fix:
+   - URL-style `client_id` values are fetched before dynamic Prisma client lookup.
+   - Dynamic Prisma client lookup failures are logged and do not crash the authorize request.
+4. Confirm the production build ran `prisma generate --schema prisma/schema.prisma`.
+5. Confirm the production database has the MCP OAuth tables by running `npm run db:migrate:deploy` or the hosting equivalent.
+6. Retry the ChatGPT connector from a fresh browser session.
+
+Expected result after the fix:
+
+- If the user is not signed in, Verto redirects to `/sign-in` instead of returning a blank 500 page.
+- If ChatGPT client metadata is invalid, Verto returns a controlled OAuth error.
+- If the database is missing OAuth tables, the deployment logs show the Prisma failure clearly instead of failing during ChatGPT metadata validation.
+
+## 12. Phase 7 Exit Gate
 
 Phase 7 is complete when:
 
