@@ -293,6 +293,20 @@ Expected result after the fix:
 - If ChatGPT client metadata is invalid, Verto returns a controlled OAuth error.
 - If the database is missing OAuth tables, the deployment logs show the Prisma failure clearly instead of failing during ChatGPT metadata validation.
 
+If Google/Clerk sign-in succeeds but Verto sends the user to `/callback` or `/dashboard` instead of back to ChatGPT:
+
+1. Confirm the deployed sign-in page includes the OAuth redirect preservation fix.
+2. Confirm `/sign-in?redirect_url=.../oauth/authorize?...` renders Clerk with `forceRedirectUrl` set to the safe `/oauth/authorize?...` path.
+3. Confirm regular non-OAuth sign-in can still use the app's default `/callback` to `/dashboard` flow.
+
+If the consent screen appears and `POST /oauth/authorize` returns `302`, but ChatGPT shows `There was a problem connecting Verto AI`:
+
+1. Check production logs for `POST /oauth/token` immediately after the consent redirect.
+2. If token exchange returns `400`, confirm the deployed token endpoint accepts a missing `resource` parameter for `authorization_code` and `refresh_token` grants.
+3. Confirm `client_id`, `redirect_uri`, `code`, and `code_verifier` are present in the token request.
+4. Confirm the authorization code was issued for the same ChatGPT `client_id` metadata URL and redirect URI.
+5. Retry with a fresh ChatGPT connector attempt because authorization codes are single-use.
+
 ## 12. Phase 7 Exit Gate
 
 Phase 7 is complete when:

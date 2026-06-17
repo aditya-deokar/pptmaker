@@ -24,16 +24,16 @@ This checklist is the practical launch path for getting Verto AI into ChatGPT an
 
 ### Product And Legal
 
-- [ ] Final app name.
-- [ ] Final tagline.
-- [ ] Final short and long descriptions.
-- [ ] Logo/icon.
+- [x] Final app name prepared in `docs/mcp-apps/08-product-submission-packet.md`.
+- [x] Final tagline prepared in `docs/mcp-apps/08-product-submission-packet.md`.
+- [x] Final short and long descriptions prepared in `docs/mcp-apps/08-product-submission-packet.md`.
+- [ ] Final owned logo/icon exported.
 - [ ] Privacy policy URL.
 - [ ] Terms URL.
 - [ ] Support URL or support email.
-- [ ] Public help article for connecting Verto AI.
+- [x] Public help article drafts prepared for connecting Verto AI to ChatGPT and Claude.
 - [ ] Test account with real sample presentations and safe data: `adityadeokar80@gmail.com`.
-- [ ] Review instructions for test account setup.
+- [x] Review instructions for test account setup prepared in the Phase 8 packet.
 - [ ] Screenshots of app output in chat.
 - [ ] List of countries/regions where the app should be available.
 

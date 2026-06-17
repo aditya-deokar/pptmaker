@@ -50,10 +50,17 @@ export async function POST(request: Request): Promise<Response> {
   const clientId = params.get('client_id');
   const resource = params.get('resource');
 
-  if (!clientId || !isExpectedMcpResource(resource, request.url)) {
+  if (!clientId) {
     return oauthJson(400, {
       error: 'invalid_request',
-      error_description: 'client_id and the Verto MCP resource parameter are required.',
+      error_description: 'client_id is required.',
+    });
+  }
+
+  if (resource && !isExpectedMcpResource(resource, request.url)) {
+    return oauthJson(400, {
+      error: 'invalid_target',
+      error_description: 'resource must match the Verto MCP endpoint.',
     });
   }
 
@@ -83,7 +90,7 @@ export async function POST(request: Request): Promise<Response> {
       clientId,
       redirectUri,
       codeVerifier,
-      resource: resource!,
+      resource,
     });
 
     if (!tokenResponse) {
@@ -110,7 +117,7 @@ export async function POST(request: Request): Promise<Response> {
     const tokenResponse = await refreshAccessToken({
       refreshToken,
       clientId,
-      resource: resource!,
+      resource,
     });
 
     if (!tokenResponse) {

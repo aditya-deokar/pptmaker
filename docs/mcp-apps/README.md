@@ -109,6 +109,8 @@ Claude:
 | `05-tool-review-matrix.md` | Tool titles, review annotations, and safety notes for app submission. |
 | `06-security-privacy-observability.md` | Phase 6 hardening notes, ownership matrix, prompt-injection tests, and validation checklist. |
 | `07-testing-plan.md` | Phase 7 automated checks, MCP Inspector steps, ChatGPT developer mode steps, Claude custom connector steps, and reviewer prompt matrix. |
+| `08-product-submission-packet.md` | Phase 8 app listing copy, reviewer instructions, data handling answers, screenshot plan, help article drafts, and owner submission steps. |
+| `submission-assets/` | Place final icons, screenshots, and evidence files here before app review. |
 
 ## Source Highlights
 
