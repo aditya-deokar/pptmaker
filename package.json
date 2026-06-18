@@ -17,9 +17,11 @@
     "lint": "next lint",
     "mcp:dev": "npx tsx src/mcp/transport/stdio.ts",
     "mcp:inspect": "npx @modelcontextprotocol/inspector npx tsx src/mcp/transport/stdio.ts",
+    "mcp:apps:build": "node scripts/mcp-apps/build-widgets.mjs",
+    "mcp:apps:check": "node scripts/mcp-apps/build-widgets.mjs --check",
     "mcp:phase7:checks": "node scripts/mcp-apps/phase7-checks.mjs",
     "mcp:phase7:typecheck": "node scripts/mcp-apps/focused-typecheck.mjs",
-    "mcp:phase7": "npm run mcp:phase7:checks && npm run mcp:phase7:typecheck"
+    "mcp:phase7": "npm run mcp:apps:check && npm run mcp:phase7:checks && npm run mcp:phase7:typecheck"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.14",
@@ -117,6 +119,7 @@
     "@types/react-dom": "19.2.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "baseline-browser-mapping": "^2.10.29",
+    "esbuild": "0.27.2",
     "eslint": "^8",
     "eslint-config-next": "16.0.7",
     "inngest-cli": "^1.16.0",

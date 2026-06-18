@@ -10,6 +10,7 @@ import {
   buildGenerationStatusResponse,
   getGenerationRunForMcp,
 } from '../../lib/presentation-generation-runs';
+import { createGenerationProgressWidgetData } from '../../apps/widget-data';
 import { mcpSuccess, type McpToolResponse } from '../_shared/response';
 import { Errors } from '../_shared/errors';
 import type { PresentationGenerationStatusInput } from './schemas';
@@ -35,5 +36,9 @@ export async function handlePresentationGenerationStatus(
     error: run.error,
   });
 
-  return mcpSuccess(buildGenerationStatusResponse(run));
+  const statusPayload = buildGenerationStatusResponse(run);
+
+  return mcpSuccess(statusPayload, {
+    widget: createGenerationProgressWidgetData(statusPayload),
+  });
 }

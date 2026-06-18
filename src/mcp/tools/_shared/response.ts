@@ -5,7 +5,20 @@
  * Responses are serialized as JSON text content blocks.
  */
 
+import { z } from 'zod';
 import type { PaginationMeta } from './pagination';
+import type { McpAppWidgetData } from '../../apps/widget-data';
+
+interface McpSuccessOptions {
+  widget?: McpAppWidgetData;
+}
+
+export const MCP_SUCCESS_OUTPUT_SCHEMA = {
+  success: z.boolean(),
+  data: z.any(),
+  widget: z.any().optional(),
+  pagination: z.any().optional(),
+} as const;
 
 /**
  * Standard MCP tool response type.
@@ -13,6 +26,7 @@ import type { PaginationMeta } from './pagination';
 export interface McpToolResponse {
   [key: string]: unknown;
   content: Array<{ type: 'text'; text: string }>;
+  structuredContent?: Record<string, unknown>;
   isError?: boolean;
   _meta?: Record<string, unknown>;
 }
@@ -20,8 +34,16 @@ export interface McpToolResponse {
 /**
  * Build a success response with data.
  */
-export function mcpSuccess(data: unknown): McpToolResponse {
+export function mcpSuccess(
+  data: unknown,
+  options?: McpSuccessOptions
+): McpToolResponse {
   return {
+    structuredContent: {
+      success: true,
+      data,
+      ...(options?.widget ? { widget: options.widget } : {}),
+    },
     content: [
       {
         type: 'text',
@@ -39,6 +61,11 @@ export function mcpPaginated(
   pagination: PaginationMeta
 ): McpToolResponse {
   return {
+    structuredContent: {
+      success: true,
+      data,
+      pagination,
+    },
     content: [
       {
         type: 'text',

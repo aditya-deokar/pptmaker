@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verto deck preview</title>
+</head>
+<body>
+  <script>
+"use strict";(()=>{var B="2026-01-26";var z=0,p=null,u=new Map,H=`
+  :root {
+    color-scheme: light dark;
+    --bg: #fbfbfc;
+    --fg: #18181b;
+    --muted: #6b7280;
+    --line: #d7dce2;
+    --accent: #0f766e;
+    --accent-soft: #ccfbf1;
+    --surface: #ffffff;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0c0f;
+      --fg: #f4f4f5;
+      --muted: #a1a1aa;
+      --line: #2f333a;
+      --accent: #5eead4;
+      --accent-soft: #123532;
+      --surface: #111318;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-width: 260px;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  main {
+    width: 100%;
+    min-height: 180px;
+    padding: 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  h1 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+  .muted { color: var(--muted); }
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px solid var(--line);
+    padding: 10px 0;
+  }
+  .row:first-of-type { border-top: 0; }
+  .label { color: var(--muted); }
+  .value { font-weight: 650; text-align: right; overflow-wrap: anywhere; }
+  .bar {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--line) 70%, transparent);
+    margin: 14px 0 6px;
+  }
+  .fill {
+    width: var(--progress, 0%);
+    height: 100%;
+    background: var(--accent);
+    transition: width 180ms ease;
+  }
+  .slides {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .slide {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px;
+    background: color-mix(in srgb, var(--surface) 88%, var(--accent-soft));
+  }
+  .slide-title {
+    font-weight: 650;
+    overflow-wrap: anywhere;
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 3px 8px;
+    background: var(--accent-soft);
+    color: var(--fg);
+    font-size: 12px;
+    font-weight: 650;
+  }
+  a {
+    color: var(--accent);
+    font-weight: 650;
+    text-decoration: none;
+  }
+`;function C(e){y(H),window.addEventListener("message",t=>{if(t.source!==window.parent)return;let n=t.data;if(!(!n||typeof n!="object")){if(n.jsonrpc==="2.0"){if(F(n))return;n.method==="ui/notifications/tool-result"&&v(n.params,e);return}v(n.result||n.payload||n,e)}}),_().catch(t=>{console.warn("Verto MCP Apps bridge was not initialized:",t)}),v(G(),e)}async function f(e,t){let n=await j(e,t),i=A(n);return window.__VERTO_MCP_PAYLOAD__=i,i}function o(e){let t=document.getElementById(e);if(!t)throw new Error(`Missing widget element: ${e}`);return t}function r(e){return e&&typeof e=="object"?e:{}}function d(e,t=""){return typeof e=="string"&&e.length>0?e:t}function P(e,t=0){return typeof e=="number"&&Number.isFinite(e)?e:t}function g(e){return Array.isArray(e)?e:[]}function y(e){let t=document.createElement("style");t.textContent=e,document.head.appendChild(t)}async function j(e,t){if(T())try{return await _(),await M("tools/call",{name:e,arguments:t},15e3)}catch(n){if(typeof window.openai?.callTool!="function")throw n}if(typeof window.openai?.callTool=="function")return window.openai.callTool(e,t);throw new Error("This host has not enabled widget tool calls for Verto AI yet.")}function T(){return typeof window<"u"&&window.parent!==window}function _(){return T()?(p||(p=M("ui/initialize",{appInfo:{name:"verto-ai",version:"0.1.0"},appCapabilities:{},protocolVersion:B},5e3).then(()=>{$("ui/notifications/initialized",{})}).catch(e=>{throw p=null,e})),p):Promise.resolve()}function $(e,t){window.parent.postMessage({jsonrpc:"2.0",method:e,params:t},"*")}function M(e,t,n){return new Promise((i,a)=>{let s=++z,l=window.setTimeout(()=>{u.delete(s),a(new Error(`Timed out waiting for ${e}.`))},n);u.set(s,{resolve:i,reject:a,timeoutId:l}),window.parent.postMessage({jsonrpc:"2.0",id:s,method:e,params:t},"*")})}function F(e){if(typeof e.id!="number"||typeof e.method=="string")return!1;let t=u.get(e.id);return t?(u.delete(e.id),window.clearTimeout(t.timeoutId),e.error?t.reject(e.error):t.resolve(e.result),!0):!1}function G(){if(window.__VERTO_MCP_PAYLOAD__)return window.__VERTO_MCP_PAYLOAD__;let e=window.openai||{};return e.toolOutput||e.toolResult||e.toolResponse||{}}function v(e,t){let n=A(e);window.__VERTO_MCP_PAYLOAD__=n,t(n)}function A(e){let t=W(e);if(t)return t;let n=Y(e);return n||r(e)}function W(e){let t=r(e),n=t.structuredContent||t.structured_content;return n?r(n):null}function Y(e){let n=g(r(e).content).find(i=>{let a=r(i);return a.type==="text"&&typeof a.text=="string"});if(!n)return null;try{return r(JSON.parse(d(r(n).text)))}catch{return null}}var q=`
+  .deck-shell {
+    display: grid;
+    gap: 16px;
+    min-height: 360px;
+    padding: 16px;
+    overflow: hidden;
+  }
+  .deck-header {
+    display: grid;
+    gap: 8px;
+  }
+  .deck-kicker {
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .deck-title {
+    margin: 0;
+    max-width: 42rem;
+    font-size: 22px;
+    line-height: 1.18;
+    overflow-wrap: anywhere;
+  }
+  .deck-summary {
+    max-width: 44rem;
+    margin: 0;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 26px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    max-width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 3px 8px;
+    background: color-mix(in srgb, var(--surface) 90%, var(--accent-soft));
+    color: var(--fg);
+    font-size: 12px;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+  }
+  .badge.is-published {
+    border-color: color-mix(in srgb, var(--accent) 42%, var(--line));
+    color: var(--accent);
+  }
+  .deck-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(176px, 220px);
+    gap: 14px;
+    align-items: stretch;
+  }
+  .cover-preview {
+    position: relative;
+    display: grid;
+    align-content: space-between;
+    min-height: 242px;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--surface) 94%, var(--accent-soft));
+  }
+  .cover-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 650;
+  }
+  .cover-title {
+    max-width: 78%;
+    margin: 22px 0 8px;
+    font-size: 28px;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+  .cover-text {
+    max-width: 68%;
+    margin: 0;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+  .cover-lines {
+    display: grid;
+    gap: 8px;
+    width: min(260px, 58%);
+    margin-top: 18px;
+  }
+  .cover-line {
+    height: 8px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--accent) 24%, var(--line));
+  }
+  .cover-line:nth-child(2) { width: 72%; }
+  .cover-line:nth-child(3) { width: 48%; }
+  .action-panel {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    background: color-mix(in srgb, var(--surface) 96%, var(--accent-soft));
+  }
+  .action-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 750;
+  }
+  .action-note {
+    min-height: 36px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: var(--surface);
+    color: var(--fg);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .button.primary {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .button[aria-disabled="true"],
+  .button:disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+  .button.is-busy {
+    cursor: wait;
+  }
+  .filmstrip {
+    display: grid;
+    gap: 9px;
+  }
+  .filmstrip-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 650;
+  }
+  .filmstrip-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+  }
+  .slide-card {
+    display: grid;
+    gap: 7px;
+    min-width: 0;
+  }
+  .slide-preview {
+    position: relative;
+    display: grid;
+    align-content: end;
+    aspect-ratio: 16 / 9;
+    min-height: 78px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--surface) 88%, var(--accent-soft));
+  }
+  .slide-number {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    min-width: 22px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1px 5px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .slide-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    margin: 0;
+    color: var(--fg);
+    font-size: 12px;
+    font-weight: 750;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+  .slide-preview-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    min-height: 32px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+  .empty-state {
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    padding: 14px;
+    color: var(--muted);
+    background: color-mix(in srgb, var(--surface) 94%, var(--accent-soft));
+  }
+  .is-loading .cover-preview,
+  .is-loading .badge,
+  .is-loading .button,
+  .is-loading .slide-preview {
+    opacity: 0.72;
+  }
+  @media (max-width: 560px) {
+    .deck-shell { padding: 14px; }
+    .deck-stage { grid-template-columns: 1fr; }
+    .cover-preview {
+      min-height: 220px;
+      aspect-ratio: 4 / 3;
+    }
+    .cover-title {
+      max-width: 100%;
+      font-size: 23px;
+    }
+    .cover-text { max-width: 100%; }
+    .action-panel { grid-template-columns: 1fr; }
+    .filmstrip-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+`,R=!1;function J(){R||(y(q),R=!0)}function K(){document.getElementById("verto-deck-widget")||(document.body.innerHTML=`
+    <main class="deck-shell" id="verto-deck-widget">
+      <section class="deck-header" aria-labelledby="title">
+        <div class="deck-kicker">Verto AI deck</div>
+        <h1 class="deck-title" id="title">Deck preview</h1>
+        <p class="deck-summary" id="summary">Waiting for deck data.</p>
+        <div class="badge-row" id="badges" aria-label="Deck metadata"></div>
+      </section>
+      <section class="deck-stage" aria-label="Deck overview">
+        <article class="cover-preview" id="cover-preview">
+          <div class="cover-meta">
+            <span id="cover-theme">Theme</span>
+            <span id="cover-count">0 slides</span>
+          </div>
+          <div>
+            <h2 class="cover-title" id="cover-title">Deck preview</h2>
+            <p class="cover-text" id="cover-text">Slide preview will appear here.</p>
+            <div class="cover-lines" aria-hidden="true">
+              <span class="cover-line"></span>
+              <span class="cover-line"></span>
+              <span class="cover-line"></span>
+            </div>
+          </div>
+        </article>
+        <aside class="action-panel" aria-label="Deck actions">
+          <p class="action-title">Next action</p>
+          <a class="button primary" id="open-link">Open in Verto</a>
+          <button class="button" id="secondary-action" type="button">Copy link</button>
+          <button class="button" id="refresh-action" type="button">Refresh preview</button>
+          <p class="action-note" id="action-note">Open the deck to continue editing in Verto.</p>
+        </aside>
+      </section>
+      <section class="filmstrip" aria-label="Slide filmstrip">
+        <div class="filmstrip-head">
+          <span>Slide preview</span>
+          <span id="filmstrip-count">0 shown</span>
+        </div>
+        <div class="filmstrip-grid" id="slides"></div>
+      </section>
+    </main>
+  `)}function Q(e){let t=r(e.widget);if(t.widget==="deck_preview")return{presentation:r(t.presentation),slides:g(t.slides),actions:r(t.actions)};let n=r(e.data||e),i=r(n.presentation||n);return{presentation:i,slides:g(i.slides),actions:{}}}function X(e){let{presentation:t,slides:n,actions:i}=Q(e);return{id:d(t.id),title:d(t.title,"Deck preview"),themeName:d(t.theme_name||t.themeName,"Default"),slideCount:P(t.slide_count||t.slideCount,n.length),updatedAt:d(t.updated_at||t.updatedAt),isPublished:!!(t.is_published||t.isPublished),shareUrl:d(t.share_url||t.shareUrl),openUrl:d(t.open_url||t.openUrl||t.verto_url||t.url),actions:i,slides:n}}function Z(e){return!!(e.id||e.title!=="Deck preview"||e.slides.length>0)}function D(e,t){return d(e.title||e.slideName||e.slide_name,`Slide ${t+1}`)}function E(e){return d(e.previewText||e.preview_text||e.subtitle||e.description||e.body||e.content)}function ee(e){if(!e)return"Updated time unavailable";let t=new Date(e);return Number.isNaN(t.getTime())?"Updated time unavailable":`Updated ${new Intl.DateTimeFormat(void 0,{month:"short",day:"numeric"}).format(t)}`}function k(e){return`${e} slide${e===1?"":"s"}`}function m(e,t=""){let n=document.createElement("span");return n.className=`badge${t?` ${t}`:""}`,n.textContent=e,n}function L(e){let t=o("badges");t.textContent="",t.appendChild(m(e.isPublished?"Published":"Draft",e.isPublished?"is-published":"")),t.appendChild(m(k(e.slideCount))),t.appendChild(m(e.themeName)),t.appendChild(m(ee(e.updatedAt)))}function V(e){let t=r(e.slides[0]),n=D(t,0)||e.title,i=E(t)||"A clean preview of your generated Verto deck.";o("cover-theme").textContent=e.themeName,o("cover-count").textContent=k(e.slideCount),o("cover-title").textContent=n,o("cover-text").textContent=i}function S(e){let t=o("open-link");if(t instanceof HTMLAnchorElement){if(t.textContent="Open in Verto",!e.openUrl){t.removeAttribute("href"),t.setAttribute("aria-disabled","true");return}t.href=e.openUrl,t.target="_blank",t.rel="noopener noreferrer",t.setAttribute("aria-disabled","false")}}function U(e){let t=o("secondary-action"),n=o("action-note");if(t instanceof HTMLButtonElement){if(t.disabled=!1,t.setAttribute("aria-disabled","false"),t.onclick=null,e.shareUrl){t.textContent="Copy share link",n.textContent="This deck is published. Share the public link when you are ready.",t.onclick=()=>re(e.shareUrl,t,n);return}if(e.actions.canPublish!==!1&&e.id){t.textContent="Publish from chat",n.textContent="Publish when you want a public share link.",t.onclick=()=>te(e,t,n);return}t.textContent="Share unavailable",t.disabled=!0,t.setAttribute("aria-disabled","true"),n.textContent="Sharing is unavailable for this deck state."}}function N(e){let t=o("refresh-action"),n=o("action-note");if(t instanceof HTMLButtonElement){if(t.textContent="Refresh preview",t.onclick=null,!e.id){t.disabled=!0,t.setAttribute("aria-disabled","true");return}t.disabled=!1,t.setAttribute("aria-disabled","false"),t.onclick=()=>ie(e,t,n)}}var c="";function te(e,t,n){if(c!==e.id){c=e.id,t.textContent="Confirm publish",n.textContent="This creates a public share link for this deck.",window.setTimeout(()=>{c===e.id&&t.textContent==="Confirm publish"&&(c="",t.textContent="Publish from chat",n.textContent="Publish when you want a public share link.")},6e3);return}c="",ne(e,t,n)}async function ne(e,t,n){await O(t,n,"Publishing...",async()=>{let i=await f("presentation_publish",{presentation_id:e.id});try{let a=await f("presentation_get",{presentation_id:e.id,include_slides:!0});w(a)}catch{w(i)}o("action-note").textContent="Deck published. The share link is ready."})}async function ie(e,t,n){await O(t,n,"Refreshing...",async()=>{let i=await f("presentation_get",{presentation_id:e.id,include_slides:!0});w(i),o("action-note").textContent="Preview refreshed from Verto."})}async function O(e,t,n,i){let a=e.textContent||"";e.disabled=!0,e.classList.add("is-busy"),e.setAttribute("aria-disabled","true"),e.textContent=n;try{await i()}catch(s){t.textContent=oe(s)}finally{e.disabled=!1,e.classList.remove("is-busy"),e.setAttribute("aria-disabled","false"),e.textContent===n&&(e.textContent=a)}}function oe(e){if(e&&typeof e=="object"){let t=e;if(typeof t.message=="string")return t.message}return"ChatGPT could not complete that Verto action. Try again in a moment."}async function re(e,t,n){try{await navigator.clipboard?.writeText(e),t.textContent="Copied",n.textContent="Share link copied.",window.setTimeout(()=>{t.textContent="Copy share link"},1400)}catch{n.textContent=e}}function I(e){let t=o("slides");if(t.textContent="",o("filmstrip-count").textContent=`${Math.min(e.slides.length,6)} shown`,e.slides.length===0){let n=document.createElement("div");n.className="empty-state",n.textContent="Slide previews are not available yet. Open the deck to inspect the full presentation.",t.appendChild(n);return}e.slides.slice(0,6).forEach((n,i)=>{let a=r(n),s=document.createElement("article");s.className="slide-card";let l=document.createElement("div");l.className="slide-preview";let h=document.createElement("span");h.className="slide-number",h.textContent=String(i+1),l.appendChild(h);let x=document.createElement("h3");x.className="slide-title",x.textContent=D(a,i),l.appendChild(x);let b=document.createElement("p");b.className="slide-preview-text",b.textContent=E(a)||"Preview text unavailable.",s.appendChild(l),s.appendChild(b),t.appendChild(s)})}function ae(){o("verto-deck-widget").classList.add("is-loading"),o("title").textContent="Loading deck preview",o("summary").textContent="Waiting for Verto deck data from ChatGPT.",L({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]}),V({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]}),S({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]}),U({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{canPublish:!1},slides:[]}),N({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]}),I({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]})}function w(e){J(),K();let t=X(e),n=o("verto-deck-widget");if(!Z(t)){ae();return}n.classList.remove("is-loading"),o("title").textContent=t.title,o("summary").textContent=t.slides.length>0?`Previewing ${k(t.slideCount)} in ${t.themeName}.`:"Deck metadata is ready. Slide previews are still unavailable.",L(t),V(t),S(t),U(t),N(t),I(t)}C(e=>{w(e)});})();
+  </script>
+</body>
+</html>

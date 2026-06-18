@@ -110,6 +110,7 @@ Claude:
 | `06-security-privacy-observability.md` | Phase 6 hardening notes, ownership matrix, prompt-injection tests, and validation checklist. |
 | `07-testing-plan.md` | Phase 7 automated checks, MCP Inspector steps, ChatGPT developer mode steps, Claude custom connector steps, and reviewer prompt matrix. |
 | `08-product-submission-packet.md` | Phase 8 app listing copy, reviewer instructions, data handling answers, screenshot plan, help article drafts, and owner submission steps. |
+| `09-premium-mcp-apps-ui-plan.md` | Phase 9 plan for making Verto's ChatGPT MCP Apps UI render reliably, then upgrading it into a premium in-chat presentation experience. |
 | `submission-assets/` | Place final icons, screenshots, and evidence files here before app review. |
 
 ## Source Highlights

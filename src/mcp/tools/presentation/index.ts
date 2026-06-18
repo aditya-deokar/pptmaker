@@ -17,6 +17,7 @@ import {
   type McpAppUiResourceUri,
 } from '../../apps/constants';
 import { registerToolPlugin } from '../registry';
+import { MCP_SUCCESS_OUTPUT_SCHEMA } from '../_shared/response';
 import { TOOL_NAMES, PAGINATION, LIMITS } from '../../config/constants';
 import { Errors } from '../_shared/errors';
 import { resolveAuth, type TransportType } from '../../auth/middleware';
@@ -50,6 +51,7 @@ interface PresentationToolMetadata {
   title: string;
   annotations: ToolAnnotations;
   uiResourceUri?: McpAppUiResourceUri;
+  appCallable?: boolean;
 }
 
 const PRESENTATION_TOOL_METADATA: Record<
@@ -68,6 +70,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   [TOOL_NAMES.PRESENTATION_GET]: {
     title: 'Get presentation',
     uiResourceUri: MCP_APP_UI_RESOURCE_URIS.DECK_PREVIEW,
+    appCallable: true,
     annotations: {
       readOnlyHint: true,
       destructiveHint: false,
@@ -131,6 +134,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
   [TOOL_NAMES.PRESENTATION_PUBLISH]: {
     title: 'Publish presentation',
+    appCallable: true,
     annotations: {
       readOnlyHint: false,
       destructiveHint: false,
@@ -160,6 +164,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   [TOOL_NAMES.PRESENTATION_GENERATION_STATUS]: {
     title: 'Get generation status',
     uiResourceUri: MCP_APP_UI_RESOURCE_URIS.GENERATION_PROGRESS,
+    appCallable: true,
     annotations: {
       readOnlyHint: true,
       destructiveHint: false,
@@ -188,8 +193,11 @@ function registerPresentationTool<TInputSchema extends Record<string, z.ZodTypeA
       title: metadata.title,
       description,
       inputSchema,
+      outputSchema: MCP_SUCCESS_OUTPUT_SCHEMA,
       annotations: metadata.annotations,
-      _meta: createToolUiMeta(metadata.uiResourceUri),
+      _meta: createToolUiMeta(metadata.uiResourceUri, {
+        appCallable: metadata.appCallable,
+      }),
     },
     callback
   );

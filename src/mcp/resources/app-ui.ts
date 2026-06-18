@@ -1,6 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import {
+  createUiResourceContentMeta,
   createUiResourceMeta,
+  MCP_APP_UI_MIME_TYPE,
   MCP_APP_UI_RESOURCE_URIS,
 } from '../apps/constants';
 import {
@@ -9,17 +11,22 @@ import {
 } from '../apps/widgets';
 import { registerResourcePlugin } from './registry';
 
+const GENERATION_PROGRESS_DESCRIPTION =
+  'Shows Verto AI presentation generation progress.';
+const DECK_PREVIEW_DESCRIPTION = 'Shows a compact Verto AI deck preview.';
+
 function registerAppUiResources(server: McpServer): void {
   server.resource(
     'verto-generation-progress-ui',
     MCP_APP_UI_RESOURCE_URIS.GENERATION_PROGRESS,
-    createUiResourceMeta('Shows Verto AI presentation generation progress.'),
+    createUiResourceMeta(GENERATION_PROGRESS_DESCRIPTION),
     async () => ({
       contents: [
         {
           uri: MCP_APP_UI_RESOURCE_URIS.GENERATION_PROGRESS,
-          mimeType: 'text/html',
+          mimeType: MCP_APP_UI_MIME_TYPE,
           text: getGenerationProgressWidgetHtml(),
+          _meta: createUiResourceContentMeta(GENERATION_PROGRESS_DESCRIPTION),
         },
       ],
     })
@@ -28,13 +35,14 @@ function registerAppUiResources(server: McpServer): void {
   server.resource(
     'verto-deck-preview-ui',
     MCP_APP_UI_RESOURCE_URIS.DECK_PREVIEW,
-    createUiResourceMeta('Shows a compact Verto AI deck preview.'),
+    createUiResourceMeta(DECK_PREVIEW_DESCRIPTION),
     async () => ({
       contents: [
         {
           uri: MCP_APP_UI_RESOURCE_URIS.DECK_PREVIEW,
-          mimeType: 'text/html',
+          mimeType: MCP_APP_UI_MIME_TYPE,
           text: getDeckPreviewWidgetHtml(),
+          _meta: createUiResourceContentMeta(DECK_PREVIEW_DESCRIPTION),
         },
       ],
     })
