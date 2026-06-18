@@ -13,6 +13,7 @@ const tools = [
     scope: 'presentations:read',
     readOnly: true,
     destructive: false,
+    ui: 'MCP_APP_UI_RESOURCE_URIS.PRESENTATION_LIST',
   },
   {
     key: 'PRESENTATION_GET',
@@ -20,6 +21,7 @@ const tools = [
     scope: 'presentations:read',
     readOnly: true,
     destructive: false,
+    ui: 'MCP_APP_UI_RESOURCE_URIS.DECK_PREVIEW',
   },
   {
     key: 'PRESENTATION_CREATE',
@@ -27,6 +29,7 @@ const tools = [
     scope: 'presentations:write',
     readOnly: false,
     destructive: false,
+    ui: 'MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT',
   },
   {
     key: 'PRESENTATION_GENERATE',
@@ -50,6 +53,7 @@ const tools = [
     scope: 'presentations:write',
     readOnly: false,
     destructive: false,
+    ui: 'MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT',
   },
   {
     key: 'PRESENTATION_UPDATE_THEME',
@@ -57,6 +61,7 @@ const tools = [
     scope: 'presentations:write',
     readOnly: false,
     destructive: false,
+    ui: 'MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT',
   },
   {
     key: 'PRESENTATION_PUBLISH',
@@ -64,6 +69,7 @@ const tools = [
     scope: 'presentations:publish',
     readOnly: false,
     destructive: false,
+    ui: 'MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT',
   },
   {
     key: 'PRESENTATION_UNPUBLISH',
@@ -71,6 +77,7 @@ const tools = [
     scope: 'presentations:publish',
     readOnly: false,
     destructive: false,
+    ui: 'MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT',
   },
   {
     key: 'PRESENTATION_DELETE',
@@ -78,6 +85,7 @@ const tools = [
     scope: 'presentations:write',
     readOnly: false,
     destructive: false,
+    ui: 'MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT',
   },
   {
     key: 'PRESENTATION_RECOVER',
@@ -85,6 +93,7 @@ const tools = [
     scope: 'presentations:write',
     readOnly: false,
     destructive: false,
+    ui: 'MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT',
   },
   {
     key: 'PRESENTATION_DELETE_PERMANENTLY',
@@ -92,6 +101,7 @@ const tools = [
     scope: 'presentations:write',
     readOnly: false,
     destructive: true,
+    ui: 'MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT',
   },
 ];
 
@@ -141,13 +151,19 @@ const requiredFiles = [
   'src/mcp/apps/widget-data.ts',
   'src/mcp/apps/widgets.ts',
   'src/mcp/apps/components/shared/runtime.ts',
+  'src/mcp/apps/components/presentation-list.ts',
   'src/mcp/apps/components/generation-progress.ts',
   'src/mcp/apps/components/deck-preview.ts',
+  'src/mcp/apps/components/action-result.ts',
   'src/mcp/apps/generated/index.ts',
+  'src/mcp/apps/generated/presentation-list.ts',
   'src/mcp/apps/generated/generation-progress.ts',
   'src/mcp/apps/generated/deck-preview.ts',
+  'src/mcp/apps/generated/action-result.ts',
+  'src/mcp/apps/generated/presentation-list.html',
   'src/mcp/apps/generated/generation-progress.html',
   'src/mcp/apps/generated/deck-preview.html',
+  'src/mcp/apps/generated/action-result.html',
   'src/mcp/tools/_shared/response.ts',
   'src/app/mcp/route.ts',
   'src/app/mcp/health/route.ts',
@@ -162,7 +178,9 @@ const requiredFiles = [
   'docs/mcp-apps/05-tool-review-matrix.md',
   'docs/mcp-apps/06-security-privacy-observability.md',
   'docs/mcp-apps/07-testing-plan.md',
+  'docs/mcp-apps/09h-visual-qa-evidence.md',
   'scripts/mcp-apps/build-widgets.mjs',
+  'scripts/mcp-apps/phase9h-visual-qa.mjs',
 ];
 
 for (const filePath of requiredFiles) {
@@ -181,15 +199,28 @@ const appUiConstants = read('src/mcp/apps/constants.ts');
 const appUiWidgetData = read('src/mcp/apps/widget-data.ts');
 const appUiWidgets = read('src/mcp/apps/widgets.ts');
 const appUiRuntime = read('src/mcp/apps/components/shared/runtime.ts');
+const listWidgetSource = read('src/mcp/apps/components/presentation-list.ts');
 const generationWidgetSource = read('src/mcp/apps/components/generation-progress.ts');
 const deckWidgetSource = read('src/mcp/apps/components/deck-preview.ts');
+const actionResultWidgetSource = read('src/mcp/apps/components/action-result.ts');
 const generatedWidgetIndex = read('src/mcp/apps/generated/index.ts');
+const generatedListHtml = read('src/mcp/apps/generated/presentation-list.html');
 const generatedGenerationHtml = read('src/mcp/apps/generated/generation-progress.html');
 const generatedDeckHtml = read('src/mcp/apps/generated/deck-preview.html');
+const generatedActionResultHtml = read('src/mcp/apps/generated/action-result.html');
 const responseBuilders = read('src/mcp/tools/_shared/response.ts');
+const presentationList = read('src/mcp/tools/presentation/list.ts');
 const presentationGet = read('src/mcp/tools/presentation/get.ts');
+const presentationCreate = read('src/mcp/tools/presentation/create.ts');
 const presentationGenerate = read('src/mcp/tools/presentation/generate.ts');
 const presentationGenerationStatus = read('src/mcp/tools/presentation/generation-status.ts');
+const presentationUpdateSlides = read('src/mcp/tools/presentation/update-slides.ts');
+const presentationUpdateTheme = read('src/mcp/tools/presentation/update-theme.ts');
+const presentationPublish = read('src/mcp/tools/presentation/publish.ts');
+const presentationUnpublish = read('src/mcp/tools/presentation/unpublish.ts');
+const presentationDelete = read('src/mcp/tools/presentation/delete.ts');
+const presentationRecover = read('src/mcp/tools/presentation/recover.ts');
+const presentationDeletePermanently = read('src/mcp/tools/presentation/delete-permanently.ts');
 const packageJson = read('package.json');
 const widgetBuildScript = read('scripts/mcp-apps/build-widgets.mjs');
 const protectedResourceMetadata = read('src/app/api/mcp/oauth-protected-resource/metadata.ts');
@@ -197,6 +228,10 @@ const prismaSchema = read('prisma/schema.prisma');
 const readme = read('docs/mcp-apps/README.md');
 const implementationPlan = read('docs/mcp-apps/implementation.md');
 const testingPlan = read('docs/mcp-apps/07-testing-plan.md');
+const phase9hEvidence = read('docs/mcp-apps/09h-visual-qa-evidence.md');
+const submissionPacket = read('docs/mcp-apps/08-product-submission-packet.md');
+const submissionAssetsReadme = read('docs/mcp-apps/submission-assets/README.md');
+const visualQaScript = read('scripts/mcp-apps/phase9h-visual-qa.mjs');
 
 check('tool count remains 12', tools.length === 12);
 
@@ -242,6 +277,7 @@ for (const tool of tools) {
 }
 
 for (const key of [
+  'PRESENTATION_LIST',
   'PRESENTATION_GET',
   'PRESENTATION_PUBLISH',
   'PRESENTATION_GENERATION_STATUS',
@@ -278,17 +314,22 @@ check('permanent delete requires z.literal(true) in shared schema', schemas.incl
 check('OAuth connected generation limit is 15', constants.includes('OAUTH_CONNECTED_GENERATION_LIMIT: 15'));
 check('generation timeout returns before host timeout by default', constants.includes('GENERATION_DEFAULT_WAIT_TIMEOUT_MS: 25_000'));
 
+check('presentation list UI URI is defined', appUiConstants.includes("'ui://verto/presentation-list.html'"));
 check('generation progress UI URI is defined', appUiConstants.includes("'ui://verto/generation-progress.html'"));
 check('deck preview UI URI is defined', appUiConstants.includes("'ui://verto/deck-preview.html'"));
+check('action result UI URI is defined', appUiConstants.includes("'ui://verto/action-result.html'"));
 check('UI resources serve MCP app HTML MIME', appUiConstants.includes("'text/html;profile=mcp-app'") && appUiResources.includes('MCP_APP_UI_MIME_TYPE'));
 check('UI resources include CSP metadata', appUiConstants.includes("'ui/csp'"));
 check('UI resource content includes metadata', appUiResources.includes('_meta: createUiResourceContentMeta('));
 check('UI resource content includes widget domain metadata', appUiConstants.includes("'openai/widgetDomain'") && appUiConstants.includes('domain,'));
-check('widget provider imports generated HTML', appUiWidgets.includes("from './generated'") && appUiWidgets.includes('GENERATION_PROGRESS_WIDGET_HTML'));
-check('generated widget index exports both widgets', generatedWidgetIndex.includes('GENERATION_PROGRESS_WIDGET_HTML') && generatedWidgetIndex.includes('DECK_PREVIEW_WIDGET_HTML'));
-check('generated widget HTML is MCP app iframe-ready', generatedGenerationHtml.includes('<!doctype html>') && generatedGenerationHtml.includes('ui/notifications/tool-result') && generatedDeckHtml.includes('<!doctype html>'));
-check('generated widgets are within Phase 9C size budgets', Buffer.byteLength(generatedGenerationHtml, 'utf8') <= 120 * 1024 && Buffer.byteLength(generatedDeckHtml, 'utf8') <= 180 * 1024);
+check('presentation list UI resource is registered', appUiResources.includes('PRESENTATION_LIST') && appUiResources.includes('getPresentationListWidgetHtml'));
+check('action result UI resource is registered', appUiResources.includes('ACTION_RESULT') && appUiResources.includes('getActionResultWidgetHtml'));
+check('widget provider imports generated HTML', appUiWidgets.includes("from './generated'") && appUiWidgets.includes('PRESENTATION_LIST_WIDGET_HTML') && appUiWidgets.includes('GENERATION_PROGRESS_WIDGET_HTML') && appUiWidgets.includes('ACTION_RESULT_WIDGET_HTML'));
+check('generated widget index exports all widgets', generatedWidgetIndex.includes('PRESENTATION_LIST_WIDGET_HTML') && generatedWidgetIndex.includes('GENERATION_PROGRESS_WIDGET_HTML') && generatedWidgetIndex.includes('DECK_PREVIEW_WIDGET_HTML') && generatedWidgetIndex.includes('ACTION_RESULT_WIDGET_HTML'));
+check('generated widget HTML is MCP app iframe-ready', generatedListHtml.includes('<!doctype html>') && generatedListHtml.includes('ui/notifications/tool-result') && generatedGenerationHtml.includes('<!doctype html>') && generatedGenerationHtml.includes('ui/notifications/tool-result') && generatedDeckHtml.includes('<!doctype html>') && generatedDeckHtml.includes('ui/notifications/tool-result') && generatedActionResultHtml.includes('<!doctype html>') && generatedActionResultHtml.includes('ui/notifications/tool-result'));
+check('generated widgets are within Phase 9C size budgets', Buffer.byteLength(generatedListHtml, 'utf8') <= 160 * 1024 && Buffer.byteLength(generatedGenerationHtml, 'utf8') <= 120 * 1024 && Buffer.byteLength(generatedDeckHtml, 'utf8') <= 180 * 1024 && Buffer.byteLength(generatedActionResultHtml, 'utf8') <= 140 * 1024);
 check('package exposes widget build script', packageJson.includes('"mcp:apps:build"') && packageJson.includes('"mcp:apps:check"'));
+check('package exposes Phase 9H visual QA script', packageJson.includes('"mcp:phase9h"'));
 check('package declares esbuild dev dependency', packageJson.includes('"esbuild": "0.27.2"'));
 check('Phase 7 runs generated widget freshness check', packageJson.includes('npm run mcp:apps:check'));
 check('widget build script bundles with esbuild', widgetBuildScript.includes("from 'esbuild'") && widgetBuildScript.includes('budgetBytes'));
@@ -298,22 +339,44 @@ check('tool UI metadata supports app-callable allowlist', appUiConstants.include
 check('tool UI metadata keeps non-callable tools model-only', appUiConstants.includes("visibility: appCallable ? ['model', 'app'] : ['model']"));
 check('success responses include structuredContent', responseBuilders.includes('structuredContent') && responseBuilders.includes('success: true'));
 check('success responses can carry widget contracts', responseBuilders.includes('widget?: McpAppWidgetData') && responseBuilders.includes('widget: options.widget'));
+check('paginated responses can carry widget contracts', responseBuilders.includes('options?: McpSuccessOptions') && responseBuilders.includes('widget: options.widget'));
 check('success output schema allows widget data', responseBuilders.includes('MCP_SUCCESS_OUTPUT_SCHEMA') && responseBuilders.includes('widget: z.any().optional()'));
+check('presentation list widget data contract exists', appUiWidgetData.includes('interface PresentationListWidgetData') && appUiWidgetData.includes("widget: 'presentation_list'"));
 check('deck preview widget data contract exists', appUiWidgetData.includes('interface DeckPreviewWidgetData') && appUiWidgetData.includes("widget: 'deck_preview'"));
 check('deck preview widget data contract includes refresh action', appUiWidgetData.includes('canRefresh: boolean'));
 check('generation progress widget data contract exists', appUiWidgetData.includes('interface GenerationProgressWidgetData') && appUiWidgetData.includes("widget: 'generation_progress'"));
+check('action result widget data contract exists', appUiWidgetData.includes('interface ActionResultWidgetData') && appUiWidgetData.includes("widget: 'action_result'"));
 check('future publish and theme widget contracts exist', appUiWidgetData.includes('interface PublishCardWidgetData') && appUiWidgetData.includes('interface ThemeStudioWidgetData'));
+check('presentation list emits list widget data', presentationList.includes('createPresentationListWidgetData') && presentationList.includes('widget: createPresentationListWidgetData(presentations, pagination)'));
 check('deck widget mapper limits slide previews', appUiWidgetData.includes('MAX_DECK_PREVIEW_SLIDES') && appUiWidgetData.includes('MAX_PREVIEW_TEXT_LENGTH'));
 check('presentation_get emits deck widget data', presentationGet.includes('createDeckPreviewWidgetData') && presentationGet.includes('widget: createDeckPreviewWidgetData(presentation)'));
 check('presentation_generate emits generation widget data', presentationGenerate.includes('createGenerationProgressWidgetData') && presentationGenerate.includes('widget: createGenerationProgressWidgetData'));
 check('presentation_generation_status emits generation widget data', presentationGenerationStatus.includes('createGenerationProgressWidgetData') && presentationGenerationStatus.includes('widget: createGenerationProgressWidgetData(statusPayload)'));
+check(
+  'mutation tools emit action result widget data',
+  [
+    presentationCreate,
+    presentationUpdateSlides,
+    presentationUpdateTheme,
+    presentationPublish,
+    presentationUnpublish,
+    presentationDelete,
+    presentationRecover,
+    presentationDeletePermanently,
+  ].every((source) => source.includes('createActionResultWidgetData') && source.includes('widget: createActionResultWidgetData'))
+);
 check('widget runtime listens for MCP Apps tool result notification', appUiRuntime.includes('ui/notifications/tool-result'));
 check('widget runtime renders from structuredContent', appUiRuntime.includes('structuredContent') || appUiRuntime.includes('structured_content'));
 check('widget runtime can call MCP tools from UI', appUiRuntime.includes('callMcpTool') && appUiRuntime.includes("'tools/call'") && appUiRuntime.includes("'ui/initialize'"));
 check('widget runtime supports ChatGPT follow-up messages', appUiRuntime.includes('sendFollowUpMessage') && appUiRuntime.includes("'ui/message'"));
 check('widget runtime times out UI tool calls', appUiRuntime.includes('TOOL_CALL_TIMEOUT_MS') && appUiRuntime.includes('pendingRequests'));
-check('widget sources prefer explicit widget contracts', generationWidgetSource.includes('payload.widget') && deckWidgetSource.includes('payload.widget'));
+check('widget sources prefer explicit widget contracts', listWidgetSource.includes('payload.widget') && generationWidgetSource.includes('payload.widget') && deckWidgetSource.includes('payload.widget') && actionResultWidgetSource.includes('payload.widget'));
 check('widget runtime verifies parent postMessage source', appUiRuntime.includes('event.source !== window.parent'));
+check('premium presentation list has workspace surface', listWidgetSource.includes('Presentation workspace') && listWidgetSource.includes('presentation-panel') && listWidgetSource.includes('badge-row'));
+check('premium presentation list has list actions', listWidgetSource.includes('Refresh list') && listWidgetSource.includes('Preview latest') && listWidgetSource.includes('Open latest'));
+check('premium presentation list refreshes through safe tool call', listWidgetSource.includes("callMcpTool('presentation_list'") && listWidgetSource.includes('Workspace list refreshed'));
+check('premium presentation list uses follow-up for preview', listWidgetSource.includes('sendFollowUpMessage') && listWidgetSource.includes('Show me a visual preview'));
+check('premium presentation list includes responsive mobile layout', listWidgetSource.includes('@media (max-width: 780px)') && listWidgetSource.includes('@media (max-width: 440px)'));
 check('premium deck preview has cover preview surface', deckWidgetSource.includes('cover-preview') && deckWidgetSource.includes('renderCover'));
 check('premium deck preview has metadata badges', deckWidgetSource.includes('badge-row') && deckWidgetSource.includes('formatUpdatedAt'));
 check('premium deck preview has action CTAs', deckWidgetSource.includes('Open in Verto') && deckWidgetSource.includes('copyShareLink') && deckWidgetSource.includes('Publish from chat'));
@@ -322,6 +385,9 @@ check('premium deck preview publishes only after confirmation', deckWidgetSource
 check('premium deck preview has filmstrip layout', deckWidgetSource.includes('filmstrip-grid') && deckWidgetSource.includes('renderSlides'));
 check('premium deck preview handles loading and partial states', deckWidgetSource.includes('renderLoading') && deckWidgetSource.includes('Slide previews are not available yet'));
 check('premium deck preview includes responsive mobile layout', deckWidgetSource.includes('@media (max-width: 560px)'));
+check('premium action result has summary, affected list, and CTAs', actionResultWidgetSource.includes('summary-grid') && actionResultWidgetSource.includes('affected-panel') && actionResultWidgetSource.includes('Open in Verto') && actionResultWidgetSource.includes('Preview with ChatGPT') && actionResultWidgetSource.includes('Copy share link'));
+check('premium action result uses follow-up for preview', actionResultWidgetSource.includes('sendFollowUpMessage') && actionResultWidgetSource.includes('Show me a visual preview'));
+check('premium action result includes responsive mobile layout', actionResultWidgetSource.includes('@media (max-width: 720px)') && actionResultWidgetSource.includes('@media (max-width: 440px)'));
 check('premium generation progress has progress surface', generationWidgetSource.includes('progress-panel') && generationWidgetSource.includes('progress-percent') && generationWidgetSource.includes('progress-fill'));
 check('premium generation progress has six-stage timeline', generationWidgetSource.includes('DISPLAY_STAGES') && generationWidgetSource.includes("id: 'queued'") && generationWidgetSource.includes("id: 'complete'"));
 check('premium generation progress has failure recovery state', generationWidgetSource.includes('error-card') && generationWidgetSource.includes('Ask ChatGPT to retry generation'));
@@ -330,6 +396,14 @@ check('premium generation progress refreshes through safe tool call', generation
 check('premium generation progress uses follow-up for inspect and retry', generationWidgetSource.includes('sendFollowUpMessage') && generationWidgetSource.includes('Inspect Verto presentation') && generationWidgetSource.includes('Retry the Verto presentation'));
 check('premium generation progress respects reduced motion', generationWidgetSource.includes('prefers-reduced-motion'));
 check('premium generation progress includes responsive layout', generationWidgetSource.includes('@media (max-width: 700px)') && generationWidgetSource.includes('@media (max-width: 440px)'));
+check('Phase 9H visual QA renders generated widgets', visualQaScript.includes('presentation-list.html') && visualQaScript.includes('generation-progress.html') && visualQaScript.includes('deck-preview.html') && visualQaScript.includes('action-result.html'));
+check('Phase 9H visual QA captures required states', visualQaScript.includes('presentation-list') && visualQaScript.includes('generation-running') && visualQaScript.includes('generation-complete') && visualQaScript.includes('generation-error') && visualQaScript.includes('deck-publish-success') && visualQaScript.includes('action-result-publish') && visualQaScript.includes('action-result-delete'));
+check('Phase 9H visual QA checks accessibility basics', visualQaScript.includes('contrastRatio') && visualQaScript.includes('collectKeyboardOrder') && visualQaScript.includes('Interactive controls without labels'));
+check('Phase 9H visual QA checks layout and reduced motion', visualQaScript.includes('horizontal overflow') && visualQaScript.includes('Nested scrolling') && visualQaScript.includes('prefers-reduced-motion'));
+check('Phase 9H evidence includes ChatGPT test prompts', phase9hEvidence.includes('Generate a 7 slide investor pitch deck') && phase9hEvidence.includes('Click "Check status"') && phase9hEvidence.includes('Click "Confirm publish"'));
+check('Phase 9H evidence includes manual accessibility checklist', phase9hEvidence.includes('Press `Tab`') && phase9hEvidence.includes('browser zoom to `200%`') && phase9hEvidence.includes('DevTools console'));
+check('submission packet references Phase 9H automated evidence', submissionPacket.includes('npm.cmd run mcp:phase9h') && submissionPacket.includes('phase9h-visual-qa-summary.md'));
+check('submission assets README lists Phase 9H evidence', submissionAssetsReadme.includes('phase9h-generation-running-dark-desktop.png') && submissionAssetsReadme.includes('phase9h-visual-qa-report.json'));
 check('HTTP transport registers app UI resources', httpTransport.includes("import '../resources/app-ui'"));
 check('stdio transport registers app UI resources', stdioTransport.includes("import '../resources/app-ui'"));
 

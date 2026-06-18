@@ -16,6 +16,7 @@ import type { AuthContext } from '../../auth/types';
 import type { McpToolResponse } from '../_shared/response';
 import { mcpSuccess } from '../_shared/response';
 import { Errors } from '../_shared/errors';
+import { createActionResultWidgetData } from '../../apps/widget-data';
 import type { PresentationUpdateThemeInput } from './schemas';
 import { getOwnedProjectForMcp } from '../../lib/mcp-project-access';
 import { projectToPresentation } from './mappers';
@@ -52,5 +53,14 @@ export async function handlePresentationUpdateTheme(
     data: { themeName: theme_name },
   });
 
-  return mcpSuccess(projectToPresentation(updated));
+  const presentation = projectToPresentation(updated);
+
+  return mcpSuccess(presentation, {
+    widget: createActionResultWidgetData({
+      kind: 'update_theme',
+      title: 'Theme updated',
+      message: `The deck theme was changed to ${theme_name}.`,
+      presentation,
+    }),
+  });
 }

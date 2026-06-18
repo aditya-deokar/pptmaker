@@ -15,6 +15,7 @@ import type { AuthContext } from '../../auth/types';
 import type { McpToolResponse } from '../_shared/response';
 import { mcpSuccess } from '../_shared/response';
 import { Errors } from '../_shared/errors';
+import { createActionResultWidgetData } from '../../apps/widget-data';
 import type { PresentationUpdateSlidesInput } from './schemas';
 import { getOwnedProjectForMcp } from '../../lib/mcp-project-access';
 import { projectToPresentation } from './mappers';
@@ -41,5 +42,14 @@ export async function handlePresentationUpdateSlides(
     data: { slides: slides as unknown as any },
   });
 
-  return mcpSuccess(projectToPresentation(updated, { includeSlides: true }));
+  const presentation = projectToPresentation(updated, { includeSlides: true });
+
+  return mcpSuccess(presentation, {
+    widget: createActionResultWidgetData({
+      kind: 'update_slides',
+      title: 'Slides updated',
+      message: 'The deck slides were replaced successfully.',
+      presentation,
+    }),
+  });
 }

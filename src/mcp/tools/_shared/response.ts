@@ -58,13 +58,15 @@ export function mcpSuccess(
  */
 export function mcpPaginated(
   data: unknown[],
-  pagination: PaginationMeta
+  pagination: PaginationMeta,
+  options?: McpSuccessOptions
 ): McpToolResponse {
   return {
     structuredContent: {
       success: true,
       data,
       pagination,
+      ...(options?.widget ? { widget: options.widget } : {}),
     },
     content: [
       {

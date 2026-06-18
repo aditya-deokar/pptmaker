@@ -16,6 +16,7 @@ import type { AuthContext } from '../../auth/types';
 import type { McpToolResponse } from '../_shared/response';
 import { mcpPaginated } from '../_shared/response';
 import type { PresentationListInput } from './schemas';
+import { createPresentationListWidgetData } from '../../apps/widget-data';
 import {
   buildPrismaCursorArgs,
   buildPaginationMeta,
@@ -70,5 +71,7 @@ export async function handlePresentationList(
   // Map to MCP-safe response (strips slides, renames to snake_case)
   const presentations = projectsToListItems(items);
 
-  return mcpPaginated(presentations, pagination);
+  return mcpPaginated(presentations, pagination, {
+    widget: createPresentationListWidgetData(presentations, pagination),
+  });
 }

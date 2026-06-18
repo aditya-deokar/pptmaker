@@ -1,0 +1,186 @@
+{
+  "generatedAt": "2026-06-18T15:15:07.718Z",
+  "source": "scripts/mcp-apps/phase9h-visual-qa.mjs",
+  "results": [
+    {
+      "id": "phase9h-presentation-list-dark-desktop",
+      "label": "Presentation list - dark desktop",
+      "screenshot": "docs/mcp-apps/submission-assets/phase9h-presentation-list-dark-desktop.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 9,
+        "contrastChecked": 54,
+        "textElementCount": 54,
+        "bodyTextLength": 713,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase9h-presentation-list-light-mobile",
+      "label": "Presentation list - light mobile",
+      "screenshot": "docs/mcp-apps/submission-assets/phase9h-presentation-list-light-mobile.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 9,
+        "contrastChecked": 48,
+        "textElementCount": 48,
+        "bodyTextLength": 665,
+        "screenshotWidth": 390
+      }
+    },
+    {
+      "id": "phase9h-generation-running-dark-desktop",
+      "label": "Generation running - dark desktop",
+      "screenshot": "docs/mcp-apps/submission-assets/phase9h-generation-running-dark-desktop.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 1,
+        "contrastChecked": 27,
+        "textElementCount": 28,
+        "bodyTextLength": 498,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase9h-generation-complete-light-desktop",
+      "label": "Generation complete - light desktop",
+      "screenshot": "docs/mcp-apps/submission-assets/phase9h-generation-complete-light-desktop.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 2,
+        "contrastChecked": 28,
+        "textElementCount": 28,
+        "bodyTextLength": 479,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase9h-generation-error-dark-mobile",
+      "label": "Generation error - dark mobile",
+      "screenshot": "docs/mcp-apps/submission-assets/phase9h-generation-error-dark-mobile.png",
+      "viewport": {
+        "width": 390,
+        "height": 860
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 1,
+        "contrastChecked": 28,
+        "textElementCount": 29,
+        "bodyTextLength": 621,
+        "screenshotWidth": 390
+      }
+    },
+    {
+      "id": "phase9h-deck-preview-dark-desktop",
+      "label": "Deck preview - dark desktop",
+      "screenshot": "docs/mcp-apps/submission-assets/phase9h-deck-preview-dark-desktop.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 3,
+        "contrastChecked": 36,
+        "textElementCount": 36,
+        "bodyTextLength": 939,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase9h-deck-publish-success-light-desktop",
+      "label": "Publish success - light desktop",
+      "screenshot": "docs/mcp-apps/submission-assets/phase9h-deck-publish-success-light-desktop.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 3,
+        "contrastChecked": 36,
+        "textElementCount": 36,
+        "bodyTextLength": 964,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase9h-deck-preview-light-mobile",
+      "label": "Deck preview - light mobile",
+      "screenshot": "docs/mcp-apps/submission-assets/phase9h-deck-preview-light-mobile.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 3,
+        "contrastChecked": 36,
+        "textElementCount": 36,
+        "bodyTextLength": 939,
+        "screenshotWidth": 390
+      }
+    },
+    {
+      "id": "phase9h-action-result-publish-dark-desktop",
+      "label": "Action result publish - dark desktop",
+      "screenshot": "docs/mcp-apps/submission-assets/phase9h-action-result-publish-dark-desktop.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 3,
+        "contrastChecked": 21,
+        "textElementCount": 21,
+        "bodyTextLength": 341,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase9h-action-result-delete-light-mobile",
+      "label": "Action result delete - light mobile",
+      "screenshot": "docs/mcp-apps/submission-assets/phase9h-action-result-delete-light-mobile.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 0,
+        "contrastChecked": 18,
+        "textElementCount": 21,
+        "bodyTextLength": 452,
+        "screenshotWidth": 390
+      }
+    }
+  ]
+}

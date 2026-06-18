@@ -60,6 +60,8 @@ const PRESENTATION_TOOL_METADATA: Record<
 > = {
   [TOOL_NAMES.PRESENTATION_LIST]: {
     title: 'List presentations',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.PRESENTATION_LIST,
+    appCallable: true,
     annotations: {
       readOnlyHint: true,
       destructiveHint: false,
@@ -80,6 +82,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
   [TOOL_NAMES.PRESENTATION_CREATE]: {
     title: 'Create presentation',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
     annotations: {
       readOnlyHint: false,
       destructiveHint: false,
@@ -89,6 +92,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
   [TOOL_NAMES.PRESENTATION_DELETE]: {
     title: 'Soft-delete presentation',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
     annotations: {
       readOnlyHint: false,
       destructiveHint: false,
@@ -98,6 +102,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
   [TOOL_NAMES.PRESENTATION_RECOVER]: {
     title: 'Recover presentation',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
     annotations: {
       readOnlyHint: false,
       destructiveHint: false,
@@ -107,6 +112,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
   [TOOL_NAMES.PRESENTATION_DELETE_PERMANENTLY]: {
     title: 'Permanently delete presentations',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
     annotations: {
       readOnlyHint: false,
       destructiveHint: true,
@@ -116,6 +122,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
   [TOOL_NAMES.PRESENTATION_UPDATE_SLIDES]: {
     title: 'Replace presentation slides',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
     annotations: {
       readOnlyHint: false,
       destructiveHint: false,
@@ -125,6 +132,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
   [TOOL_NAMES.PRESENTATION_UPDATE_THEME]: {
     title: 'Update presentation theme',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
     annotations: {
       readOnlyHint: false,
       destructiveHint: false,
@@ -134,6 +142,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
   [TOOL_NAMES.PRESENTATION_PUBLISH]: {
     title: 'Publish presentation',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
     appCallable: true,
     annotations: {
       readOnlyHint: false,
@@ -144,6 +153,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
   [TOOL_NAMES.PRESENTATION_UNPUBLISH]: {
     title: 'Unpublish presentation',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
     annotations: {
       readOnlyHint: false,
       destructiveHint: false,

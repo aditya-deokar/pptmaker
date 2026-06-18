@@ -2,7 +2,7 @@
 
 Last updated: 2026-06-18
 
-Status: Phases 9A, 9B, 9C, 9D, 9E, and 9F implemented on 2026-06-18. Phases 9G-9H remain planning items until reviewed.
+Status: Phases 9A, 9B, 9C, 9D, 9E, 9F, and 9H implemented on 2026-06-18. Phase 9G remains a planning item until reviewed.
 
 ## Goal In Plain English
 
@@ -180,6 +180,10 @@ src/mcp/apps/
     generation-progress.ts
     deck-preview.html
     deck-preview.ts
+    presentation-list.html
+    presentation-list.ts
+    action-result.html
+    action-result.ts
     index.ts
 ```
 
@@ -438,16 +442,20 @@ Acceptance criteria:
 
 Goal: make the UI review-ready.
 
+Implementation status: complete as of 2026-06-18.
+
 Tasks:
 
 - Test in ChatGPT developer mode.
 - Capture screenshots for:
+  - presentation list
   - generation running
   - generation complete
-  - deck preview
-  - publish success
-  - error state
-  - mobile/narrow layout
+   - deck preview
+   - publish success
+   - action result success and warning states
+   - error state
+   - mobile/narrow layout
 - Validate:
   - keyboard navigation
   - screen reader labels

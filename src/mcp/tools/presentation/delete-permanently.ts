@@ -15,6 +15,7 @@ import type { AuthContext } from '../../auth/types';
 import type { McpToolResponse } from '../_shared/response';
 import { mcpSuccess } from '../_shared/response';
 import { Errors } from '../_shared/errors';
+import { createActionResultWidgetData } from '../../apps/widget-data';
 import type { PresentationDeletePermanentlyInput } from './schemas';
 
 /**
@@ -57,10 +58,23 @@ export async function handlePresentationDeletePermanently(
     },
   });
 
-  return mcpSuccess({
+  const data = {
     deleted_count: result.count,
     deleted_ids: ownedIds,
     deleted_titles: ownedProjects.map((p) => p.title),
     skipped_ids: skippedIds.length > 0 ? skippedIds : undefined,
+  };
+
+  return mcpSuccess(data, {
+    widget: createActionResultWidgetData({
+      kind: 'delete_permanently',
+      title: 'Presentations permanently deleted',
+      message: `${result.count} presentation${result.count === 1 ? '' : 's'} were permanently deleted.`,
+      affectedPresentations: ownedProjects.map((project) => ({
+        id: project.id,
+        title: project.title,
+      })),
+      status: 'warning',
+    }),
   });
 }
