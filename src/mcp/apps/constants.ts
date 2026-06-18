@@ -1,6 +1,8 @@
 export const MCP_APP_UI_RESOURCE_URIS = {
+  PRESENTATION_LIST: 'ui://verto/presentation-list.html',
   GENERATION_PROGRESS: 'ui://verto/generation-progress.html',
   DECK_PREVIEW: 'ui://verto/deck-preview.html',
+  ACTION_RESULT: 'ui://verto/action-result.html',
 } as const;
 
 export const MCP_APP_UI_MIME_TYPE = 'text/html;profile=mcp-app';

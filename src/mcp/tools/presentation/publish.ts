@@ -15,6 +15,7 @@ import type { AuthContext } from '../../auth/types';
 import type { McpToolResponse } from '../_shared/response';
 import { mcpSuccess } from '../_shared/response';
 import { Errors } from '../_shared/errors';
+import { createActionResultWidgetData } from '../../apps/widget-data';
 import type { PresentationPublishInput } from './schemas';
 import { getOwnedProjectForMcp } from '../../lib/mcp-project-access';
 import { projectToPresentation } from './mappers';
@@ -41,6 +42,13 @@ export async function handlePresentationPublish(
     return mcpSuccess({
       ...presentation,
       message: 'Presentation is already published.',
+    }, {
+      widget: createActionResultWidgetData({
+        kind: 'publish',
+        title: 'Presentation already published',
+        message: 'This deck already has a public share link.',
+        presentation,
+      }),
     });
   }
 
@@ -53,5 +61,14 @@ export async function handlePresentationPublish(
     },
   });
 
-  return mcpSuccess(projectToPresentation(published));
+  const presentation = projectToPresentation(published);
+
+  return mcpSuccess(presentation, {
+    widget: createActionResultWidgetData({
+      kind: 'publish',
+      title: 'Presentation published',
+      message: 'The deck is now publicly shareable.',
+      presentation,
+    }),
+  });
 }

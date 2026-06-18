@@ -15,6 +15,7 @@ import type { AuthContext } from '../../auth/types';
 import type { McpToolResponse } from '../_shared/response';
 import { mcpSuccess } from '../_shared/response';
 import { Errors } from '../_shared/errors';
+import { createActionResultWidgetData } from '../../apps/widget-data';
 import type { PresentationDeleteInput } from './schemas';
 import { getOwnedProjectForMcp } from '../../lib/mcp-project-access';
 
@@ -38,11 +39,21 @@ export async function handlePresentationDelete(
 
   // Idempotent: already soft-deleted
   if (project.isDeleted) {
-    return mcpSuccess({
+    const data = {
       id: project.id,
       title: project.title,
       deleted: true,
       message: 'Presentation was already deleted. Use presentation_recover to restore it.',
+    };
+
+    return mcpSuccess(data, {
+      widget: createActionResultWidgetData({
+        kind: 'delete',
+        title: 'Presentation already deleted',
+        message: 'Presentation was already deleted. Use presentation_recover to restore it.',
+        affectedPresentations: [{ id: project.id, title: project.title }],
+        status: 'warning',
+      }),
     });
   }
 
@@ -52,9 +63,18 @@ export async function handlePresentationDelete(
     data: { isDeleted: true },
   });
 
-  return mcpSuccess({
+  const data = {
     id: project.id,
     title: project.title,
     deleted: true,
+  };
+
+  return mcpSuccess(data, {
+    widget: createActionResultWidgetData({
+      kind: 'delete',
+      title: 'Presentation deleted',
+      message: 'The deck was moved to deleted items and can be recovered.',
+      affectedPresentations: [{ id: project.id, title: project.title }],
+    }),
   });
 }

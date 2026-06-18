@@ -15,6 +15,7 @@ import type { AuthContext } from '../../auth/types';
 import type { McpToolResponse } from '../_shared/response';
 import { mcpSuccess } from '../_shared/response';
 import { Errors } from '../_shared/errors';
+import { createActionResultWidgetData } from '../../apps/widget-data';
 import type { PresentationCreateInput } from './schemas';
 import { projectToPresentation } from './mappers';
 import { checkAndIncrementUsage } from '@/lib/usage-limit';
@@ -55,5 +56,14 @@ export async function handlePresentationCreate(
     },
   });
 
-  return mcpSuccess(projectToPresentation(project));
+  const presentation = projectToPresentation(project);
+
+  return mcpSuccess(presentation, {
+    widget: createActionResultWidgetData({
+      kind: 'create',
+      title: 'Presentation created',
+      message: 'The new Verto presentation is ready to open or preview.',
+      presentation,
+    }),
+  });
 }

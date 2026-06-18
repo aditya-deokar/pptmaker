@@ -21,7 +21,8 @@
     "mcp:apps:check": "node scripts/mcp-apps/build-widgets.mjs --check",
     "mcp:phase7:checks": "node scripts/mcp-apps/phase7-checks.mjs",
     "mcp:phase7:typecheck": "node scripts/mcp-apps/focused-typecheck.mjs",
-    "mcp:phase7": "npm run mcp:apps:check && npm run mcp:phase7:checks && npm run mcp:phase7:typecheck"
+    "mcp:phase7": "npm run mcp:apps:check && npm run mcp:phase7:checks && npm run mcp:phase7:typecheck",
+    "mcp:phase9h": "node scripts/mcp-apps/phase9h-visual-qa.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.14",

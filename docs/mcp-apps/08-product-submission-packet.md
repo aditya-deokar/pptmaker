@@ -141,7 +141,7 @@ AI presentations, slide deck, pitch deck, presentation generator, deck editor, p
 | Resource parameter | `https://verto.ai.aditya-deokar.me/mcp` |
 | Scopes | `presentations:read presentations:write presentations:generate presentations:publish` |
 | Transport | Streamable HTTP MCP |
-| MCP Apps UI resources | `ui://verto/generation-progress.html`, `ui://verto/deck-preview.html` |
+| MCP Apps UI resources | `ui://verto/presentation-list.html`, `ui://verto/generation-progress.html`, `ui://verto/deck-preview.html`, `ui://verto/action-result.html` |
 
 Deployment prerequisites before submission:
 
@@ -211,11 +211,38 @@ Current repo note:
 
 Capture final screenshots after the production OAuth flow and ChatGPT developer mode tests pass.
 
+Automated widget evidence can be generated locally before live ChatGPT capture:
+
+```powershell
+npm.cmd run mcp:apps:build
+npm.cmd run mcp:phase9h
+```
+
+Automated evidence files:
+
+```text
+docs/mcp-apps/submission-assets/phase9h-generation-running-dark-desktop.png
+docs/mcp-apps/submission-assets/phase9h-generation-complete-light-desktop.png
+docs/mcp-apps/submission-assets/phase9h-generation-error-dark-mobile.png
+docs/mcp-apps/submission-assets/phase9h-presentation-list-dark-desktop.png
+docs/mcp-apps/submission-assets/phase9h-presentation-list-light-mobile.png
+docs/mcp-apps/submission-assets/phase9h-deck-preview-dark-desktop.png
+docs/mcp-apps/submission-assets/phase9h-deck-publish-success-light-desktop.png
+docs/mcp-apps/submission-assets/phase9h-deck-preview-light-mobile.png
+docs/mcp-apps/submission-assets/phase9h-action-result-publish-dark-desktop.png
+docs/mcp-apps/submission-assets/phase9h-action-result-delete-light-mobile.png
+docs/mcp-apps/submission-assets/phase9h-visual-qa-summary.md
+docs/mcp-apps/submission-assets/phase9h-visual-qa-report.json
+```
+
+Use `docs/mcp-apps/09h-visual-qa-evidence.md` for the exact live ChatGPT prompts and widget button actions.
+
 Recommended file names:
 
 ```text
 docs/mcp-apps/submission-assets/chatgpt-01-connect-success.png
 docs/mcp-apps/submission-assets/chatgpt-02-generate-result.png
+docs/mcp-apps/submission-assets/chatgpt-02a-presentation-list-ui.png
 docs/mcp-apps/submission-assets/chatgpt-03-progress-ui.png
 docs/mcp-apps/submission-assets/chatgpt-04-deck-preview.png
 docs/mcp-apps/submission-assets/chatgpt-05-publish-link.png
@@ -228,9 +255,10 @@ Minimum ChatGPT screenshots:
 
 1. Verto AI connected in ChatGPT developer mode.
 2. Generation prompt and successful result or `RUNNING` status.
-3. Generation progress UI or text fallback.
-4. Deck preview UI or text fallback.
-5. Publish/share-link result.
+3. Presentation list UI after `List my Verto presentations`.
+4. Generation progress UI or text fallback.
+5. Deck preview UI or text fallback.
+6. Publish/share-link result with the Verto action result UI or text fallback.
 
 Minimum Claude screenshots after ChatGPT approval:
 

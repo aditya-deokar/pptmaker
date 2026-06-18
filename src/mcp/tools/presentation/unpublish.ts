@@ -15,6 +15,7 @@ import type { AuthContext } from '../../auth/types';
 import type { McpToolResponse } from '../_shared/response';
 import { mcpSuccess } from '../_shared/response';
 import { Errors } from '../_shared/errors';
+import { createActionResultWidgetData } from '../../apps/widget-data';
 import type { PresentationUnpublishInput } from './schemas';
 import { getOwnedProjectForMcp } from '../../lib/mcp-project-access';
 import { projectToPresentation } from './mappers';
@@ -37,9 +38,17 @@ export async function handlePresentationUnpublish(
 
   // Idempotent: already unpublished
   if (!project.isPublished) {
+    const presentation = projectToPresentation(project);
     return mcpSuccess({
-      ...projectToPresentation(project),
+      ...presentation,
       message: 'Presentation is already unpublished.',
+    }, {
+      widget: createActionResultWidgetData({
+        kind: 'unpublish',
+        title: 'Presentation already unpublished',
+        message: 'This deck is already private.',
+        presentation,
+      }),
     });
   }
 
@@ -49,5 +58,14 @@ export async function handlePresentationUnpublish(
     data: { isPublished: false },
   });
 
-  return mcpSuccess(projectToPresentation(unpublished));
+  const presentation = projectToPresentation(unpublished);
+
+  return mcpSuccess(presentation, {
+    widget: createActionResultWidgetData({
+      kind: 'unpublish',
+      title: 'Presentation unpublished',
+      message: 'The public share link has been removed.',
+      presentation,
+    }),
+  });
 }

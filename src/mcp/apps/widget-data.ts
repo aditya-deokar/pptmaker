@@ -2,6 +2,7 @@ import type {
   PresentationGenerationStatusMcpResponse,
   PresentationGenerationRunMcpResponse,
 } from '../lib/presentation-generation-runs';
+import type { PaginationMeta } from '../tools/_shared/pagination';
 import type { PresentationMCPResponse } from '../tools/presentation/mappers';
 
 const WIDGET_DATA_VERSION = 1;
@@ -10,8 +11,10 @@ const MAX_DECK_PREVIEW_SLIDES = 6;
 const MAX_PREVIEW_TEXT_LENGTH = 180;
 
 export type VertoMcpAppWidgetKind =
+  | 'presentation_list'
   | 'deck_preview'
   | 'generation_progress'
+  | 'action_result'
   | 'publish_card'
   | 'theme_studio';
 
@@ -26,6 +29,41 @@ export interface DeckPreviewSlide {
   order: number;
   previewText: string;
   visualHint?: string;
+}
+
+export interface PresentationListItem {
+  id: string;
+  title: string;
+  themeName: string | null;
+  slideCount: number;
+  updatedAt: string | null;
+  isPublished: boolean;
+  isDeleted: boolean;
+  shareUrl: string | null;
+  openUrl: string | null;
+}
+
+export interface PresentationListWidgetData extends BaseWidgetData {
+  widget: 'presentation_list';
+  presentations: PresentationListItem[];
+  pagination: {
+    nextCursor: string | null;
+    hasMore: boolean;
+    totalCount: number;
+    pageSize: number;
+  };
+  summary: {
+    shownCount: number;
+    totalCount: number;
+    publishedCount: number;
+    draftCount: number;
+    deletedCount: number;
+  };
+  actions: {
+    canRefresh: boolean;
+    canOpenLatest: boolean;
+    canPreviewLatest: boolean;
+  };
 }
 
 export interface DeckPreviewWidgetData extends BaseWidgetData {
@@ -55,6 +93,49 @@ export interface GenerationProgressStep {
   name: string;
   status: string;
   details?: string;
+}
+
+export type ActionResultKind =
+  | 'create'
+  | 'update_slides'
+  | 'update_theme'
+  | 'publish'
+  | 'unpublish'
+  | 'delete'
+  | 'recover'
+  | 'delete_permanently';
+
+export interface ActionResultAffectedPresentation {
+  id: string;
+  title: string;
+}
+
+export interface ActionResultWidgetData extends BaseWidgetData {
+  widget: 'action_result';
+  operation: {
+    kind: ActionResultKind;
+    title: string;
+    message: string;
+    status: 'success' | 'warning';
+    completedAt: string;
+  };
+  presentation: {
+    id: string;
+    title: string;
+    themeName: string | null;
+    slideCount: number;
+    updatedAt: string | null;
+    isPublished: boolean;
+    isDeleted: boolean;
+    shareUrl: string | null;
+    openUrl: string | null;
+  } | null;
+  affectedPresentations: ActionResultAffectedPresentation[];
+  actions: {
+    canOpen: boolean;
+    canPreview: boolean;
+    canCopyShareLink: boolean;
+  };
 }
 
 export interface GenerationProgressWidgetData extends BaseWidgetData {
@@ -118,8 +199,10 @@ export interface ThemeStudioWidgetData extends BaseWidgetData {
 }
 
 export type McpAppWidgetData =
+  | PresentationListWidgetData
   | DeckPreviewWidgetData
   | GenerationProgressWidgetData
+  | ActionResultWidgetData
   | PublishCardWidgetData
   | ThemeStudioWidgetData;
 
@@ -240,6 +323,48 @@ export function createDeckPreviewWidgetData(
   };
 }
 
+export function createPresentationListWidgetData(
+  presentations: PresentationMCPResponse[],
+  pagination: PaginationMeta
+): PresentationListWidgetData {
+  const items = presentations.map((presentation) => ({
+    id: presentation.id,
+    title: presentation.title,
+    themeName: presentation.theme_name || null,
+    slideCount: presentation.slide_count,
+    updatedAt: presentation.updated_at || null,
+    isPublished: presentation.is_published,
+    isDeleted: presentation.is_deleted,
+    shareUrl: presentation.share_url,
+    openUrl: presentation.open_url || buildPresentationOpenUrl(presentation.id),
+  }));
+  const latest = items[0];
+
+  return {
+    widget: 'presentation_list',
+    version: WIDGET_DATA_VERSION,
+    presentations: items,
+    pagination: {
+      nextCursor: pagination.next_cursor,
+      hasMore: pagination.has_more,
+      totalCount: pagination.total_count,
+      pageSize: pagination.page_size,
+    },
+    summary: {
+      shownCount: items.length,
+      totalCount: pagination.total_count,
+      publishedCount: items.filter((presentation) => presentation.isPublished).length,
+      draftCount: items.filter((presentation) => !presentation.isPublished && !presentation.isDeleted).length,
+      deletedCount: items.filter((presentation) => presentation.isDeleted).length,
+    },
+    actions: {
+      canRefresh: true,
+      canOpenLatest: Boolean(latest?.openUrl),
+      canPreviewLatest: Boolean(latest?.id),
+    },
+  };
+}
+
 export function createGenerationProgressWidgetData(
   status: PresentationGenerationStatusMcpResponse
 ): GenerationProgressWidgetData {
@@ -279,6 +404,51 @@ export function createGenerationProgressWidgetData(
       canOpenPresentation: Boolean(status.presentation_id && openUrl),
       canInspectPresentation: Boolean(status.presentation_id),
       canRetry: status.is_failed,
+    },
+  };
+}
+
+export function createActionResultWidgetData(options: {
+  kind: ActionResultKind;
+  title: string;
+  message: string;
+  presentation?: PresentationMCPResponse | null;
+  affectedPresentations?: ActionResultAffectedPresentation[];
+  status?: 'success' | 'warning';
+}): ActionResultWidgetData {
+  const presentation = options.presentation;
+  const openUrl = presentation
+    ? presentation.open_url || buildPresentationOpenUrl(presentation.id)
+    : null;
+
+  return {
+    widget: 'action_result',
+    version: WIDGET_DATA_VERSION,
+    operation: {
+      kind: options.kind,
+      title: options.title,
+      message: options.message,
+      status: options.status || 'success',
+      completedAt: new Date().toISOString(),
+    },
+    presentation: presentation
+      ? {
+          id: presentation.id,
+          title: presentation.title,
+          themeName: presentation.theme_name || null,
+          slideCount: presentation.slide_count,
+          updatedAt: presentation.updated_at || null,
+          isPublished: presentation.is_published,
+          isDeleted: presentation.is_deleted,
+          shareUrl: presentation.share_url,
+          openUrl,
+        }
+      : null,
+    affectedPresentations: options.affectedPresentations || [],
+    actions: {
+      canOpen: Boolean(openUrl && !presentation?.is_deleted),
+      canPreview: Boolean(presentation?.id && !presentation?.is_deleted),
+      canCopyShareLink: Boolean(presentation?.share_url),
     },
   };
 }

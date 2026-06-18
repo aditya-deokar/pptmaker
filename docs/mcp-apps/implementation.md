@@ -599,6 +599,7 @@ Purpose: submit Verto AI to ChatGPT public distribution.
 - [ ] Use an eligible OpenAI project for app submission.
 - [ ] Create/test connector in developer mode.
 - [ ] Add MCP server URL and OAuth credentials/details.
+- [x] Generate automated MCP Apps visual QA evidence with `npm run mcp:phase9h`.
 - [ ] Add app metadata, screenshots, privacy policy, support link, and test prompts.
 - [ ] Complete compliance confirmations.
 - [ ] Submit for review.
