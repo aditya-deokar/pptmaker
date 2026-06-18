@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verto generation progress</title>
+</head>
+<body>
+  <script>
+"use strict";(()=>{var O="2026-01-26";var N=0,u=null,g=new Map,z=`
+  :root {
+    color-scheme: light dark;
+    --bg: #fbfbfc;
+    --fg: #18181b;
+    --muted: #6b7280;
+    --line: #d7dce2;
+    --accent: #0f766e;
+    --accent-soft: #ccfbf1;
+    --surface: #ffffff;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0c0f;
+      --fg: #f4f4f5;
+      --muted: #a1a1aa;
+      --line: #2f333a;
+      --accent: #5eead4;
+      --accent-soft: #123532;
+      --surface: #111318;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-width: 260px;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  main {
+    width: 100%;
+    min-height: 180px;
+    padding: 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  h1 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+  .muted { color: var(--muted); }
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px solid var(--line);
+    padding: 10px 0;
+  }
+  .row:first-of-type { border-top: 0; }
+  .label { color: var(--muted); }
+  .value { font-weight: 650; text-align: right; overflow-wrap: anywhere; }
+  .bar {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--line) 70%, transparent);
+    margin: 14px 0 6px;
+  }
+  .fill {
+    width: var(--progress, 0%);
+    height: 100%;
+    background: var(--accent);
+    transition: width 180ms ease;
+  }
+  .slides {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .slide {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px;
+    background: color-mix(in srgb, var(--surface) 88%, var(--accent-soft));
+  }
+  .slide-title {
+    font-weight: 650;
+    overflow-wrap: anywhere;
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 3px 8px;
+    background: var(--accent-soft);
+    color: var(--fg);
+    font-size: 12px;
+    font-weight: 650;
+  }
+  a {
+    color: var(--accent);
+    font-weight: 650;
+    text-decoration: none;
+  }
+`;function M(e){v(z),window.addEventListener("message",t=>{if(t.source!==window.parent)return;let n=t.data;if(!(!n||typeof n!="object")){if(n.jsonrpc==="2.0"){if(B(n))return;n.method==="ui/notifications/tool-result"&&x(n.params,e);return}x(n.result||n.payload||n,e)}}),I().catch(t=>{console.warn("Verto MCP Apps bridge was not initialized:",t)}),x(H(),e)}async function G(e,t){let n=await F(e,t),r=R(n);return window.__VERTO_MCP_PAYLOAD__=r,r}async function b(e){if(!e.trim())return;let t=window.openai;if(typeof t?.sendFollowUpMessage=="function"){await t.sendFollowUpMessage({prompt:e,scrollToBottom:!0});return}if(!k())throw new Error("This host has not enabled ChatGPT follow-up messages for the widget.");A("ui/message",{role:"user",content:[{type:"text",text:e}]})}function d(e){let t=document.getElementById(e);if(!t)throw new Error(`Missing widget element: ${e}`);return t}function a(e){return e&&typeof e=="object"?e:{}}function s(e,t=""){return typeof e=="string"&&e.length>0?e:t}function y(e,t=0){return typeof e=="number"&&Number.isFinite(e)?e:t}function f(e){return Array.isArray(e)?e:[]}function v(e){let t=document.createElement("style");t.textContent=e,document.head.appendChild(t)}async function F(e,t){if(k())try{return await I(),await E("tools/call",{name:e,arguments:t},15e3)}catch(n){if(typeof window.openai?.callTool!="function")throw n}if(typeof window.openai?.callTool=="function")return window.openai.callTool(e,t);throw new Error("This host has not enabled widget tool calls for Verto AI yet.")}function k(){return typeof window<"u"&&window.parent!==window}function I(){return k()?(u||(u=E("ui/initialize",{appInfo:{name:"verto-ai",version:"0.1.0"},appCapabilities:{},protocolVersion:O},5e3).then(()=>{A("ui/notifications/initialized",{})}).catch(e=>{throw u=null,e})),u):Promise.resolve()}function A(e,t){window.parent.postMessage({jsonrpc:"2.0",method:e,params:t},"*")}function E(e,t,n){return new Promise((r,i)=>{let o=++N,l=window.setTimeout(()=>{g.delete(o),i(new Error(`Timed out waiting for ${e}.`))},n);g.set(o,{resolve:r,reject:i,timeoutId:l}),window.parent.postMessage({jsonrpc:"2.0",id:o,method:e,params:t},"*")})}function B(e){if(typeof e.id!="number"||typeof e.method=="string")return!1;let t=g.get(e.id);return t?(g.delete(e.id),window.clearTimeout(t.timeoutId),e.error?t.reject(e.error):t.resolve(e.result),!0):!1}function H(){if(window.__VERTO_MCP_PAYLOAD__)return window.__VERTO_MCP_PAYLOAD__;let e=window.openai||{};return e.toolOutput||e.toolResult||e.toolResponse||{}}function x(e,t){let n=R(e);window.__VERTO_MCP_PAYLOAD__=n,t(n)}function R(e){let t=D(e);if(t)return t;let n=U(e);return n||a(e)}function D(e){let t=a(e),n=t.structuredContent||t.structured_content;return n?a(n):null}function U(e){let n=f(a(e).content).find(r=>{let i=a(r);return i.type==="text"&&typeof i.text=="string"});if(!n)return null;try{return a(JSON.parse(s(a(n).text)))}catch{return null}}var j=`
+  .generation-shell {
+    display: grid;
+    gap: 16px;
+    min-height: 360px;
+    padding: 16px;
+    overflow: hidden;
+  }
+  .generation-header {
+    display: grid;
+    gap: 8px;
+  }
+  .generation-kicker {
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 750;
+  }
+  .generation-title {
+    margin: 0;
+    max-width: 44rem;
+    font-size: 22px;
+    line-height: 1.18;
+    overflow-wrap: anywhere;
+  }
+  .generation-summary {
+    max-width: 46rem;
+    margin: 0;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+  .status-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    max-width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 3px 8px;
+    background: color-mix(in srgb, var(--surface) 90%, var(--accent-soft));
+    color: var(--fg);
+    font-size: 12px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+  .pill.running,
+  .pill.complete {
+    border-color: color-mix(in srgb, var(--accent) 42%, var(--line));
+    color: var(--accent);
+  }
+  .pill.failed {
+    border-color: #b91c1c;
+    color: #fca5a5;
+  }
+  .progress-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(184px, 236px);
+    gap: 14px;
+  }
+  .progress-panel,
+  .action-panel,
+  .timeline-panel {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--surface) 96%, var(--accent-soft));
+  }
+  .progress-panel {
+    display: grid;
+    gap: 16px;
+    padding: 16px;
+  }
+  .progress-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: start;
+  }
+  .progress-label {
+    margin: 0 0 4px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .progress-percent {
+    margin: 0;
+    font-size: 42px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+  .current-step {
+    max-width: 18rem;
+    margin: 0;
+    color: var(--fg);
+    font-size: 14px;
+    font-weight: 750;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+  .progress-track {
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--line) 72%, transparent);
+  }
+  .progress-fill {
+    width: var(--progress, 0%);
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent);
+    transition: width 260ms ease;
+  }
+  .status-message {
+    min-height: 42px;
+    margin: 0;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+  .error-card {
+    display: none;
+    border: 1px solid #7f1d1d;
+    border-radius: 8px;
+    padding: 12px;
+    color: #fecaca;
+    background: color-mix(in srgb, #7f1d1d 18%, var(--surface));
+  }
+  .error-card.is-visible {
+    display: block;
+  }
+  .action-panel {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 12px;
+  }
+  .action-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .action-note {
+    min-height: 40px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: var(--surface);
+    color: var(--fg);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 750;
+    text-align: center;
+    text-decoration: none;
+  }
+  .button.primary {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .button[aria-disabled="true"] {
+    cursor: default;
+    opacity: 0.55;
+  }
+  .button:disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+  .button.is-busy {
+    cursor: wait;
+  }
+  .timeline-panel {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+  }
+  .timeline-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .stage-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .stage {
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    gap: 6px;
+    min-width: 0;
+    min-height: 116px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px;
+    background: color-mix(in srgb, var(--surface) 94%, var(--accent-soft));
+  }
+  .stage-dot {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+  }
+  .stage.done .stage-dot,
+  .stage.current .stage-dot {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+  .stage.failed .stage-dot {
+    border-color: #b91c1c;
+    background: #b91c1c;
+  }
+  .stage.current {
+    border-color: color-mix(in srgb, var(--accent) 46%, var(--line));
+  }
+  .stage-name {
+    font-size: 12px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+  }
+  .stage-copy {
+    margin: 0;
+    color: var(--muted);
+    font-size: 11px;
+    overflow-wrap: anywhere;
+  }
+  .stage.current .stage-dot {
+    animation: verto-stage-pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes verto-stage-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 34%, transparent); }
+    50% { box-shadow: 0 0 0 6px transparent; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stage.current .stage-dot,
+    .progress-fill {
+      animation: none;
+      transition: none;
+    }
+  }
+  @media (max-width: 700px) {
+    .progress-stage { grid-template-columns: 1fr; }
+    .stage-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .progress-head { align-items: start; }
+    .progress-percent { font-size: 36px; }
+  }
+  @media (max-width: 440px) {
+    .generation-shell { padding: 14px; }
+    .stage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .progress-head { grid-template-columns: 1fr; }
+    .current-step { text-align: left; }
+  }
+`,c=[{id:"queued",name:"Queued",copy:"Preparing the run",threshold:0},{id:"outline",name:"Outline",copy:"Structuring the story",threshold:12},{id:"content",name:"Content",copy:"Writing slides",threshold:35},{id:"design",name:"Design",copy:"Choosing layouts",threshold:58},{id:"finalizing",name:"Finalizing",copy:"Saving the deck",threshold:82},{id:"complete",name:"Complete",copy:"Ready to review",threshold:100}],S=!1;function $(){S||(v(j),S=!0)}function W(){document.getElementById("verto-generation-widget")||(document.body.innerHTML=`
+    <main class="generation-shell" id="verto-generation-widget">
+      <section class="generation-header" aria-labelledby="title">
+        <div class="generation-kicker">Verto AI generation</div>
+        <h1 class="generation-title" id="title">Generation progress</h1>
+        <p class="generation-summary" id="summary">Waiting for generation data.</p>
+        <div class="status-row" id="status-row" aria-label="Generation status"></div>
+      </section>
+      <section class="progress-stage" aria-label="Generation progress">
+        <article class="progress-panel">
+          <div class="progress-head">
+            <div>
+              <p class="progress-label">Progress</p>
+              <p class="progress-percent" id="progress-percent">0%</p>
+            </div>
+            <p class="current-step" id="current-step">Waiting</p>
+          </div>
+          <div class="progress-track" aria-hidden="true">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <p class="status-message" id="status-message">Generation has not started yet.</p>
+          <div class="error-card" id="error-card" role="status"></div>
+        </article>
+        <aside class="action-panel" aria-label="Generation actions">
+          <p class="action-title">Next action</p>
+          <a class="button primary" id="open-link">Open deck</a>
+          <button class="button" id="inspect-action" type="button">Inspect with ChatGPT</button>
+          <p class="action-note" id="action-note">Wait for Verto to finish the deck.</p>
+        </aside>
+      </section>
+      <section class="timeline-panel" aria-label="Generation stages">
+        <div class="timeline-head">
+          <span>Stage timeline</span>
+          <span id="timeline-state">Waiting</span>
+        </div>
+        <div class="stage-grid" id="stage-grid"></div>
+      </section>
+    </main>
+  `)}function Y(e){let t=a(e.widget);if(t.widget==="generation_progress"){let o=a(t.generation),l=a(t.presentation);return{topic:s(o.topic,"Generation progress"),status:s(o.status,"Waiting"),currentStepName:s(o.currentStepName,"Queued"),progress:y(o.progress),presentationId:s(o.presentationId||l.id),presentationOpenUrl:s(l.openUrl),runId:s(o.runId),error:s(o.error),isComplete:!!o.isComplete,isFailed:!!o.isFailed,pollHint:s(o.pollHint),steps:f(t.steps)}}let n=a(e.data||e),r=a(n.generation_status||n),i=a(r.generation_run||n.generation_run||n.generation||{});return{topic:s(i.topic||n.topic,"Generation progress"),status:s(r.status||n.status||i.status,"Waiting"),currentStepName:s(i.current_step_name||i.currentStepName||n.current_step_name,"Queued"),progress:y(i.progress||n.progress),presentationId:s(r.presentation_id||n.presentation_id||i.project_id||i.projectId),presentationOpenUrl:"",runId:s(r.generation_run_id||n.generation_run_id||i.id),error:s(i.error||n.error),isComplete:!!(r.is_complete||n.is_complete||n.status==="COMPLETED"),isFailed:!!(r.is_failed||n.is_failed||n.status==="FAILED"),pollHint:s(r.poll_hint||n.poll_hint),steps:f(i.steps)}}function _(e){return Math.max(0,Math.min(100,Math.round(e)))}function q(e){return e.isFailed||e.status==="FAILED"?"failed":e.isComplete||e.status==="COMPLETED"?"complete":e.status==="RUNNING"?"running":""}function Q(e){let t=d("status-row");t.textContent="",t.appendChild(C(e.status,q(e))),t.appendChild(C(`${_(e.progress)}%`)),e.runId&&t.appendChild(C(`Run ${e.runId.slice(0,8)}`))}function C(e,t=""){let n=document.createElement("span");return n.className=`pill${t?` ${t}`:""}`,n.textContent=e||"Waiting",n}function J(e){return e.isFailed?"Generation stopped before the deck was ready.":e.isComplete?e.presentationId?"Your deck is ready to review.":"Generation finished, but the deck ID is not available yet.":e.progress<=0?"Verto is preparing the generation run.":e.pollHint||"Verto is building the deck. Check back shortly instead of starting a duplicate run."}function K(e){let t=_(e.progress);document.documentElement.style.setProperty("--progress",`${t}%`),d("progress-percent").textContent=`${t}%`,d("current-step").textContent=e.currentStepName||V(t).name,d("status-message").textContent=J(e)}function X(e){let t=d("error-card");if(!e.isFailed){t.classList.remove("is-visible"),t.textContent="";return}t.classList.add("is-visible"),t.textContent=e.error?`Error: ${e.error}. Ask ChatGPT to retry with a simpler topic or fewer constraints.`:"Ask ChatGPT to retry with a simpler topic or fewer constraints."}function Z(e){let t=d("open-link"),n=d("inspect-action"),r=d("action-note");t instanceof HTMLAnchorElement&&(t.textContent=e.isComplete?"Open deck":"Deck not ready",e.isComplete&&e.presentationOpenUrl?(t.href=e.presentationOpenUrl,t.target="_blank",t.rel="noopener noreferrer",t.setAttribute("aria-disabled","false")):(t.removeAttribute("href"),t.setAttribute("aria-disabled","true"))),n instanceof HTMLButtonElement&&(n.disabled=!1,n.classList.remove("is-busy"),n.setAttribute("aria-disabled","false"),n.onclick=null,e.isFailed?(n.textContent="Ask ChatGPT to retry",n.onclick=()=>ne(e,n,r)):e.isComplete&&e.presentationId?(n.textContent="Inspect with ChatGPT",n.onclick=()=>te(e,n,r)):e.runId?(n.textContent="Check status",n.onclick=()=>ee(e,n,r)):(n.textContent="Check status",n.disabled=!0,n.setAttribute("aria-disabled","true"))),e.isFailed?r.textContent="Ask ChatGPT to retry generation with clearer constraints.":e.isComplete?r.textContent=e.presentationId?"Open the deck or ask ChatGPT to inspect, edit, or publish it.":"Ask ChatGPT to check the completed generation status.":r.textContent="Ask ChatGPT to check status after a short pause."}async function ee(e,t,n){e.runId&&await T(t,n,"Checking...",async()=>{let r=await G("presentation_generation_status",{generation_run_id:e.runId});L(r),d("action-note").textContent="Generation status refreshed."})}async function te(e,t,n){e.presentationId&&await T(t,n,"Asking ChatGPT...",async()=>{await b(`Inspect Verto presentation ${e.presentationId}, summarize the deck, and suggest the next best edits.`),n.textContent="Asked ChatGPT to inspect this deck."})}async function ne(e,t,n){await T(t,n,"Asking ChatGPT...",async()=>{let r=e.topic==="Generation progress"?"this Verto presentation":`"${e.topic}"`;await b(`Retry the Verto presentation generation for ${r}. Use simpler constraints and avoid starting duplicate runs unless needed.`),n.textContent="Asked ChatGPT to prepare a retry."})}async function T(e,t,n,r){let i=e.textContent||"";e.disabled=!0,e.classList.add("is-busy"),e.setAttribute("aria-disabled","true"),e.textContent=n;try{await r()}catch(o){t.textContent=re(o)}finally{e.disabled=!1,e.classList.remove("is-busy"),e.setAttribute("aria-disabled","false"),e.textContent===n&&(e.textContent=i)}}function re(e){if(e&&typeof e=="object"){let t=e;if(typeof t.message=="string")return t.message}return"ChatGPT could not complete that Verto action. Try again in a moment."}function V(e){let t=c[0];for(let n of c)e>=n.threshold&&(t=n);return t}function oe(e,t,n){return n.isFailed&&e===t?"failed":n.isComplete||e<t?"done":e===t?"current":"pending"}function ie(e){let t=_(e.progress),n=e.isComplete?c[c.length-1]:V(t),r=c.findIndex(o=>o.id===n.id),i=d("stage-grid");d("timeline-state").textContent=n.name,i.textContent="",c.forEach((o,l)=>{let P=oe(l,r,e),p=document.createElement("article");p.className=`stage ${P}`;let m=document.createElement("span");m.className="stage-dot",m.setAttribute("aria-hidden","true"),p.appendChild(m);let w=document.createElement("div");w.className="stage-name",w.textContent=o.name,p.appendChild(w);let h=document.createElement("p");h.className="stage-copy",h.textContent=se(o.id,e,P)||o.copy,p.appendChild(h),i.appendChild(p)})}function se(e,t,n){return t.isFailed&&n==="failed"?"Needs retry":t.isComplete&&e==="complete"?"Ready to review":n==="current"&&t.currentStepName?t.currentStepName:""}function L(e){$(),W();let t=Y(e);d("title").textContent=t.topic,d("summary").textContent=t.isComplete?"Verto finished building your presentation.":t.isFailed?"Verto could not finish this presentation run.":"Verto is turning your prompt into a presentation.",Q(t),K(t),X(t),Z(t),ie(t)}M(e=>{L(e)});})();
+  </script>
+</body>
+</html>

@@ -15,6 +15,7 @@ import type { AuthContext } from '../../auth/types';
 import type { McpToolResponse } from '../_shared/response';
 import { mcpSuccess } from '../_shared/response';
 import { Errors } from '../_shared/errors';
+import { createDeckPreviewWidgetData } from '../../apps/widget-data';
 import type { PresentationGetInput } from './schemas';
 import { getOwnedProjectForMcp } from '../../lib/mcp-project-access';
 import { projectToPresentation } from './mappers';
@@ -40,5 +41,7 @@ export async function handlePresentationGet(
     includeSlides: include_slides,
   });
 
-  return mcpSuccess(presentation);
+  return mcpSuccess(presentation, {
+    widget: createDeckPreviewWidgetData(presentation),
+  });
 }

@@ -17,6 +17,7 @@ import {
   getGenerationRunForMcp,
   markGenerationRunStartedForMcp,
 } from '../../lib/presentation-generation-runs';
+import { createGenerationProgressWidgetData } from '../../apps/widget-data';
 import { logGenerationTelemetry } from '../../lib/generation-telemetry';
 import { limitSlidesForMcp, projectToPresentation } from './mappers';
 
@@ -160,13 +161,18 @@ export async function handlePresentationGenerate(
       latencyMs: Math.round(performance.now() - startedAt),
     });
 
-    return mcpSuccess({
-      ...statusPayload,
-      response_mode: 'RUNNING_BEFORE_HOST_TIMEOUT',
-      wait_timeout_ms: waitTimeoutMs,
-      background_execution_note:
-        'Generation has started. Use presentation_generation_status or the progress resource instead of starting a duplicate generation.',
-    });
+    return mcpSuccess(
+      {
+        ...statusPayload,
+        response_mode: 'RUNNING_BEFORE_HOST_TIMEOUT',
+        wait_timeout_ms: waitTimeoutMs,
+        background_execution_note:
+          'Generation has started. Use presentation_generation_status or the progress resource instead of starting a duplicate generation.',
+      },
+      {
+        widget: createGenerationProgressWidgetData(statusPayload),
+      }
+    );
   }
 
   const result = outcome.result;
@@ -186,31 +192,39 @@ export async function handlePresentationGenerate(
   }
 
   const latestRun = await getGenerationRunForMcp(generationRun.id, auth.userId);
+  const generationStatus = latestRun ? buildGenerationStatusResponse(latestRun) : null;
   const project = result.projectId
     ? await getOwnedProjectForMcp(result.projectId, auth.userId)
     : null;
   const fallbackSlides = Array.isArray(result.slides) ? result.slides : [];
   const limitedFallbackSlides = limitSlidesForMcp(fallbackSlides);
 
-  return mcpSuccess({
-    status: 'COMPLETED',
-    generation_run_id: generationRun.id,
-    generation_status: latestRun ? buildGenerationStatusResponse(latestRun) : null,
-    presentation_id: result.projectId,
-    presentation: project
-      ? projectToPresentation(project, { includeSlides: true })
-      : {
-          id: result.projectId,
-          slide_count: result.slideCount,
-          outlines: result.outlines ?? [],
-          slides: limitedFallbackSlides.slides,
-          slides_returned: limitedFallbackSlides.slidesReturned,
-          slides_total: limitedFallbackSlides.slidesTotal,
-          slides_truncated: limitedFallbackSlides.slidesTruncated,
-          slide_payload_bytes: limitedFallbackSlides.slidePayloadBytes,
-          ...(limitedFallbackSlides.truncationReason
-            ? { truncation_reason: limitedFallbackSlides.truncationReason }
-            : {}),
-        },
-  });
+  return mcpSuccess(
+    {
+      status: 'COMPLETED',
+      generation_run_id: generationRun.id,
+      generation_status: generationStatus,
+      presentation_id: result.projectId,
+      presentation: project
+        ? projectToPresentation(project, { includeSlides: true })
+        : {
+            id: result.projectId,
+            slide_count: result.slideCount,
+            outlines: result.outlines ?? [],
+            slides: limitedFallbackSlides.slides,
+            slides_returned: limitedFallbackSlides.slidesReturned,
+            slides_total: limitedFallbackSlides.slidesTotal,
+            slides_truncated: limitedFallbackSlides.slidesTruncated,
+            slide_payload_bytes: limitedFallbackSlides.slidePayloadBytes,
+            ...(limitedFallbackSlides.truncationReason
+              ? { truncation_reason: limitedFallbackSlides.truncationReason }
+              : {}),
+          },
+    },
+    {
+      ...(generationStatus
+        ? { widget: createGenerationProgressWidgetData(generationStatus) }
+        : {}),
+    }
+  );
 }

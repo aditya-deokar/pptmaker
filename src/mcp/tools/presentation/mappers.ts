@@ -28,6 +28,7 @@ export interface PresentationMCPResponse {
   is_deleted: boolean;
   published_at: string | null;
   share_url: string | null;
+  open_url: string;
   outlines: string[];
   slides?: unknown[];
   slides_returned?: number;
@@ -114,6 +115,7 @@ export function projectToPresentation(
     is_deleted: project.isDeleted,
     published_at: project.publishedAt?.toISOString() ?? null,
     share_url: project.isPublished ? `${baseUrl}/share/${project.id}` : null,
+    open_url: `${baseUrl}/presentation/${project.id}`,
     outlines: project.outlines,
     ...(limitedSlides
       ? {
