@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-28T13:17:38.552Z",
+  "generatedAt": "2026-06-28T13:52:06.786Z",
   "source": "scripts/mcp-apps/phase9h-visual-qa.mjs",
   "results": [
     {
@@ -13,10 +13,10 @@
       "colorScheme": "dark",
       "failures": [],
       "metrics": {
-        "focusableCount": 9,
-        "contrastChecked": 54,
-        "textElementCount": 54,
-        "bodyTextLength": 713,
+        "focusableCount": 7,
+        "contrastChecked": 66,
+        "textElementCount": 66,
+        "bodyTextLength": 826,
         "screenshotWidth": 1200
       }
     },
@@ -31,10 +31,10 @@
       "colorScheme": "light",
       "failures": [],
       "metrics": {
-        "focusableCount": 9,
-        "contrastChecked": 48,
-        "textElementCount": 48,
-        "bodyTextLength": 665,
+        "focusableCount": 7,
+        "contrastChecked": 60,
+        "textElementCount": 60,
+        "bodyTextLength": 777,
         "screenshotWidth": 390
       }
     },
@@ -157,10 +157,10 @@
       "colorScheme": "dark",
       "failures": [],
       "metrics": {
-        "focusableCount": 3,
-        "contrastChecked": 21,
-        "textElementCount": 21,
-        "bodyTextLength": 341,
+        "focusableCount": 4,
+        "contrastChecked": 22,
+        "textElementCount": 22,
+        "bodyTextLength": 356,
         "screenshotWidth": 1200
       }
     },
@@ -177,8 +177,8 @@
       "metrics": {
         "focusableCount": 0,
         "contrastChecked": 18,
-        "textElementCount": 21,
-        "bodyTextLength": 452,
+        "textElementCount": 20,
+        "bodyTextLength": 436,
         "screenshotWidth": 390
       }
     }

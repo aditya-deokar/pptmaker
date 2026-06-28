@@ -7,7 +7,7 @@ import type { PresentationMCPResponse } from '../tools/presentation/mappers';
 
 const WIDGET_DATA_VERSION = 1;
 const FALLBACK_PUBLIC_APP_URL = 'https://verto.ai.aditya-deokar.me';
-const MAX_DECK_PREVIEW_SLIDES = 6;
+const MAX_DECK_PREVIEW_SLIDES = 50;
 const MAX_PREVIEW_TEXT_LENGTH = 180;
 
 export type VertoMcpAppWidgetKind =
@@ -29,6 +29,7 @@ export interface DeckPreviewSlide {
   order: number;
   previewText: string;
   visualHint?: string;
+  content?: unknown;
 }
 
 export interface PresentationListItem {
@@ -85,6 +86,7 @@ export interface DeckPreviewWidgetData extends BaseWidgetData {
     canPublish: boolean;
     canUnpublish: boolean;
     canCopyShareLink: boolean;
+    canUpdateSlides: boolean;
   };
 }
 
@@ -290,6 +292,7 @@ function mapDeckSlides(slides: unknown[] | undefined): DeckPreviewSlide[] {
       order,
       previewText: extractSlidePreviewText(slide),
       ...(extractVisualHint(slide) ? { visualHint: extractVisualHint(slide) } : {}),
+      content: slide && typeof slide === 'object' && 'content' in slide ? (slide as any).content : undefined,
     };
   });
 }
@@ -318,7 +321,8 @@ export function createDeckPreviewWidgetData(
       canRefresh: true,
       canPublish: !presentation.is_published && !presentation.is_deleted,
       canUnpublish: presentation.is_published && !presentation.is_deleted,
-      canCopyShareLink: Boolean(presentation.share_url),
+      canCopyShareLink: presentation.is_published && !presentation.is_deleted,
+      canUpdateSlides: Boolean(presentation.id && !presentation.is_deleted),
     },
   };
 }

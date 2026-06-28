@@ -213,26 +213,80 @@ const deckStyles = `
   }
   .filmstrip-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 16px;
   }
   .slide-card {
-    display: grid;
-    gap: 10px;
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
     min-width: 0;
   }
+  .slide-reorder-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+  }
+  .reorder-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+  }
+  .reorder-btn:hover:not(:disabled) {
+    background: var(--line);
+    color: var(--fg);
+  }
+  .reorder-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
   .slide-preview {
+    flex: 1;
     position: relative;
-    display: grid;
-    align-content: end;
-    aspect-ratio: 16 / 9;
-    min-height: 78px;
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: auto;
+    min-height: 120px;
     border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
     border-radius: 12px;
-    padding: 12px;
+    padding: 16px;
     overflow: hidden;
     background: color-mix(in srgb, var(--surface) 60%, transparent);
     transition: all 0.2s;
+  }
+  .slide-preview:hover {
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  .slide-content-html {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--fg);
+    margin-top: 24px;
+  }
+  .slide-content-html h1, .slide-content-html h2, .slide-content-html h3 {
+    margin: 0 0 8px;
+    color: var(--fg);
+  }
+  .slide-content-html p {
+    margin: 0 0 8px;
+    color: var(--muted);
+  }
+  .slide-content-html ul, .slide-content-html ol {
+    margin: 0 0 8px;
+    padding-left: 20px;
+    color: var(--muted);
   }
   .slide-preview:hover {
     background: color-mix(in srgb, var(--surface) 80%, transparent);
@@ -305,7 +359,7 @@ const deckStyles = `
     }
     .cover-text { max-width: 100%; }
     .action-panel { grid-template-columns: 1fr; }
-    .filmstrip-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .filmstrip-grid { grid-template-columns: 1fr; }
   }
 `;
 
@@ -322,6 +376,7 @@ type DeckViewModel = {
   openUrl: string;
   actions: Record<string, unknown>;
   slides: unknown[];
+  rawSlides: unknown[];
 };
 
 function ensureDeckStyles(): void {
@@ -417,6 +472,9 @@ function toDeckViewModel(payload: Record<string, unknown>): DeckViewModel {
     openUrl: getString(presentation.open_url || presentation.openUrl || presentation.verto_url || presentation.url),
     actions,
     slides,
+    rawSlides: getArray(getRecord(getRecord(payload.data || payload).presentation || getRecord(payload.data || payload)).slides).length > 0 
+      ? getArray(getRecord(getRecord(payload.data || payload).presentation || getRecord(payload.data || payload)).slides)
+      : slides,
   };
 }
 
@@ -674,10 +732,78 @@ async function copyShareLink(
   }
 }
 
+function renderContentItem(item: unknown): string {
+  if (!item) return '';
+  if (typeof item === 'string') return item;
+  if (Array.isArray(item)) return item.map(renderContentItem).join('');
+
+  if (typeof item === 'object') {
+    const record = item as Record<string, unknown>;
+    const type = typeof record.type === 'string' ? record.type : '';
+    const content = record.content;
+
+    switch (type) {
+      case 'title':
+      case 'heading1': return `<h1>${renderContentItem(content)}</h1>`;
+      case 'heading2': return `<h2>${renderContentItem(content)}</h2>`;
+      case 'heading3':
+      case 'heading4': return `<h3>${renderContentItem(content)}</h3>`;
+      case 'paragraph':
+      case 'text': return `<p>${renderContentItem(content)}</p>`;
+      case 'bulletedList':
+      case 'bulletList':
+      case 'numberedList': {
+        const items = Array.isArray(content) ? content : [content];
+        return `<ul>${items.map(c => `<li>${renderContentItem(c)}</li>`).join('')}</ul>`;
+      }
+      case 'image':
+      case 'imageAndText':
+        return `<i>[Image${record.alt ? `: ${record.alt}` : ''}]</i>`;
+      case 'column':
+      case 'multiColumn':
+        return `<div style="display: flex; gap: 8px;">${renderContentItem(content)}</div>`;
+      default:
+        if (content) return `<div>${renderContentItem(content)}</div>`;
+    }
+  }
+  return '';
+}
+
+async function reorderSlide(deck: DeckViewModel, index: number, direction: -1 | 1, button: HTMLButtonElement): Promise<void> {
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= deck.rawSlides.length) return;
+
+  const rawSlides = [...deck.rawSlides];
+  const temp = rawSlides[index];
+  rawSlides[index] = rawSlides[newIndex];
+  rawSlides[newIndex] = temp;
+
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = '...';
+
+  try {
+    const updatedPayload = await callMcpTool('presentation_update_slides', {
+      presentation_id: deck.id,
+      slides: rawSlides
+    });
+    const refreshedPayload = await callMcpTool('presentation_get', {
+      presentation_id: deck.id,
+      include_slides: true
+    });
+    renderDeckPayload(refreshedPayload);
+  } catch (error) {
+    console.error(error);
+    button.disabled = false;
+    button.textContent = originalText || '';
+    alert('Failed to reorder slide.');
+  }
+}
+
 function renderSlides(deck: DeckViewModel): void {
   const container = byId('slides');
   container.textContent = '';
-  byId('filmstrip-count').textContent = `${Math.min(deck.slides.length, 6)} shown`;
+  byId('filmstrip-count').textContent = `${Math.min(deck.slides.length, 50)} shown`;
 
   if (deck.slides.length === 0) {
     const item = document.createElement('div');
@@ -687,10 +813,33 @@ function renderSlides(deck: DeckViewModel): void {
     return;
   }
 
-  deck.slides.slice(0, 6).forEach((slide, index) => {
+  const canUpdate = Boolean(deck.actions.canUpdateSlides);
+
+  deck.slides.slice(0, 50).forEach((slide, index) => {
     const record = getRecord(slide);
     const item = document.createElement('article');
     item.className = 'slide-card';
+
+    if (canUpdate) {
+      const controls = document.createElement('div');
+      controls.className = 'slide-reorder-controls';
+
+      const upBtn = document.createElement('button');
+      upBtn.className = 'reorder-btn';
+      upBtn.textContent = '↑';
+      upBtn.disabled = index === 0;
+      upBtn.onclick = () => reorderSlide(deck, index, -1, upBtn);
+
+      const downBtn = document.createElement('button');
+      downBtn.className = 'reorder-btn';
+      downBtn.textContent = '↓';
+      downBtn.disabled = index === deck.slides.length - 1;
+      downBtn.onclick = () => reorderSlide(deck, index, 1, downBtn);
+
+      controls.appendChild(upBtn);
+      controls.appendChild(downBtn);
+      item.appendChild(controls);
+    }
 
     const preview = document.createElement('div');
     preview.className = 'slide-preview';
@@ -703,14 +852,26 @@ function renderSlides(deck: DeckViewModel): void {
     const title = document.createElement('h3');
     title.className = 'slide-title';
     title.textContent = getSlideTitle(record, index);
-    preview.appendChild(title);
+    // Hide title if we are rendering html to avoid duplication
+    if (record.content) {
+      title.style.display = 'none';
+    } else {
+      preview.appendChild(title);
+    }
 
-    const previewText = document.createElement('p');
-    previewText.className = 'slide-preview-text';
-    previewText.textContent = getSlidePreview(record) || 'Preview text unavailable.';
+    if (record.content) {
+      const contentHtml = document.createElement('div');
+      contentHtml.className = 'slide-content-html';
+      contentHtml.innerHTML = renderContentItem(record.content);
+      preview.appendChild(contentHtml);
+    } else {
+      const previewText = document.createElement('p');
+      previewText.className = 'slide-preview-text';
+      previewText.textContent = getSlidePreview(record) || 'Preview text unavailable.';
+      preview.appendChild(previewText);
+    }
 
     item.appendChild(preview);
-    item.appendChild(previewText);
     container.appendChild(item);
   });
 }
