@@ -256,7 +256,14 @@ function consentPage(
   scopes: readonly string[]
 ): Response {
   const scopeRows = scopes
-    .map((scope) => `<li><code>${escapeHtml(scope)}</code></li>`)
+    .map((scope) => `
+      <li style="display: flex; align-items: flex-start; margin-bottom: 8px;">
+        <svg style="width: 20px; height: 20px; color: #10b981; margin-right: 8px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <code style="padding: 2px 6px; background-color: rgba(0,0,0,0.05); color: #374151; border-radius: 4px; font-size: 12px; font-family: monospace;">${escapeHtml(scope)}</code>
+      </li>
+    `)
     .join('');
 
   const hiddenInputs = [
@@ -280,37 +287,102 @@ function consentPage(
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Connect Verto AI</title>
+  <title>Add Verto AI to ${escapeHtml(clientName)}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #09090b; color: #f4f4f5; }
-    main { width: min(92vw, 460px); border: 1px solid #27272a; border-radius: 8px; background: #111113; padding: 28px; box-shadow: 0 24px 80px rgba(0,0,0,.35); }
-    h1 { margin: 0 0 10px; font-size: 24px; line-height: 1.2; letter-spacing: 0; }
-    p { margin: 0 0 18px; color: #d4d4d8; line-height: 1.5; }
-    ul { margin: 0 0 24px; padding-left: 20px; color: #d4d4d8; }
-    li { margin: 8px 0; }
-    code { color: #a7f3d0; }
-    .meta { margin-bottom: 18px; padding: 12px; border: 1px solid #27272a; border-radius: 8px; background: #18181b; font-size: 14px; color: #d4d4d8; }
-    .actions { display: flex; gap: 12px; }
-    button { appearance: none; border: 0; border-radius: 6px; padding: 10px 14px; font-weight: 650; cursor: pointer; }
-    .allow { background: #f4f4f5; color: #09090b; }
-    .deny { background: transparent; color: #f4f4f5; border: 1px solid #3f3f46; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; background-color: #1a1a1a; }
+    .bg-gradient-premium {
+      background: linear-gradient(135deg, #fcebb6 0%, #78c5f9 50%, #4a8df8 100%);
+    }
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    .logo-connector {
+      width: 24px;
+      height: 2px;
+      background: #e5e7eb;
+      margin: 0 8px;
+    }
   </style>
 </head>
-<body>
-  <main>
-    <h1>Connect Verto AI</h1>
-    <p><strong>${escapeHtml(clientName)}</strong> wants permission to use Verto AI from chat.</p>
-    <div class="meta">Signed in as ${escapeHtml(userEmail)}</div>
-    <p>This connection can use these Verto permissions:</p>
-    <ul>${scopeRows}</ul>
-    <form method="post" action="${escapeHtml(new URL('/oauth/authorize', request.url).toString())}">
-      ${hiddenInputs}
-      <div class="actions">
-        <button class="allow" type="submit" name="decision" value="allow">Allow</button>
-        <button class="deny" type="submit" name="decision" value="deny">Cancel</button>
+<body class="min-h-screen flex items-center justify-center p-4 antialiased">
+  <main class="w-full max-w-[480px] overflow-hidden rounded-3xl glass-panel relative">
+    
+    <!-- Top colorful gradient area -->
+    <div class="h-44 w-full bg-gradient-premium absolute top-0 left-0 right-0 z-0 opacity-90 mix-blend-multiply"></div>
+    <div class="h-44 w-full bg-gradient-to-b from-transparent to-white absolute top-0 left-0 right-0 z-0"></div>
+
+    <div class="relative z-10 p-8 pt-14">
+      
+      <!-- Close button (decorative) -->
+      <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Logos -->
+      <div class="flex items-center justify-center mb-8">
+        <div class="w-14 h-14 bg-white rounded-[14px] shadow-sm border border-gray-100 flex items-center justify-center overflow-hidden z-10">
+          <img src="/new-logo.png" alt="Verto AI" class="w-full h-full object-cover" onerror="this.src='/logoipsum-246.png'" />
+        </div>
+        <div class="logo-connector -mx-2 z-0"></div>
+        <div class="w-14 h-14 bg-[#10a37f] rounded-[14px] shadow-sm flex items-center justify-center overflow-hidden z-10">
+          <img src="/globe.svg" alt="${escapeHtml(clientName)}" class="w-8 h-8 object-contain" style="filter: invert(1);" />
+        </div>
       </div>
-    </form>
+
+      <!-- Text -->
+      <div class="text-center mb-8">
+        <h1 class="text-[26px] font-bold text-gray-900 mb-2 leading-tight">Add Verto AI to ${escapeHtml(clientName)}</h1>
+        <p class="text-[15px] text-gray-600 font-medium px-4">Create, edit, preview, and publish Verto AI presentations directly from chat.</p>
+      </div>
+
+      <!-- Account Info & Permissions -->
+      <div class="bg-gray-50/80 rounded-2xl p-5 mb-8 border border-gray-100/80">
+        <div class="text-sm text-gray-500 mb-3 flex items-center justify-between">
+          <span>Signed in as</span>
+          <span class="font-semibold text-gray-800">${escapeHtml(userEmail)}</span>
+        </div>
+        <div class="w-full h-px bg-gray-200 mb-3"></div>
+        <p class="text-xs text-gray-500 mb-3 uppercase font-semibold tracking-wider">Required Permissions</p>
+        <ul class="text-sm text-gray-700 m-0 p-0 list-none">
+          ${scopeRows}
+        </ul>
+      </div>
+
+      <form method="post" action="${escapeHtml(new URL('/oauth/authorize', request.url).toString())}">
+        ${hiddenInputs}
+        
+        <div class="flex flex-col gap-3">
+          <button class="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-semibold text-[15px] py-3.5 px-4 rounded-full transition-all flex items-center justify-center group" type="submit" name="decision" value="allow">
+            <span>Sign in with Verto AI</span>
+            <svg class="w-4 h-4 ml-1.5 group-hover:translate-x-0.5 transition-transform text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+          
+          <button class="w-full bg-transparent hover:bg-gray-50 text-gray-600 font-medium text-[15px] py-3 px-4 rounded-full transition-colors" type="submit" name="decision" value="deny">
+            Cancel
+          </button>
+        </div>
+      </form>
+
+      <!-- Footer text -->
+      <div class="mt-8 pt-6 border-t border-gray-100 space-y-4">
+        <div class="text-[13px] text-gray-500 leading-relaxed">
+          <strong class="text-gray-700 font-semibold block mb-0.5">Permissions always respected.</strong>
+          ${escapeHtml(clientName)} is strictly limited to permissions you've explicitly set. Disable access anytime to revoke permissions.
+        </div>
+        <div class="text-[13px] text-gray-500 leading-relaxed">
+          <strong class="text-gray-700 font-semibold block mb-0.5">You're in control.</strong>
+          ${escapeHtml(clientName)} always respects your training data preferences. Data from Verto AI may be used to provide you relevant and useful information.
+        </div>
+      </div>
+
+    </div>
   </main>
 </body>
 </html>`;
