@@ -14,59 +14,68 @@ const deckStyles = `
     display: grid;
     gap: 16px;
     min-height: 360px;
-    padding: 16px;
+    padding: 24px;
     overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    letter-spacing: -0.01em;
   }
   .deck-header {
     display: grid;
-    gap: 8px;
+    gap: 6px;
+    margin-bottom: 8px;
   }
   .deck-kicker {
     color: var(--accent);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
+    letter-spacing: 0.05em;
   }
   .deck-title {
     margin: 0;
     max-width: 42rem;
-    font-size: 22px;
-    line-height: 1.18;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.2;
     overflow-wrap: anywhere;
   }
   .deck-summary {
     max-width: 44rem;
-    margin: 0;
+    margin: 4px 0 12px;
     color: var(--muted);
+    font-size: 15px;
     overflow-wrap: anywhere;
   }
   .badge-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    min-height: 26px;
+    gap: 8px;
+    min-height: 28px;
   }
   .badge {
     display: inline-flex;
     align-items: center;
-    min-height: 24px;
+    min-height: 26px;
     max-width: 100%;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 3px 8px;
-    background: color-mix(in srgb, var(--surface) 90%, var(--accent-soft));
+    border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
+    border-radius: 99px;
+    padding: 4px 12px;
+    background: color-mix(in srgb, var(--surface) 60%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     color: var(--fg);
     font-size: 12px;
-    font-weight: 650;
+    font-weight: 600;
     overflow-wrap: anywhere;
   }
   .badge.is-published {
-    border-color: color-mix(in srgb, var(--accent) 42%, var(--line));
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
     color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
   }
   .deck-stage {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(176px, 220px);
-    gap: 14px;
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 240px);
+    gap: 20px;
     align-items: stretch;
   }
   .cover-preview {
@@ -75,24 +84,30 @@ const deckStyles = `
     align-content: space-between;
     min-height: 242px;
     aspect-ratio: 16 / 9;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 18px;
+    border: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+    border-radius: 16px;
+    padding: 24px;
     overflow: hidden;
-    background: color-mix(in srgb, var(--surface) 94%, var(--accent-soft));
+    background: color-mix(in srgb, var(--surface) 75%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
   }
   .cover-meta {
     display: flex;
     justify-content: space-between;
     gap: 12px;
     color: var(--muted);
-    font-size: 12px;
-    font-weight: 650;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
   .cover-title {
     max-width: 78%;
     margin: 22px 0 8px;
-    font-size: 28px;
+    font-size: 32px;
+    font-weight: 800;
     line-height: 1.1;
     overflow-wrap: anywhere;
   }
@@ -100,92 +115,110 @@ const deckStyles = `
     max-width: 68%;
     margin: 0;
     color: var(--muted);
+    font-size: 15px;
     overflow-wrap: anywhere;
   }
   .cover-lines {
     display: grid;
     gap: 8px;
     width: min(260px, 58%);
-    margin-top: 18px;
+    margin-top: 20px;
   }
   .cover-line {
     height: 8px;
     border-radius: 8px;
-    background: color-mix(in srgb, var(--accent) 24%, var(--line));
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
   }
   .cover-line:nth-child(2) { width: 72%; }
   .cover-line:nth-child(3) { width: 48%; }
   .action-panel {
     display: grid;
     align-content: start;
-    gap: 10px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 12px;
-    background: color-mix(in srgb, var(--surface) 96%, var(--accent-soft));
+    gap: 12px;
+    border: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+    border-radius: 16px;
+    padding: 20px;
+    background: color-mix(in srgb, var(--surface) 75%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
   }
   .action-title {
     margin: 0;
-    font-size: 13px;
-    font-weight: 750;
+    font-size: 15px;
+    font-weight: 700;
   }
   .action-note {
     min-height: 36px;
     margin: 0;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 13px;
+    line-height: 1.4;
   }
   .button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 38px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 8px 10px;
-    background: var(--surface);
+    min-height: 42px;
+    border: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
+    border-radius: 99px;
+    padding: 8px 16px;
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
     color: var(--fg);
     font: inherit;
-    font-size: 13px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 600;
     text-align: center;
     text-decoration: none;
     cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .button:hover:not(:disabled) {
+    background: var(--surface);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
   }
   .button.primary {
     border-color: var(--accent);
     background: var(--accent);
     color: var(--bg);
   }
+  .button.primary:hover:not(:disabled) {
+    opacity: 0.9;
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
   .button[aria-disabled="true"],
   .button:disabled {
     cursor: default;
-    opacity: 0.55;
+    opacity: 0.5;
   }
   .button.is-busy {
     cursor: wait;
+    opacity: 0.7;
   }
   .filmstrip {
     display: grid;
-    gap: 9px;
+    gap: 12px;
   }
   .filmstrip-head {
     display: flex;
     justify-content: space-between;
     gap: 12px;
     color: var(--muted);
-    font-size: 12px;
-    font-weight: 650;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
   .filmstrip-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 9px;
+    gap: 16px;
   }
   .slide-card {
     display: grid;
-    gap: 7px;
+    gap: 10px;
     min-width: 0;
   }
   .slide-preview {
@@ -194,22 +227,29 @@ const deckStyles = `
     align-content: end;
     aspect-ratio: 16 / 9;
     min-height: 78px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 9px;
+    border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
+    border-radius: 12px;
+    padding: 12px;
     overflow: hidden;
-    background: color-mix(in srgb, var(--surface) 88%, var(--accent-soft));
+    background: color-mix(in srgb, var(--surface) 60%, transparent);
+    transition: all 0.2s;
+  }
+  .slide-preview:hover {
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   }
   .slide-number {
     position: absolute;
-    top: 7px;
-    left: 7px;
-    min-width: 22px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 1px 5px;
-    background: var(--surface);
-    color: var(--muted);
+    top: 8px;
+    left: 8px;
+    min-width: 24px;
+    border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
+    border-radius: 99px;
+    padding: 2px 8px;
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--fg);
     font-size: 11px;
     font-weight: 700;
     text-align: center;
@@ -220,8 +260,8 @@ const deckStyles = `
     -webkit-line-clamp: 2;
     margin: 0;
     color: var(--fg);
-    font-size: 12px;
-    font-weight: 750;
+    font-size: 13px;
+    font-weight: 700;
     overflow: hidden;
     overflow-wrap: anywhere;
   }
@@ -229,28 +269,31 @@ const deckStyles = `
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-    min-height: 32px;
+    min-height: 36px;
     margin: 0;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 13px;
     overflow: hidden;
     overflow-wrap: anywhere;
   }
   .empty-state {
-    border: 1px dashed var(--line);
-    border-radius: 8px;
-    padding: 14px;
+    border: 1px dashed color-mix(in srgb, var(--line) 60%, transparent);
+    border-radius: 12px;
+    padding: 24px;
     color: var(--muted);
-    background: color-mix(in srgb, var(--surface) 94%, var(--accent-soft));
+    background: color-mix(in srgb, var(--surface) 40%, transparent);
+    text-align: center;
+    font-size: 14px;
   }
   .is-loading .cover-preview,
   .is-loading .badge,
   .is-loading .button,
   .is-loading .slide-preview {
-    opacity: 0.72;
+    opacity: 0.6;
+    pointer-events: none;
   }
   @media (max-width: 560px) {
-    .deck-shell { padding: 14px; }
+    .deck-shell { padding: 16px; }
     .deck-stage { grid-template-columns: 1fr; }
     .cover-preview {
       min-height: 220px;
@@ -258,7 +301,7 @@ const deckStyles = `
     }
     .cover-title {
       max-width: 100%;
-      font-size: 23px;
+      font-size: 26px;
     }
     .cover-text { max-width: 100%; }
     .action-panel { grid-template-columns: 1fr; }
