@@ -892,6 +892,7 @@ function renderLoading(): void {
     openUrl: '',
     actions: {},
     slides: [],
+    rawSlides: [],
   });
   renderCover({
     id: '',
@@ -904,6 +905,7 @@ function renderLoading(): void {
     openUrl: '',
     actions: {},
     slides: [],
+    rawSlides: [],
   });
   configureOpenLink({
     id: '',
@@ -916,6 +918,7 @@ function renderLoading(): void {
     openUrl: '',
     actions: {},
     slides: [],
+    rawSlides: [],
   });
   configureSecondaryAction({
     id: '',
@@ -928,6 +931,7 @@ function renderLoading(): void {
     openUrl: '',
     actions: { canPublish: false },
     slides: [],
+    rawSlides: [],
   });
   configureRefreshAction({
     id: '',
@@ -940,6 +944,7 @@ function renderLoading(): void {
     openUrl: '',
     actions: {},
     slides: [],
+    rawSlides: [],
   });
   renderSlides({
     id: '',
@@ -952,6 +957,7 @@ function renderLoading(): void {
     openUrl: '',
     actions: {},
     slides: [],
+    rawSlides: [],
   });
 }
 
