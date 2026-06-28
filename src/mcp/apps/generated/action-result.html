@@ -7,7 +7,7 @@
 </head>
 <body>
   <script>
-"use strict";(()=>{var _="2026-01-26";var R=0,p=null,f=new Map,M=`
+"use strict";(()=>{var _="2026-01-26";var R=0,u=null,f=new Map,M=`
   :root {
     color-scheme: light dark;
     --bg: #fbfbfc;
@@ -108,199 +108,228 @@
     font-weight: 650;
     text-decoration: none;
   }
-`;function w(e){m(M),window.addEventListener("message",t=>{if(t.source!==window.parent)return;let n=t.data;if(!(!n||typeof n!="object")){if(n.jsonrpc==="2.0"){if(V(n))return;n.method==="ui/notifications/tool-result"&&g(n.params,e);return}g(n.result||n.payload||n,e)}}),E().catch(t=>{console.warn("Verto MCP Apps bridge was not initialized:",t)}),g(O(),e)}async function h(e){if(!e.trim())return;let t=window.openai;if(typeof t?.sendFollowUpMessage=="function"){await t.sendFollowUpMessage({prompt:e,scrollToBottom:!0});return}if(!x())throw new Error("This host has not enabled ChatGPT follow-up messages for the widget.");y("ui/message",{role:"user",content:[{type:"text",text:e}]})}function l(e){let t=document.getElementById(e);if(!t)throw new Error(`Missing widget element: ${e}`);return t}function s(e){return e&&typeof e=="object"?e:{}}function a(e,t=""){return typeof e=="string"&&e.length>0?e:t}function b(e,t=0){return typeof e=="number"&&Number.isFinite(e)?e:t}function c(e){return Array.isArray(e)?e:[]}function m(e){let t=document.createElement("style");t.textContent=e,document.head.appendChild(t)}function x(){return typeof window<"u"&&window.parent!==window}function E(){return x()?(p||(p=L("ui/initialize",{appInfo:{name:"verto-ai",version:"0.1.0"},appCapabilities:{},protocolVersion:_},5e3).then(()=>{y("ui/notifications/initialized",{})}).catch(e=>{throw p=null,e})),p):Promise.resolve()}function y(e,t){window.parent.postMessage({jsonrpc:"2.0",method:e,params:t},"*")}function L(e,t,n){return new Promise((i,o)=>{let r=++R,T=window.setTimeout(()=>{f.delete(r),o(new Error(`Timed out waiting for ${e}.`))},n);f.set(r,{resolve:i,reject:o,timeoutId:T}),window.parent.postMessage({jsonrpc:"2.0",id:r,method:e,params:t},"*")})}function V(e){if(typeof e.id!="number"||typeof e.method=="string")return!1;let t=f.get(e.id);return t?(f.delete(e.id),window.clearTimeout(t.timeoutId),e.error?t.reject(e.error):t.resolve(e.result),!0):!1}function O(){if(window.__VERTO_MCP_PAYLOAD__)return window.__VERTO_MCP_PAYLOAD__;let e=window.openai||{};return e.toolOutput||e.toolResult||e.toolResponse||{}}function g(e,t){let n=N(e);window.__VERTO_MCP_PAYLOAD__=n,t(n)}function N(e){let t=I(e);if(t)return t;let n=S(e);return n||s(e)}function I(e){let t=s(e),n=t.structuredContent||t.structured_content;return n?s(n):null}function S(e){let n=c(s(e).content).find(i=>{let o=s(i);return o.type==="text"&&typeof o.text=="string"});if(!n)return null;try{return s(JSON.parse(a(s(n).text)))}catch{return null}}var U=`
+`;function w(e){m(M),window.addEventListener("message",t=>{if(t.source!==window.parent)return;let n=t.data;if(!(!n||typeof n!="object")){if(n.jsonrpc==="2.0"){if(V(n))return;n.method==="ui/notifications/tool-result"&&g(n.params,e);return}g(n.result||n.payload||n,e)}}),E().catch(t=>{console.warn("Verto MCP Apps bridge was not initialized:",t)}),g(O(),e)}async function b(e){if(!e.trim())return;let t=window.openai;if(typeof t?.sendFollowUpMessage=="function"){await t.sendFollowUpMessage({prompt:e,scrollToBottom:!0});return}if(!x())throw new Error("This host has not enabled ChatGPT follow-up messages for the widget.");y("ui/message",{role:"user",content:[{type:"text",text:e}]})}function l(e){let t=document.getElementById(e);if(!t)throw new Error(`Missing widget element: ${e}`);return t}function s(e){return e&&typeof e=="object"?e:{}}function a(e,t=""){return typeof e=="string"&&e.length>0?e:t}function h(e,t=0){return typeof e=="number"&&Number.isFinite(e)?e:t}function c(e){return Array.isArray(e)?e:[]}function m(e){let t=document.createElement("style");t.textContent=e,document.head.appendChild(t)}function x(){return typeof window<"u"&&window.parent!==window}function E(){return x()?(u||(u=L("ui/initialize",{appInfo:{name:"verto-ai",version:"0.1.0"},appCapabilities:{},protocolVersion:_},5e3).then(()=>{y("ui/notifications/initialized",{})}).catch(e=>{throw u=null,e})),u):Promise.resolve()}function y(e,t){window.parent.postMessage({jsonrpc:"2.0",method:e,params:t},"*")}function L(e,t,n){return new Promise((i,r)=>{let o=++R,T=window.setTimeout(()=>{f.delete(o),r(new Error(`Timed out waiting for ${e}.`))},n);f.set(o,{resolve:i,reject:r,timeoutId:T}),window.parent.postMessage({jsonrpc:"2.0",id:o,method:e,params:t},"*")})}function V(e){if(typeof e.id!="number"||typeof e.method=="string")return!1;let t=f.get(e.id);return t?(f.delete(e.id),window.clearTimeout(t.timeoutId),e.error?t.reject(e.error):t.resolve(e.result),!0):!1}function O(){if(window.__VERTO_MCP_PAYLOAD__)return window.__VERTO_MCP_PAYLOAD__;let e=window.openai||{};return e.toolOutput||e.toolResult||e.toolResponse||{}}function g(e,t){let n=S(e);window.__VERTO_MCP_PAYLOAD__=n,t(n)}function S(e){let t=I(e);if(t)return t;let n=N(e);return n||s(e)}function I(e){let t=s(e),n=t.structuredContent||t.structured_content;return n?s(n):null}function N(e){let n=c(s(e).content).find(i=>{let r=s(i);return r.type==="text"&&typeof r.text=="string"});if(!n)return null;try{return s(JSON.parse(a(s(n).text)))}catch{return null}}var U=`
   .result-shell {
     display: grid;
     gap: 16px;
     min-height: 300px;
-    padding: 16px;
+    padding: 24px;
     overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    letter-spacing: -0.01em;
   }
   .result-header {
     display: grid;
-    gap: 8px;
+    gap: 6px;
+    margin-bottom: 8px;
   }
   .result-kicker {
     color: var(--accent);
-    font-size: 12px;
-    font-weight: 750;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
   }
   .result-title {
     margin: 0;
     max-width: 44rem;
-    font-size: 22px;
-    line-height: 1.18;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.2;
     overflow-wrap: anywhere;
   }
   .result-message {
     max-width: 48rem;
-    margin: 0;
+    margin: 4px 0 12px;
     color: var(--muted);
+    font-size: 15px;
     overflow-wrap: anywhere;
   }
   .badge-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
   }
   .badge {
     display: inline-flex;
     align-items: center;
-    min-height: 24px;
+    min-height: 26px;
     max-width: 100%;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 3px 8px;
-    background: color-mix(in srgb, var(--surface) 90%, var(--accent-soft));
+    border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
+    border-radius: 99px;
+    padding: 4px 12px;
+    background: color-mix(in srgb, var(--surface) 60%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     color: var(--fg);
     font-size: 12px;
-    font-weight: 750;
+    font-weight: 600;
     overflow-wrap: anywhere;
   }
   .badge.success {
-    border-color: color-mix(in srgb, var(--accent) 42%, var(--line));
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
     color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
   }
   .badge.warning {
-    border-color: #b45309;
-    background: #fff7ed;
-    color: #92400e;
+    border-color: #fca5a5;
+    background: color-mix(in srgb, #fef2f2 80%, transparent);
+    color: #b91c1c;
+  }
+  @media (prefers-color-scheme: dark) {
+    .badge.warning {
+      border-color: #7f1d1d;
+      background: color-mix(in srgb, #450a0a 60%, transparent);
+      color: #fca5a5;
+    }
   }
   .result-stage {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(184px, 236px);
-    gap: 14px;
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 240px);
+    gap: 20px;
   }
   .summary-panel,
   .action-panel,
   .affected-panel {
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--surface) 96%, var(--accent-soft));
+    border: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--surface) 75%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
   }
   .summary-panel {
     display: grid;
-    gap: 12px;
-    padding: 14px;
+    gap: 16px;
+    padding: 24px;
   }
   .summary-title {
     margin: 0;
-    font-size: 15px;
-    font-weight: 800;
+    font-size: 16px;
+    font-weight: 700;
     overflow-wrap: anywhere;
   }
   .summary-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
+    gap: 12px;
   }
   .metric {
     display: grid;
-    gap: 4px;
-    min-height: 68px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 9px;
+    gap: 6px;
+    min-height: 74px;
+    border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
+    border-radius: 12px;
+    padding: 12px;
+    background: color-mix(in srgb, var(--surface) 60%, transparent);
   }
   .metric-label {
     color: var(--muted);
-    font-size: 11px;
-    font-weight: 750;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
   .metric-value {
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--fg);
     overflow-wrap: anywhere;
   }
   .affected-panel {
     display: grid;
-    gap: 8px;
-    padding: 12px;
+    gap: 12px;
+    padding: 16px;
   }
   .affected-panel[hidden] {
     display: none;
   }
   .affected-title {
     margin: 0;
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 14px;
+    font-weight: 700;
   }
   .affected-list {
     display: grid;
-    gap: 6px;
+    gap: 8px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
   .affected-item {
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 8px;
+    border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
+    border-radius: 10px;
+    padding: 10px 12px;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 13px;
+    background: color-mix(in srgb, var(--surface) 60%, transparent);
     overflow-wrap: anywhere;
   }
   .action-panel {
     display: grid;
     align-content: start;
-    gap: 10px;
-    padding: 12px;
+    gap: 12px;
+    padding: 20px;
   }
   .action-title {
     margin: 0;
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 15px;
+    font-weight: 700;
   }
   .action-note {
     min-height: 40px;
     margin: 0;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 13px;
+    line-height: 1.4;
   }
   .button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 38px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 8px 10px;
-    background: var(--surface);
+    min-height: 42px;
+    border: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
+    border-radius: 99px;
+    padding: 8px 16px;
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
     color: var(--fg);
     font: inherit;
-    font-size: 13px;
-    font-weight: 750;
+    font-size: 14px;
+    font-weight: 600;
     text-align: center;
     text-decoration: none;
     cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .button:hover:not(:disabled) {
+    background: var(--surface);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
   }
   .button.primary {
     border-color: var(--accent);
     background: var(--accent);
     color: var(--bg);
   }
+  .button.primary:hover:not(:disabled) {
+    opacity: 0.9;
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
   .button:disabled,
   .button[aria-disabled="true"] {
     cursor: default;
-    opacity: 0.55;
+    opacity: 0.5;
   }
   .button.is-busy {
     cursor: wait;
+    opacity: 0.7;
   }
   @media (max-width: 720px) {
     .result-stage { grid-template-columns: 1fr; }
     .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
-  @media (prefers-color-scheme: dark) {
-    .badge.warning {
-      border-color: #f59e0b;
-      background: #271303;
-      color: #fbbf24;
-    }
-  }
   @media (max-width: 440px) {
-    .result-shell { padding: 14px; }
+    .result-shell { padding: 16px; }
     .summary-grid { grid-template-columns: 1fr; }
   }
 `,v=!1;function B(){v||(m(U),v=!0)}function D(){document.getElementById("verto-action-result-widget")||(document.body.innerHTML=`
@@ -329,7 +358,7 @@
         </aside>
       </section>
     </main>
-  `)}function z(e){let t=s(e.widget);if(t.widget==="action_result"){let o=s(t.operation),r=k(s(t.presentation));return{kind:a(o.kind,"action"),title:a(o.title,"Action complete"),message:a(o.message,"Verto finished the requested action."),status:a(o.status,"success"),completedAt:a(o.completedAt),presentation:r,affectedPresentations:H(c(t.affectedPresentations))}}let n=s(e.data||e),i=k(n);return{kind:"action",title:a(n.message,"Action complete"),message:a(n.message,"Verto finished the requested action."),status:"success",completedAt:"",presentation:i,affectedPresentations:$(n)}}function k(e){let t=a(e.id),n=a(e.title);return!t&&!n?null:{id:t,title:n||"Untitled presentation",themeName:a(e.themeName||e.theme_name,"Default"),slideCount:b(e.slideCount||e.slide_count),updatedAt:a(e.updatedAt||e.updated_at),isPublished:!!(e.isPublished||e.is_published),isDeleted:!!(e.isDeleted||e.is_deleted||e.deleted),shareUrl:a(e.shareUrl||e.share_url),openUrl:a(e.openUrl||e.open_url||e.url)}}function H(e){return e.map((t,n)=>{let i=s(t);return{id:a(i.id,`item-${n+1}`),title:a(i.title,`Presentation ${n+1}`)}})}function $(e){let t=c(e.deleted_ids),n=c(e.deleted_titles);return t.map((i,o)=>({id:a(i,`item-${o+1}`),title:a(n[o],`Presentation ${o+1}`)}))}function j(e){B(),D();let t=z(e);l("title").textContent=t.title,l("message").textContent=t.message,F(t),G(t),q(t),Y(t)}function F(e){let t=l("badges");t.textContent="",t.appendChild(u(e.status==="warning"?"Needs attention":"Complete",e.status)),t.appendChild(u(P(e.kind))),e.presentation?.isPublished&&t.appendChild(u("Published")),e.presentation?.isDeleted&&t.appendChild(u("Deleted","warning")),e.completedAt&&t.appendChild(u(C(e.completedAt)))}function u(e,t=""){let n=document.createElement("span");return n.className=`badge${t?` ${t}`:""}`,n.textContent=e,n}function G(e){let t=l("summary-grid"),n=l("summary-title");if(t.textContent="",!e.presentation){n.textContent="Operation summary",t.appendChild(d("Affected",String(e.affectedPresentations.length||1))),t.appendChild(d("Status",e.status==="warning"?"Needs attention":"Complete")),t.appendChild(d("Operation",P(e.kind)));return}let i=e.presentation;n.textContent=i.title,t.appendChild(d("Slides",`${i.slideCount}`)),t.appendChild(d("Theme",i.themeName)),t.appendChild(d("Status",i.isDeleted?"Deleted":i.isPublished?"Published":"Draft")),t.appendChild(d("Updated",C(i.updatedAt)))}function d(e,t){let n=document.createElement("div");n.className="metric";let i=document.createElement("span");i.className="metric-label",i.textContent=e,n.appendChild(i);let o=document.createElement("span");return o.className="metric-value",o.textContent=t||"Not available",n.appendChild(o),n}function q(e){let t=l("affected-panel"),n=l("affected-list");if(n.textContent="",e.affectedPresentations.length===0){t.setAttribute("hidden","true");return}t.removeAttribute("hidden"),e.affectedPresentations.slice(0,8).forEach(i=>{let o=document.createElement("li");o.className="affected-item",o.textContent=`${i.title} (${i.id})`,n.appendChild(o)})}function Y(e){let t=l("open-link"),n=l("preview-action"),i=l("copy-action"),o=l("action-note"),r=e.presentation;t instanceof HTMLAnchorElement&&(r?.openUrl&&!r.isDeleted?(t.href=r.openUrl,t.target="_blank",t.rel="noopener noreferrer",t.textContent="Open in Verto",t.classList.add("primary"),t.setAttribute("aria-label",`Open presentation: ${r.title}`),t.setAttribute("aria-disabled","false")):(t.removeAttribute("href"),t.removeAttribute("aria-label"),t.textContent="Open unavailable",t.classList.remove("primary"),t.setAttribute("aria-disabled","true"))),n instanceof HTMLButtonElement&&(n.disabled=!r?.id||!!r?.isDeleted,n.setAttribute("aria-disabled",r?.id&&!r.isDeleted?"false":"true"),n.onclick=r?.id&&!r.isDeleted?()=>W(r,n,o):null),i instanceof HTMLButtonElement&&(i.disabled=!r?.shareUrl,i.setAttribute("aria-disabled",r?.shareUrl?"false":"true"),i.onclick=r?.shareUrl?()=>J(r.shareUrl,i,o):null),o.textContent=r?.isDeleted?"This deck is deleted. Recover it before opening or previewing.":r?.id?"Open the deck, preview it with ChatGPT, or copy the share link when available.":"The operation finished. Review the affected presentation list above."}async function W(e,t,n){await A(t,n,"Asking ChatGPT...",async()=>{await h(`Show me a visual preview of Verto presentation ${e.id}.`),n.textContent="Asked ChatGPT to preview this deck."})}async function J(e,t,n){await A(t,n,"Copying...",async()=>{await navigator.clipboard?.writeText(e),n.textContent="Share link copied."})}async function A(e,t,n,i){let o=e.textContent||"";e.disabled=!0,e.classList.add("is-busy"),e.setAttribute("aria-disabled","true"),e.textContent=n;try{await i()}catch(r){t.textContent=K(r)}finally{e.disabled=!1,e.classList.remove("is-busy"),e.setAttribute("aria-disabled","false"),e.textContent===n&&(e.textContent=o)}}function K(e){if(e&&typeof e=="object"){let t=e;if(typeof t.message=="string")return t.message}return"ChatGPT could not complete that Verto action. Try again in a moment."}function P(e){return e.replace(/_/g," ").replace(/\b\w/g,t=>t.toUpperCase())}function C(e){if(!e)return"Time unavailable";let t=new Date(e);return Number.isNaN(t.getTime())?"Time unavailable":new Intl.DateTimeFormat(void 0,{month:"short",day:"numeric"}).format(t)}w(e=>{j(e)});})();
+  `)}function z(e){let t=s(e.widget);if(t.widget==="action_result"){let r=s(t.operation),o=k(s(t.presentation));return{kind:a(r.kind,"action"),title:a(r.title,"Action complete"),message:a(r.message,"Verto finished the requested action."),status:a(r.status,"success"),completedAt:a(r.completedAt),presentation:o,affectedPresentations:H(c(t.affectedPresentations))}}let n=s(e.data||e),i=k(n);return{kind:"action",title:a(n.message,"Action complete"),message:a(n.message,"Verto finished the requested action."),status:"success",completedAt:"",presentation:i,affectedPresentations:$(n)}}function k(e){let t=a(e.id),n=a(e.title);return!t&&!n?null:{id:t,title:n||"Untitled presentation",themeName:a(e.themeName||e.theme_name,"Default"),slideCount:h(e.slideCount||e.slide_count),updatedAt:a(e.updatedAt||e.updated_at),isPublished:!!(e.isPublished||e.is_published),isDeleted:!!(e.isDeleted||e.is_deleted||e.deleted),shareUrl:a(e.shareUrl||e.share_url),openUrl:a(e.openUrl||e.open_url||e.url)}}function H(e){return e.map((t,n)=>{let i=s(t);return{id:a(i.id,`item-${n+1}`),title:a(i.title,`Presentation ${n+1}`)}})}function $(e){let t=c(e.deleted_ids),n=c(e.deleted_titles);return t.map((i,r)=>({id:a(i,`item-${r+1}`),title:a(n[r],`Presentation ${r+1}`)}))}function j(e){B(),D();let t=z(e);l("title").textContent=t.title,l("message").textContent=t.message,F(t),G(t),q(t),Y(t)}function F(e){let t=l("badges");t.textContent="",t.appendChild(p(e.status==="warning"?"Needs attention":"Complete",e.status)),t.appendChild(p(P(e.kind))),e.presentation?.isPublished&&t.appendChild(p("Published")),e.presentation?.isDeleted&&t.appendChild(p("Deleted","warning")),e.completedAt&&t.appendChild(p(C(e.completedAt)))}function p(e,t=""){let n=document.createElement("span");return n.className=`badge${t?` ${t}`:""}`,n.textContent=e,n}function G(e){let t=l("summary-grid"),n=l("summary-title");if(t.textContent="",!e.presentation){n.textContent="Operation summary",t.appendChild(d("Affected",String(e.affectedPresentations.length||1))),t.appendChild(d("Status",e.status==="warning"?"Needs attention":"Complete")),t.appendChild(d("Operation",P(e.kind)));return}let i=e.presentation;n.textContent=i.title,t.appendChild(d("Slides",`${i.slideCount}`)),t.appendChild(d("Theme",i.themeName)),t.appendChild(d("Status",i.isDeleted?"Deleted":i.isPublished?"Published":"Draft")),t.appendChild(d("Updated",C(i.updatedAt)))}function d(e,t){let n=document.createElement("div");n.className="metric";let i=document.createElement("span");i.className="metric-label",i.textContent=e,n.appendChild(i);let r=document.createElement("span");return r.className="metric-value",r.textContent=t||"Not available",n.appendChild(r),n}function q(e){let t=l("affected-panel"),n=l("affected-list");if(n.textContent="",e.affectedPresentations.length===0){t.setAttribute("hidden","true");return}t.removeAttribute("hidden"),e.affectedPresentations.slice(0,8).forEach(i=>{let r=document.createElement("li");r.className="affected-item",r.textContent=`${i.title} (${i.id})`,n.appendChild(r)})}function Y(e){let t=l("open-link"),n=l("preview-action"),i=l("copy-action"),r=l("action-note"),o=e.presentation;t instanceof HTMLAnchorElement&&(o?.openUrl&&!o.isDeleted?(t.href=o.openUrl,t.target="_blank",t.rel="noopener noreferrer",t.textContent="Open in Verto",t.classList.add("primary"),t.setAttribute("aria-label",`Open presentation: ${o.title}`),t.setAttribute("aria-disabled","false")):(t.removeAttribute("href"),t.removeAttribute("aria-label"),t.textContent="Open unavailable",t.classList.remove("primary"),t.setAttribute("aria-disabled","true"))),n instanceof HTMLButtonElement&&(n.disabled=!o?.id||!!o?.isDeleted,n.setAttribute("aria-disabled",o?.id&&!o.isDeleted?"false":"true"),n.onclick=o?.id&&!o.isDeleted?()=>W(o,n,r):null),i instanceof HTMLButtonElement&&(i.disabled=!o?.shareUrl,i.setAttribute("aria-disabled",o?.shareUrl?"false":"true"),i.onclick=o?.shareUrl?()=>J(o.shareUrl,i,r):null),r.textContent=o?.isDeleted?"This deck is deleted. Recover it before opening or previewing.":o?.id?"Open the deck, preview it with ChatGPT, or copy the share link when available.":"The operation finished. Review the affected presentation list above."}async function W(e,t,n){await A(t,n,"Asking ChatGPT...",async()=>{await b(`Show me a visual preview of Verto presentation ${e.id}.`),n.textContent="Asked ChatGPT to preview this deck."})}async function J(e,t,n){await A(t,n,"Copying...",async()=>{await navigator.clipboard?.writeText(e),n.textContent="Share link copied."})}async function A(e,t,n,i){let r=e.textContent||"";e.disabled=!0,e.classList.add("is-busy"),e.setAttribute("aria-disabled","true"),e.textContent=n;try{await i()}catch(o){t.textContent=K(o)}finally{e.disabled=!1,e.classList.remove("is-busy"),e.setAttribute("aria-disabled","false"),e.textContent===n&&(e.textContent=r)}}function K(e){if(e&&typeof e=="object"){let t=e;if(typeof t.message=="string")return t.message}return"ChatGPT could not complete that Verto action. Try again in a moment."}function P(e){return e.replace(/_/g," ").replace(/\b\w/g,t=>t.toUpperCase())}function C(e){if(!e)return"Time unavailable";let t=new Date(e);return Number.isNaN(t.getTime())?"Time unavailable":new Intl.DateTimeFormat(void 0,{month:"short",day:"numeric"}).format(t)}w(e=>{j(e)});})();
   </script>
 </body>
 </html>
