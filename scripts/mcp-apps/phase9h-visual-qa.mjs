@@ -39,7 +39,7 @@ const scenarios = [
     viewport: { width: 1200, height: 900 },
     colorScheme: 'dark',
     expectations: {
-      text: ['Verto AI workspace', 'Presentation workspace', 'Open latest', 'Preview latest', 'Refresh list'],
+      text: ['Verto AI workspace', 'Presentation workspace', 'Open latest', 'Preview latest', 'Refresh list', 'Preview', 'Publish', 'Delete'],
       minListRows: 6,
     },
   },
@@ -51,7 +51,7 @@ const scenarios = [
     viewport: { width: 390, height: 900 },
     colorScheme: 'light',
     expectations: {
-      text: ['Verto AI workspace', 'Presentation workspace', 'Preview latest'],
+      text: ['Verto AI workspace', 'Presentation workspace', 'Preview latest', 'Preview', 'Delete'],
       minListRows: 6,
     },
   },
@@ -167,7 +167,7 @@ const scenarios = [
     viewport: { width: 1200, height: 900 },
     colorScheme: 'dark',
     expectations: {
-      text: ['Verto AI result', 'Presentation published', 'Open in Verto', 'Preview with ChatGPT', 'Copy share link'],
+      text: ['Verto AI result', 'Presentation published', 'Open in Verto', 'Preview with ChatGPT', 'Copy share link', 'Unpublish deck'],
     },
   },
   {

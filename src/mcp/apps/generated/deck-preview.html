@@ -7,7 +7,7 @@
 </head>
 <body>
   <script>
-"use strict";(()=>{var z="2026-01-26";var B=0,p=null,u=new Map,H=`
+"use strict";(()=>{var F="2026-01-26";var Y=0,y=null,k=new Map,G=`
   :root {
     color-scheme: light dark;
     --bg: #fbfbfc;
@@ -108,7 +108,7 @@
     font-weight: 650;
     text-decoration: none;
   }
-`;function C(e){k(H),window.addEventListener("message",t=>{if(t.source!==window.parent)return;let n=t.data;if(!(!n||typeof n!="object")){if(n.jsonrpc==="2.0"){if(F(n))return;n.method==="ui/notifications/tool-result"&&v(n.params,e);return}v(n.result||n.payload||n,e)}}),_().catch(t=>{console.warn("Verto MCP Apps bridge was not initialized:",t)}),v(Y(),e)}async function g(e,t){let n=await j(e,t),i=A(n);return window.__VERTO_MCP_PAYLOAD__=i,i}function r(e){let t=document.getElementById(e);if(!t)throw new Error(`Missing widget element: ${e}`);return t}function o(e){return e&&typeof e=="object"?e:{}}function l(e,t=""){return typeof e=="string"&&e.length>0?e:t}function P(e,t=0){return typeof e=="number"&&Number.isFinite(e)?e:t}function f(e){return Array.isArray(e)?e:[]}function k(e){let t=document.createElement("style");t.textContent=e,document.head.appendChild(t)}async function j(e,t){if(T())try{return await _(),await M("tools/call",{name:e,arguments:t},15e3)}catch(n){if(typeof window.openai?.callTool!="function")throw n}if(typeof window.openai?.callTool=="function")return window.openai.callTool(e,t);throw new Error("This host has not enabled widget tool calls for Verto AI yet.")}function T(){return typeof window<"u"&&window.parent!==window}function _(){return T()?(p||(p=M("ui/initialize",{appInfo:{name:"verto-ai",version:"0.1.0"},appCapabilities:{},protocolVersion:z},5e3).then(()=>{$("ui/notifications/initialized",{})}).catch(e=>{throw p=null,e})),p):Promise.resolve()}function $(e,t){window.parent.postMessage({jsonrpc:"2.0",method:e,params:t},"*")}function M(e,t,n){return new Promise((i,a)=>{let s=++B,d=window.setTimeout(()=>{u.delete(s),a(new Error(`Timed out waiting for ${e}.`))},n);u.set(s,{resolve:i,reject:a,timeoutId:d}),window.parent.postMessage({jsonrpc:"2.0",id:s,method:e,params:t},"*")})}function F(e){if(typeof e.id!="number"||typeof e.method=="string")return!1;let t=u.get(e.id);return t?(u.delete(e.id),window.clearTimeout(t.timeoutId),e.error?t.reject(e.error):t.resolve(e.result),!0):!1}function Y(){if(window.__VERTO_MCP_PAYLOAD__)return window.__VERTO_MCP_PAYLOAD__;let e=window.openai||{};return e.toolOutput||e.toolResult||e.toolResponse||{}}function v(e,t){let n=A(e);window.__VERTO_MCP_PAYLOAD__=n,t(n)}function A(e){let t=G(e);if(t)return t;let n=W(e);return n||o(e)}function G(e){let t=o(e),n=t.structuredContent||t.structured_content;return n?o(n):null}function W(e){let n=f(o(e).content).find(i=>{let a=o(i);return a.type==="text"&&typeof a.text=="string"});if(!n)return null;try{return o(JSON.parse(l(o(n).text)))}catch{return null}}var q=`
+`;function M(e){T(G),window.addEventListener("message",t=>{if(t.source!==window.parent)return;let n=t.data;if(!(!n||typeof n!="object")){if(n.jsonrpc==="2.0"){if(J(n))return;n.method==="ui/notifications/tool-result"&&P(n.params,e);return}P(n.result||n.payload||n,e)}}),R().catch(t=>{console.warn("Verto MCP Apps bridge was not initialized:",t)}),P(K(),e)}async function w(e,t){let n=await W(e,t),i=L(n);return window.__VERTO_MCP_PAYLOAD__=i,i}function a(e){let t=document.getElementById(e);if(!t)throw new Error(`Missing widget element: ${e}`);return t}function o(e){return e&&typeof e=="object"?e:{}}function d(e,t=""){return typeof e=="string"&&e.length>0?e:t}function A(e,t=0){return typeof e=="number"&&Number.isFinite(e)?e:t}function b(e){return Array.isArray(e)?e:[]}function T(e){let t=document.createElement("style");t.textContent=e,document.head.appendChild(t)}async function W(e,t){if(E())try{return await R(),await D("tools/call",{name:e,arguments:t},15e3)}catch(n){if(typeof window.openai?.callTool!="function")throw n}if(typeof window.openai?.callTool=="function")return window.openai.callTool(e,t);throw new Error("This host has not enabled widget tool calls for Verto AI yet.")}function E(){return typeof window<"u"&&window.parent!==window}function R(){return E()?(y||(y=D("ui/initialize",{appInfo:{name:"verto-ai",version:"0.1.0"},appCapabilities:{},protocolVersion:F},5e3).then(()=>{q("ui/notifications/initialized",{})}).catch(e=>{throw y=null,e})),y):Promise.resolve()}function q(e,t){window.parent.postMessage({jsonrpc:"2.0",method:e,params:t},"*")}function D(e,t,n){return new Promise((i,r)=>{let s=++Y,p=window.setTimeout(()=>{k.delete(s),r(new Error(`Timed out waiting for ${e}.`))},n);k.set(s,{resolve:i,reject:r,timeoutId:p}),window.parent.postMessage({jsonrpc:"2.0",id:s,method:e,params:t},"*")})}function J(e){if(typeof e.id!="number"||typeof e.method=="string")return!1;let t=k.get(e.id);return t?(k.delete(e.id),window.clearTimeout(t.timeoutId),e.error?t.reject(e.error):t.resolve(e.result),!0):!1}function K(){if(window.__VERTO_MCP_PAYLOAD__)return window.__VERTO_MCP_PAYLOAD__;let e=window.openai||{};return e.toolOutput||e.toolResult||e.toolResponse||{}}function P(e,t){let n=L(e);window.__VERTO_MCP_PAYLOAD__=n,t(n)}function L(e){let t=Q(e);if(t)return t;let n=X(e);return n||o(e)}function Q(e){let t=o(e),n=t.structuredContent||t.structured_content;return n?o(n):null}function X(e){let n=b(o(e).content).find(i=>{let r=o(i);return r.type==="text"&&typeof r.text=="string"});if(!n)return null;try{return o(JSON.parse(d(o(n).text)))}catch{return null}}var Z=`
   .deck-shell {
     display: grid;
     gap: 16px;
@@ -312,26 +312,80 @@
   }
   .filmstrip-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 16px;
   }
   .slide-card {
-    display: grid;
-    gap: 10px;
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
     min-width: 0;
   }
+  .slide-reorder-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+  }
+  .reorder-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+  }
+  .reorder-btn:hover:not(:disabled) {
+    background: var(--line);
+    color: var(--fg);
+  }
+  .reorder-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
   .slide-preview {
+    flex: 1;
     position: relative;
-    display: grid;
-    align-content: end;
-    aspect-ratio: 16 / 9;
-    min-height: 78px;
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: auto;
+    min-height: 120px;
     border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
     border-radius: 12px;
-    padding: 12px;
+    padding: 16px;
     overflow: hidden;
     background: color-mix(in srgb, var(--surface) 60%, transparent);
     transition: all 0.2s;
+  }
+  .slide-preview:hover {
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  .slide-content-html {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--fg);
+    margin-top: 24px;
+  }
+  .slide-content-html h1, .slide-content-html h2, .slide-content-html h3 {
+    margin: 0 0 8px;
+    color: var(--fg);
+  }
+  .slide-content-html p {
+    margin: 0 0 8px;
+    color: var(--muted);
+  }
+  .slide-content-html ul, .slide-content-html ol {
+    margin: 0 0 8px;
+    padding-left: 20px;
+    color: var(--muted);
   }
   .slide-preview:hover {
     background: color-mix(in srgb, var(--surface) 80%, transparent);
@@ -404,9 +458,9 @@
     }
     .cover-text { max-width: 100%; }
     .action-panel { grid-template-columns: 1fr; }
-    .filmstrip-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .filmstrip-grid { grid-template-columns: 1fr; }
   }
-`,R=!1;function J(){R||(k(q),R=!0)}function K(){document.getElementById("verto-deck-widget")||(document.body.innerHTML=`
+`,S=!1;function ee(){S||(T(Z),S=!0)}function te(){document.getElementById("verto-deck-widget")||(document.body.innerHTML=`
     <main class="deck-shell" id="verto-deck-widget">
       <section class="deck-header" aria-labelledby="title">
         <div class="deck-kicker">Verto AI deck</div>
@@ -446,7 +500,7 @@
         <div class="filmstrip-grid" id="slides"></div>
       </section>
     </main>
-  `)}function Q(e){let t=o(e.widget);if(t.widget==="deck_preview")return{presentation:o(t.presentation),slides:f(t.slides),actions:o(t.actions)};let n=o(e.data||e),i=o(n.presentation||n);return{presentation:i,slides:f(i.slides),actions:{}}}function X(e){let{presentation:t,slides:n,actions:i}=Q(e);return{id:l(t.id),title:l(t.title,"Deck preview"),themeName:l(t.theme_name||t.themeName,"Default"),slideCount:P(t.slide_count||t.slideCount,n.length),updatedAt:l(t.updated_at||t.updatedAt),isPublished:!!(t.is_published||t.isPublished),shareUrl:l(t.share_url||t.shareUrl),openUrl:l(t.open_url||t.openUrl||t.verto_url||t.url),actions:i,slides:n}}function Z(e){return!!(e.id||e.title!=="Deck preview"||e.slides.length>0)}function D(e,t){return l(e.title||e.slideName||e.slide_name,`Slide ${t+1}`)}function E(e){return l(e.previewText||e.preview_text||e.subtitle||e.description||e.body||e.content)}function ee(e){if(!e)return"Updated time unavailable";let t=new Date(e);return Number.isNaN(t.getTime())?"Updated time unavailable":`Updated ${new Intl.DateTimeFormat(void 0,{month:"short",day:"numeric"}).format(t)}`}function y(e){return`${e} slide${e===1?"":"s"}`}function m(e,t=""){let n=document.createElement("span");return n.className=`badge${t?` ${t}`:""}`,n.textContent=e,n}function L(e){let t=r("badges");t.textContent="",t.appendChild(m(e.isPublished?"Published":"Draft",e.isPublished?"is-published":"")),t.appendChild(m(y(e.slideCount))),t.appendChild(m(e.themeName)),t.appendChild(m(ee(e.updatedAt)))}function V(e){let t=o(e.slides[0]),n=D(t,0)||e.title,i=E(t)||"A clean preview of your generated Verto deck.";r("cover-theme").textContent=e.themeName,r("cover-count").textContent=y(e.slideCount),r("cover-title").textContent=n,r("cover-text").textContent=i}function S(e){let t=r("open-link");if(t instanceof HTMLAnchorElement){if(t.textContent="Open in Verto",!e.openUrl){t.removeAttribute("href"),t.setAttribute("aria-disabled","true");return}t.href=e.openUrl,t.target="_blank",t.rel="noopener noreferrer",t.setAttribute("aria-disabled","false")}}function U(e){let t=r("secondary-action"),n=r("action-note");if(t instanceof HTMLButtonElement){if(t.disabled=!1,t.setAttribute("aria-disabled","false"),t.onclick=null,e.shareUrl){t.textContent="Copy share link",n.textContent="This deck is published. Share the public link when you are ready.",t.onclick=()=>oe(e.shareUrl,t,n);return}if(e.actions.canPublish!==!1&&e.id){t.textContent="Publish from chat",n.textContent="Publish when you want a public share link.",t.onclick=()=>te(e,t,n);return}t.textContent="Share unavailable",t.disabled=!0,t.setAttribute("aria-disabled","true"),n.textContent="Sharing is unavailable for this deck state."}}function N(e){let t=r("refresh-action"),n=r("action-note");if(t instanceof HTMLButtonElement){if(t.textContent="Refresh preview",t.onclick=null,!e.id){t.disabled=!0,t.setAttribute("aria-disabled","true");return}t.disabled=!1,t.setAttribute("aria-disabled","false"),t.onclick=()=>ie(e,t,n)}}var c="";function te(e,t,n){if(c!==e.id){c=e.id,t.textContent="Confirm publish",n.textContent="This creates a public share link for this deck.",window.setTimeout(()=>{c===e.id&&t.textContent==="Confirm publish"&&(c="",t.textContent="Publish from chat",n.textContent="Publish when you want a public share link.")},6e3);return}c="",ne(e,t,n)}async function ne(e,t,n){await O(t,n,"Publishing...",async()=>{let i=await g("presentation_publish",{presentation_id:e.id});try{let a=await g("presentation_get",{presentation_id:e.id,include_slides:!0});w(a)}catch{w(i)}r("action-note").textContent="Deck published. The share link is ready."})}async function ie(e,t,n){await O(t,n,"Refreshing...",async()=>{let i=await g("presentation_get",{presentation_id:e.id,include_slides:!0});w(i),r("action-note").textContent="Preview refreshed from Verto."})}async function O(e,t,n,i){let a=e.textContent||"";e.disabled=!0,e.classList.add("is-busy"),e.setAttribute("aria-disabled","true"),e.textContent=n;try{await i()}catch(s){t.textContent=re(s)}finally{e.disabled=!1,e.classList.remove("is-busy"),e.setAttribute("aria-disabled","false"),e.textContent===n&&(e.textContent=a)}}function re(e){if(e&&typeof e=="object"){let t=e;if(typeof t.message=="string")return t.message}return"ChatGPT could not complete that Verto action. Try again in a moment."}async function oe(e,t,n){try{await navigator.clipboard?.writeText(e),t.textContent="Copied",n.textContent="Share link copied.",window.setTimeout(()=>{t.textContent="Copy share link"},1400)}catch{n.textContent=e}}function I(e){let t=r("slides");if(t.textContent="",r("filmstrip-count").textContent=`${Math.min(e.slides.length,6)} shown`,e.slides.length===0){let n=document.createElement("div");n.className="empty-state",n.textContent="Slide previews are not available yet. Open the deck to inspect the full presentation.",t.appendChild(n);return}e.slides.slice(0,6).forEach((n,i)=>{let a=o(n),s=document.createElement("article");s.className="slide-card";let d=document.createElement("div");d.className="slide-preview";let h=document.createElement("span");h.className="slide-number",h.textContent=String(i+1),d.appendChild(h);let b=document.createElement("h3");b.className="slide-title",b.textContent=D(a,i),d.appendChild(b);let x=document.createElement("p");x.className="slide-preview-text",x.textContent=E(a)||"Preview text unavailable.",s.appendChild(d),s.appendChild(x),t.appendChild(s)})}function ae(){r("verto-deck-widget").classList.add("is-loading"),r("title").textContent="Loading deck preview",r("summary").textContent="Waiting for Verto deck data from ChatGPT.",L({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]}),V({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]}),S({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]}),U({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{canPublish:!1},slides:[]}),N({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]}),I({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]})}function w(e){J(),K();let t=X(e),n=r("verto-deck-widget");if(!Z(t)){ae();return}n.classList.remove("is-loading"),r("title").textContent=t.title,r("summary").textContent=t.slides.length>0?`Previewing ${y(t.slideCount)} in ${t.themeName}.`:"Deck metadata is ready. Slide previews are still unavailable.",L(t),V(t),S(t),U(t),N(t),I(t)}C(e=>{w(e)});})();
+  `)}function ne(e){let t=o(e.widget);if(t.widget==="deck_preview")return{presentation:o(t.presentation),slides:b(t.slides),actions:o(t.actions)};let n=o(e.data||e),i=o(n.presentation||n);return{presentation:i,slides:b(i.slides),actions:{}}}function ie(e){let{presentation:t,slides:n,actions:i}=ne(e);return{id:d(t.id),title:d(t.title,"Deck preview"),themeName:d(t.theme_name||t.themeName,"Default"),slideCount:A(t.slide_count||t.slideCount,n.length),updatedAt:d(t.updated_at||t.updatedAt),isPublished:!!(t.is_published||t.isPublished),shareUrl:d(t.share_url||t.shareUrl),openUrl:d(t.open_url||t.openUrl||t.verto_url||t.url),actions:i,slides:n,rawSlides:b(o(o(e.data||e).presentation||o(e.data||e)).slides).length>0?b(o(o(e.data||e).presentation||o(e.data||e)).slides):n}}function re(e){return!!(e.id||e.title!=="Deck preview"||e.slides.length>0)}function N(e,t){return d(e.title||e.slideName||e.slide_name,`Slide ${t+1}`)}function U(e){return d(e.previewText||e.preview_text||e.subtitle||e.description||e.body||e.content)}function oe(e){if(!e)return"Updated time unavailable";let t=new Date(e);return Number.isNaN(t.getTime())?"Updated time unavailable":`Updated ${new Intl.DateTimeFormat(void 0,{month:"short",day:"numeric"}).format(t)}`}function _(e){return`${e} slide${e===1?"":"s"}`}function C(e,t=""){let n=document.createElement("span");return n.className=`badge${t?` ${t}`:""}`,n.textContent=e,n}function O(e){let t=a("badges");t.textContent="",t.appendChild(C(e.isPublished?"Published":"Draft",e.isPublished?"is-published":"")),t.appendChild(C(_(e.slideCount))),t.appendChild(C(e.themeName)),t.appendChild(C(oe(e.updatedAt)))}function I(e){let t=o(e.slides[0]),n=N(t,0)||e.title,i=U(t)||"A clean preview of your generated Verto deck.";a("cover-theme").textContent=e.themeName,a("cover-count").textContent=_(e.slideCount),a("cover-title").textContent=n,a("cover-text").textContent=i}function z(e){let t=a("open-link");if(t instanceof HTMLAnchorElement){if(t.textContent="Open in Verto",!e.openUrl){t.removeAttribute("href"),t.setAttribute("aria-disabled","true");return}t.href=e.openUrl,t.target="_blank",t.rel="noopener noreferrer",t.setAttribute("aria-disabled","false")}}function B(e){let t=a("secondary-action"),n=a("action-note");if(t instanceof HTMLButtonElement){if(t.disabled=!1,t.setAttribute("aria-disabled","false"),t.onclick=null,e.shareUrl){t.textContent="Copy share link",n.textContent="This deck is published. Share the public link when you are ready.",t.onclick=()=>ce(e.shareUrl,t,n);return}if(e.actions.canPublish!==!1&&e.id){t.textContent="Publish from chat",n.textContent="Publish when you want a public share link.",t.onclick=()=>ae(e,t,n);return}t.textContent="Share unavailable",t.disabled=!0,t.setAttribute("aria-disabled","true"),n.textContent="Sharing is unavailable for this deck state."}}function H(e){let t=a("refresh-action"),n=a("action-note");if(t instanceof HTMLButtonElement){if(t.textContent="Refresh preview",t.onclick=null,!e.id){t.disabled=!0,t.setAttribute("aria-disabled","true");return}t.disabled=!1,t.setAttribute("aria-disabled","false"),t.onclick=()=>le(e,t,n)}}var x="";function ae(e,t,n){if(x!==e.id){x=e.id,t.textContent="Confirm publish",n.textContent="This creates a public share link for this deck.",window.setTimeout(()=>{x===e.id&&t.textContent==="Confirm publish"&&(x="",t.textContent="Publish from chat",n.textContent="Publish when you want a public share link.")},6e3);return}x="",se(e,t,n)}async function se(e,t,n){await $(t,n,"Publishing...",async()=>{let i=await w("presentation_publish",{presentation_id:e.id});try{let r=await w("presentation_get",{presentation_id:e.id,include_slides:!0});v(r)}catch{v(i)}a("action-note").textContent="Deck published. The share link is ready."})}async function le(e,t,n){await $(t,n,"Refreshing...",async()=>{let i=await w("presentation_get",{presentation_id:e.id,include_slides:!0});v(i),a("action-note").textContent="Preview refreshed from Verto."})}async function $(e,t,n,i){let r=e.textContent||"";e.disabled=!0,e.classList.add("is-busy"),e.setAttribute("aria-disabled","true"),e.textContent=n;try{await i()}catch(s){t.textContent=de(s)}finally{e.disabled=!1,e.classList.remove("is-busy"),e.setAttribute("aria-disabled","false"),e.textContent===n&&(e.textContent=r)}}function de(e){if(e&&typeof e=="object"){let t=e;if(typeof t.message=="string")return t.message}return"ChatGPT could not complete that Verto action. Try again in a moment."}async function ce(e,t,n){try{await navigator.clipboard?.writeText(e),t.textContent="Copied",n.textContent="Share link copied.",window.setTimeout(()=>{t.textContent="Copy share link"},1400)}catch{n.textContent=e}}function c(e){if(!e)return"";if(typeof e=="string")return e;if(Array.isArray(e))return e.map(c).join("");if(typeof e=="object"){let t=e,n=typeof t.type=="string"?t.type:"",i=t.content;switch(n){case"title":case"heading1":return`<h1>${c(i)}</h1>`;case"heading2":return`<h2>${c(i)}</h2>`;case"heading3":case"heading4":return`<h3>${c(i)}</h3>`;case"paragraph":case"text":return`<p>${c(i)}</p>`;case"bulletedList":case"bulletList":case"numberedList":return`<ul>${(Array.isArray(i)?i:[i]).map(s=>`<li>${c(s)}</li>`).join("")}</ul>`;case"image":case"imageAndText":return`<i>[Image${t.alt?`: ${t.alt}`:""}]</i>`;case"column":case"multiColumn":return`<div style="display: flex; gap: 8px;">${c(i)}</div>`;default:if(i)return`<div>${c(i)}</div>`}}return""}async function V(e,t,n,i){let r=t+n;if(r<0||r>=e.rawSlides.length)return;let s=[...e.rawSlides],p=s[t];s[t]=s[r],s[r]=p;let u=i.textContent;i.disabled=!0,i.textContent="...";try{let g=await w("presentation_update_slides",{presentation_id:e.id,slides:s}),f=await w("presentation_get",{presentation_id:e.id,include_slides:!0});v(f)}catch(g){console.error(g),i.disabled=!1,i.textContent=u||"",alert("Failed to reorder slide.")}}function j(e){let t=a("slides");if(t.textContent="",a("filmstrip-count").textContent=`${Math.min(e.slides.length,50)} shown`,e.slides.length===0){let i=document.createElement("div");i.className="empty-state",i.textContent="Slide previews are not available yet. Open the deck to inspect the full presentation.",t.appendChild(i);return}let n=!!e.actions.canUpdateSlides;e.slides.slice(0,50).forEach((i,r)=>{let s=o(i),p=document.createElement("article");if(p.className="slide-card",n){let l=document.createElement("div");l.className="slide-reorder-controls";let m=document.createElement("button");m.className="reorder-btn",m.textContent="\u2191",m.disabled=r===0,m.onclick=()=>V(e,r,-1,m);let h=document.createElement("button");h.className="reorder-btn",h.textContent="\u2193",h.disabled=r===e.slides.length-1,h.onclick=()=>V(e,r,1,h),l.appendChild(m),l.appendChild(h),p.appendChild(l)}let u=document.createElement("div");u.className="slide-preview";let g=document.createElement("span");g.className="slide-number",g.textContent=String(r+1),u.appendChild(g);let f=document.createElement("h3");if(f.className="slide-title",f.textContent=N(s,r),s.content?f.style.display="none":u.appendChild(f),s.content){let l=document.createElement("div");l.className="slide-content-html",l.innerHTML=c(s.content),u.appendChild(l)}else{let l=document.createElement("p");l.className="slide-preview-text",l.textContent=U(s)||"Preview text unavailable.",u.appendChild(l)}p.appendChild(u),t.appendChild(p)})}function pe(){a("verto-deck-widget").classList.add("is-loading"),a("title").textContent="Loading deck preview",a("summary").textContent="Waiting for Verto deck data from ChatGPT.",O({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]}),I({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]}),z({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]}),B({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{canPublish:!1},slides:[]}),H({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]}),j({id:"",title:"Deck preview",themeName:"Theme pending",slideCount:0,updatedAt:"",isPublished:!1,shareUrl:"",openUrl:"",actions:{},slides:[]})}function v(e){ee(),te();let t=ie(e),n=a("verto-deck-widget");if(!re(t)){pe();return}n.classList.remove("is-loading"),a("title").textContent=t.title,a("summary").textContent=t.slides.length>0?`Previewing ${_(t.slideCount)} in ${t.themeName}.`:"Deck metadata is ready. Slide previews are still unavailable.",O(t),I(t),z(t),B(t),H(t),j(t)}M(e=>{v(e)});})();
   </script>
 </body>
 </html>

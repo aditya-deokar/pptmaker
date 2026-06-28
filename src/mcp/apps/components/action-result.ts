@@ -1,5 +1,6 @@
 import {
   byId,
+  callMcpTool,
   getArray,
   getNumber,
   getRecord,
@@ -288,6 +289,7 @@ function ensureMarkup(): void {
         <aside class="action-panel" aria-label="Result actions">
           <p class="action-title">Next action</p>
           <a class="button primary" id="open-link">Open in Verto</a>
+          <div id="dynamic-actions" style="display: grid; gap: 12px;"></div>
           <button class="button" id="preview-action" type="button">Preview with ChatGPT</button>
           <button class="button" id="copy-action" type="button">Copy share link</button>
           <p class="action-note" id="action-note">Choose what to do next.</p>
@@ -498,6 +500,38 @@ function configureActions(result: ActionResultViewModel): void {
     copyButton.onclick = presentation?.shareUrl
       ? () => copyShareLink(presentation.shareUrl, copyButton, note)
       : null;
+    
+    // Hide copy button if not applicable to save space for dynamic buttons
+    if (!presentation?.shareUrl) {
+      copyButton.style.display = 'none';
+    } else {
+      copyButton.style.display = '';
+    }
+  }
+
+  const dynamicContainer = byId('dynamic-actions');
+  dynamicContainer.textContent = '';
+
+  if (presentation?.id) {
+    if (result.kind === 'delete' || result.kind === 'presentation_delete') {
+      const btn = document.createElement('button');
+      btn.className = 'button';
+      btn.textContent = 'Recover deck';
+      btn.onclick = () => performUndoAction(presentation.id, 'presentation_recover', btn, note);
+      dynamicContainer.appendChild(btn);
+    } else if (result.kind === 'publish' || result.kind === 'presentation_publish') {
+      const btn = document.createElement('button');
+      btn.className = 'button';
+      btn.textContent = 'Unpublish deck';
+      btn.onclick = () => performUndoAction(presentation.id, 'presentation_unpublish', btn, note);
+      dynamicContainer.appendChild(btn);
+    } else if (result.kind === 'unpublish' || result.kind === 'presentation_unpublish') {
+      const btn = document.createElement('button');
+      btn.className = 'button';
+      btn.textContent = 'Publish deck';
+      btn.onclick = () => performUndoAction(presentation.id, 'presentation_publish', btn, note);
+      dynamicContainer.appendChild(btn);
+    }
   }
 
   note.textContent = presentation?.isDeleted
@@ -505,6 +539,18 @@ function configureActions(result: ActionResultViewModel): void {
     : presentation?.id
       ? 'Open the deck, preview it with ChatGPT, or copy the share link when available.'
       : 'The operation finished. Review the affected presentation list above.';
+}
+
+async function performUndoAction(
+  presentationId: string,
+  toolName: string,
+  button: HTMLButtonElement,
+  note: HTMLElement
+): Promise<void> {
+  await runButtonAction(button, note, 'Processing...', async () => {
+    const payload = await callMcpTool(toolName, { presentation_id: presentationId });
+    renderActionResultPayload(payload);
+  });
 }
 
 async function previewPresentation(

@@ -90,7 +90,7 @@ const listStyles = `
   }
   .list-head {
     display: grid;
-    grid-template-columns: minmax(0, 1.6fr) 72px 112px 100px 94px 54px;
+    grid-template-columns: minmax(0, 1.4fr) 72px 112px 100px 94px 220px;
     gap: 12px;
     padding: 0 12px 12px;
     border-bottom: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
@@ -102,7 +102,7 @@ const listStyles = `
   }
   .presentation-row {
     display: grid;
-    grid-template-columns: minmax(0, 1.6fr) 72px 112px 100px 94px 54px;
+    grid-template-columns: minmax(0, 1.4fr) 72px 112px 100px 94px 220px;
     gap: 12px;
     align-items: center;
     min-height: 60px;
@@ -158,7 +158,6 @@ const listStyles = `
     }
   }
   .open-link {
-    justify-self: end;
     font-size: 13px;
     font-weight: 700;
     color: var(--accent);
@@ -167,6 +166,41 @@ const listStyles = `
   }
   .open-link:hover {
     opacity: 0.8;
+  }
+  .row-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .row-action-btn {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+  .row-action-btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    color: var(--accent);
+  }
+  .row-action-btn.danger {
+    color: #ef4444;
+  }
+  @media (prefers-color-scheme: light) {
+    .row-action-btn.danger {
+      color: #dc2626;
+    }
+  }
+  .row-action-btn.danger:hover:not(:disabled) {
+    background: color-mix(in srgb, #ef4444 10%, transparent);
+  }
+  .row-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
   .action-panel {
     display: grid;
@@ -326,7 +360,7 @@ function ensureMarkup(): void {
             <span>Theme</span>
             <span>Status</span>
             <span>Updated</span>
-            <span>Action</span>
+            <span style="text-align: right">Actions</span>
           </div>
           <div id="presentations"></div>
         </article>
@@ -473,18 +507,50 @@ function renderRows(list: PresentationListViewModel): void {
     updated.textContent = formatUpdatedAt(presentation.updatedAt);
     row.appendChild(updated);
 
-    const link = document.createElement('a');
-    link.className = 'open-link';
-    link.textContent = 'Open';
-    if (presentation.openUrl) {
-      link.href = presentation.openUrl;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.setAttribute('aria-label', `Open presentation: ${presentation.title}`);
+    const actions = document.createElement('div');
+    actions.className = 'row-actions';
+
+    if (presentation.isDeleted) {
+      const recoverBtn = document.createElement('button');
+      recoverBtn.className = 'row-action-btn';
+      recoverBtn.textContent = 'Recover';
+      recoverBtn.onclick = () => performRowAction(presentation, 'recover', recoverBtn);
+      actions.appendChild(recoverBtn);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'row-action-btn danger';
+      deleteBtn.textContent = 'Delete forever';
+      deleteBtn.onclick = () => performRowAction(presentation, 'delete-forever', deleteBtn);
+      actions.appendChild(deleteBtn);
     } else {
-      link.setAttribute('aria-disabled', 'true');
+      const previewBtn = document.createElement('button');
+      previewBtn.className = 'row-action-btn';
+      previewBtn.textContent = 'Preview';
+      previewBtn.onclick = () => askChatGptToPreview(presentation, previewBtn, byId('action-note'));
+      actions.appendChild(previewBtn);
+
+      if (presentation.isPublished) {
+        const unpubBtn = document.createElement('button');
+        unpubBtn.className = 'row-action-btn';
+        unpubBtn.textContent = 'Unpublish';
+        unpubBtn.onclick = () => performRowAction(presentation, 'unpublish', unpubBtn);
+        actions.appendChild(unpubBtn);
+      } else {
+        const pubBtn = document.createElement('button');
+        pubBtn.className = 'row-action-btn';
+        pubBtn.textContent = 'Publish';
+        pubBtn.onclick = () => performRowAction(presentation, 'publish', pubBtn);
+        actions.appendChild(pubBtn);
+      }
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'row-action-btn danger';
+      delBtn.textContent = 'Delete';
+      delBtn.onclick = () => performRowAction(presentation, 'delete', delBtn);
+      actions.appendChild(delBtn);
     }
-    row.appendChild(link);
+
+    row.appendChild(actions);
 
     container.appendChild(row);
   });
@@ -584,6 +650,39 @@ async function runButtonAction(
     if (button.textContent === busyLabel) {
       button.textContent = previousLabel;
     }
+  }
+}
+
+async function performRowAction(
+  presentation: PresentationListItemViewModel,
+  action: 'publish' | 'unpublish' | 'delete' | 'recover' | 'delete-forever',
+  button: HTMLButtonElement
+): Promise<void> {
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = '...';
+  
+  let toolName = '';
+  if (action === 'publish') toolName = 'presentation_publish';
+  if (action === 'unpublish') toolName = 'presentation_unpublish';
+  if (action === 'delete') toolName = 'presentation_delete';
+  if (action === 'recover') toolName = 'presentation_recover';
+  if (action === 'delete-forever') toolName = 'presentation_delete_permanently';
+  
+  try {
+    await callMcpTool(toolName, { presentation_id: presentation.id });
+    const payload = await callMcpTool('presentation_list', {
+      limit: 20,
+      include_deleted: false,
+      sort_by: 'updated_at',
+      sort_order: 'desc',
+    });
+    renderListPayload(payload);
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = originalText || '';
+    const msg = error && typeof error === 'object' && 'message' in error ? String((error as any).message) : 'Action failed';
+    alert(msg);
   }
 }
 
