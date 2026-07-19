@@ -1,0 +1,846 @@
+[
+  {
+    "id": "2ba277f5-1b73-42a3-84c9-238b1358c32c",
+    "type": "creativeHero",
+    "content": {
+      "id": "358ae2d4-bf8d-4973-bef6-cd262f859424",
+      "name": "Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "b5cec02e-4ec6-4402-bbc4-fe0e4630f29d",
+          "name": "Creative Hero",
+          "type": "resizable-column",
+          "content": [
+            {
+              "id": "fe06c38a-2e1a-4eae-a8cc-9b4b2810a426",
+              "name": "Left Column",
+              "type": "column",
+              "content": [
+                {
+                  "id": "68816b26-7234-4499-b36e-9210d14ac757",
+                  "name": "Heading1",
+                  "type": "heading1",
+                  "content": "Verto AI: The Next-Gen AI Presentation Workspace",
+                  "className": "text-6xl font-black tracking-tight"
+                },
+                {
+                  "id": "53d61851-fa8e-4cfb-9db2-879726e3a6e7",
+                  "name": "Paragraph",
+                  "type": "paragraph",
+                  "content": "Transforming raw ideas into cinematic narratives using an AI-native stack. Designed for high-performance engineering teams and modern storytellers.\n- Intelligent layout engine\n- Real-time agentic collaboration\n- Model Context Protocol (MCP) native",
+                  "className": "text-xl text-muted-foreground mt-4"
+                },
+                {
+                  "id": "bdbcb55a-1269-4700-9f53-ee59aaf0d79a",
+                  "link": "#",
+                  "name": "Button",
+                  "type": "customButton",
+                  "bgColor": "#000000",
+                  "content": "Explore the Workspace →",
+                  "className": "mt-8 w-fit"
+                }
+              ],
+              "className": "flex flex-col justify-center"
+            },
+            {
+              "id": "07c8cd3c-af2c-4d14-ba81-43bebbb18f11",
+              "name": "Right Column",
+              "type": "column",
+              "content": [
+                {
+                  "id": "12ff8c7d-98f7-4e07-a554-81727b7b5f21",
+                  "alt": "Verto AI: The Next-Gen AI Presentation Workspace",
+                  "name": "Image",
+                  "type": "image",
+                  "content": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80",
+                  "className": "rounded-3xl object-cover h-full shadow-2xl skew-y-3 hover:skew-y-0 transition-all duration-500"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "className": "h-full w-full p-8",
+    "slideName": "Verto AI: The Next-Gen AI Presentation Workspace [opening]"
+  },
+  {
+    "id": "f8873fc2-06d9-4747-ae4d-21e3f70c80d6",
+    "type": "accentLeft",
+    "content": {
+      "id": "8c9a1f94-7a2f-43f0-a8f9-c61b75e7db52",
+      "name": "Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "b733b161-59e5-4071-ae75-9f62cd8ece51",
+          "name": "Resizable column",
+          "type": "resizable-column",
+          "content": [
+            {
+              "id": "8c85413a-c5d7-48e2-80ff-1aafcd7785a9",
+              "alt": "Solving the Fragmented Content Creation Crisis",
+              "name": "Image",
+              "type": "image",
+              "content": "https://images.unsplash.com/photo-1551434678-e076c223a692?w=1200&q=80"
+            },
+            {
+              "id": "a6eb3e11-6f5b-4d26-8ee3-2a9423fd17c5",
+              "name": "Column",
+              "type": "column",
+              "content": [
+                {
+                  "id": "589272fa-0c57-4384-9df3-411e843329da",
+                  "name": "Slide Title",
+                  "type": "heading1",
+                  "content": "Solving the Fragmented Content Creation Crisis"
+                },
+                {
+                  "id": "1dffb6b0-d523-4a87-a6a0-58f057715da2",
+                  "name": "Subtitle",
+                  "type": "paragraph",
+                  "content": "The bridge between raw data and visual impact",
+                  "className": "text-2xl text-muted-foreground mt-2 mb-4"
+                },
+                {
+                  "id": "7d853aea-6db0-4a26-8eee-9e3141a91de9",
+                  "name": "Bullet Points",
+                  "type": "bulletList",
+                  "content": [
+                    "Modern teams are trapped between static documents and disconnected design tools. The friction of manual formatting kills productivity and innovation.",
+                    "40% of time wasted on slide formatting",
+                    "Data silos prevent real-time updates",
+                    "Lack of context-aware design logic"
+                  ]
+                }
+              ],
+              "className": "w-full h-full p-8 flex justify-center items-center"
+            }
+          ],
+          "restrictToDrop": true
+        }
+      ],
+      "restrictDropTo": true
+    },
+    "className": "min-h-[300px]",
+    "slideName": "Solving the Fragmented Content Creation Crisis [problem statement]"
+  },
+  {
+    "id": "2e075752-142c-4408-828a-551805433d19",
+    "type": "quoteLayout",
+    "content": {
+      "id": "962c6707-9614-46cb-b89a-86db9144029b",
+      "name": "Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "04b6c5ef-1a8f-4bf2-833d-af8512db3c52",
+          "name": "Blockquote",
+          "type": "blockquote",
+          "content": "The future of productivity isn't just faster tools; it's tools that think and orchestrate alongside us.",
+          "className": "text-3xl font-medium italic text-center"
+        },
+        {
+          "id": "c4f44f58-b452-4908-bfe6-6634d1c87514",
+          "name": "Author",
+          "type": "paragraph",
+          "content": "— The Vision: Autonomously Generating Insightful Narratives",
+          "className": "text-right text-muted-foreground mt-4"
+        }
+      ],
+      "className": "max-w-4xl"
+    },
+    "className": "p-12 mx-auto flex items-center justify-center min-h-[400px]",
+    "slideName": "The Vision: Autonomously Generating Insightful Narratives [concept]"
+  },
+  {
+    "id": "f7ecfc7d-b603-4791-93c4-f8ac5541fd53",
+    "type": "titleAndContent",
+    "content": {
+      "id": "eae6d147-e226-4878-93ea-1a69f8761f87",
+      "name": "Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "e99f7939-75f1-48b0-b1ee-1b1ebde06b91",
+          "name": "Title",
+          "type": "title",
+          "content": "Core System Architecture: Scale and Speed",
+          "className": "mb-6",
+          "placeholder": "Slide Title"
+        },
+        {
+          "id": "3ebb8d05-8ec4-40b3-aa0b-24eee97ecca4",
+          "name": "Bullet List",
+          "type": "bulletList",
+          "content": [
+            "A high-concurrency backend built for sub-second latency and real-time synchronization across distributed teams.",
+            "Event-driven microservices architecture",
+            "Redis-backed state management for agents",
+            "WebSocket-based real-time collaboration layer",
+            "Edge-deployed inference for global speed"
+          ]
+        }
+      ]
+    },
+    "className": "p-8 mx-auto flex flex-col min-h-[400px]",
+    "slideName": "Core System Architecture: Scale and Speed [visual showcase]"
+  },
+  {
+    "id": "5840c8ff-79a0-4a93-956d-120e974d21fb",
+    "type": "processFlow",
+    "content": {
+      "id": "7bc32acd-ea33-464d-bf7a-95cb095cfa28",
+      "name": "Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "93102244-95bd-4d98-98b7-155ae31f6aa8",
+          "name": "Title",
+          "type": "title",
+          "content": "The 8-Agent LangGraph Workflow Orchestration",
+          "className": "mb-8 text-center",
+          "placeholder": "Process Title"
+        },
+        {
+          "id": "d4a61cea-b291-4f25-8d17-dac7ea69b809",
+          "name": "Flow Steps",
+          "type": "resizable-column",
+          "content": [
+            {
+              "id": "bd1cef54-1506-4d47-ac28-3161132aa835",
+              "name": "Step 1",
+              "type": "column",
+              "content": [
+                {
+                  "id": "e403bfd4-27ef-40e9-9f2c-2851d284dbf3",
+                  "name": "Step Number",
+                  "type": "heading3",
+                  "content": "1",
+                  "className": "text-2xl font-bold text-primary mb-2"
+                },
+                {
+                  "id": "814e5a5a-4b31-4dbe-af6d-f6eee8cd4a43",
+                  "name": "Step Title",
+                  "type": "heading4",
+                  "content": "Research Agent"
+                }
+              ],
+              "className": "flex-1 bg-primary/10 rounded-lg p-6 text-center"
+            },
+            {
+              "id": "76100d07-660f-489e-ab8a-5b5c555dca1e",
+              "name": "Step 2",
+              "type": "column",
+              "content": [
+                {
+                  "id": "34529405-8221-45a8-896c-3d5906335b9e",
+                  "name": "Step Number",
+                  "type": "heading3",
+                  "content": "2",
+                  "className": "text-2xl font-bold text-primary mb-2"
+                },
+                {
+                  "id": "ae18523c-f7f9-4d46-8f9f-1fc92fc1ffe9",
+                  "name": "Step Title",
+                  "type": "heading4",
+                  "content": "Narrative Architect"
+                }
+              ],
+              "className": "flex-1 bg-primary/10 rounded-lg p-6 text-center"
+            },
+            {
+              "id": "65d4f206-3afc-45e2-9032-cf5ecbe58711",
+              "name": "Step 3",
+              "type": "column",
+              "content": [
+                {
+                  "id": "4e1eab22-4331-4880-b3a2-b4d1f1938a09",
+                  "name": "Step Number",
+                  "type": "heading3",
+                  "content": "3",
+                  "className": "text-2xl font-bold text-primary mb-2"
+                },
+                {
+                  "id": "8f9cfc8b-f2e5-43b3-a39b-bc8c61a7d0cc",
+                  "name": "Step Title",
+                  "type": "heading4",
+                  "content": "Design Orchestrator"
+                }
+              ],
+              "className": "flex-1 bg-primary/10 rounded-lg p-6 text-center"
+            }
+          ]
+        }
+      ]
+    },
+    "className": "p-8 mx-auto min-h-[400px]",
+    "slideName": "The 8-Agent LangGraph Workflow Orchestration [process]"
+  },
+  {
+    "id": "33397002-1f8d-48f2-9ddc-1f75ef4361c4",
+    "type": "iconGrid",
+    "content": {
+      "id": "416ce5d7-a104-4522-88bf-e7083d6ebca3",
+      "name": "Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "decaa4fa-36af-43fc-a2b0-6fcfd1d74292",
+          "name": "Title",
+          "type": "title",
+          "content": "MCP Server Architecture: Modular Extension Ecosystem",
+          "className": "mb-8 text-center",
+          "placeholder": "Features / Benefits"
+        },
+        {
+          "id": "78d779f9-0a46-400a-926f-ba3fa0ed7a19",
+          "name": "Grid",
+          "type": "resizable-column",
+          "content": [
+            {
+              "id": "2c0b336c-697f-4fe3-940a-27e0c9ae960d",
+              "name": "Item 1",
+              "type": "column",
+              "content": [
+                {
+                  "id": "45c2f3f1-c877-43ad-a0d9-d523efd5a883",
+                  "name": "Icon/Number",
+                  "type": "heading3",
+                  "content": "🔌",
+                  "className": "text-4xl mb-2"
+                },
+                {
+                  "id": "8daf88d4-bcb3-48ed-85ac-33db7bf45fef",
+                  "name": "Title",
+                  "type": "heading4",
+                  "content": "Universal Connectors"
+                },
+                {
+                  "id": "abb11c21-4d9b-4243-9e9f-dfc81b73351d",
+                  "name": "Description",
+                  "type": "paragraph",
+                  "content": "Seamlessly ingest data from GitHub, Jira, and Slack via MCP.",
+                  "className": "text-sm",
+                  "placeholder": "Brief description"
+                }
+              ],
+              "className": "text-center p-4 rounded-lg border"
+            },
+            {
+              "id": "c864e369-a738-4311-af8f-2f688c4a7aa4",
+              "name": "Item 2",
+              "type": "column",
+              "content": [
+                {
+                  "id": "05a1c53c-5820-4c85-b3f3-140200472669",
+                  "name": "Icon/Number",
+                  "type": "heading3",
+                  "content": "🛠️",
+                  "className": "text-4xl mb-2"
+                },
+                {
+                  "id": "98eed810-3f53-42b9-9e24-2dc4da8c4049",
+                  "name": "Title",
+                  "type": "heading4",
+                  "content": "Custom Tooling"
+                },
+                {
+                  "id": "d02ecec6-f964-4386-81aa-1758f5a84c72",
+                  "name": "Description",
+                  "type": "paragraph",
+                  "content": "Engineers can build custom MCP servers to extend workspace logic.",
+                  "className": "text-sm",
+                  "placeholder": "Brief description"
+                }
+              ],
+              "className": "text-center p-4 rounded-lg border"
+            },
+            {
+              "id": "f694cea7-e390-48dd-adf4-6035dba4a4e5",
+              "name": "Item 3",
+              "type": "column",
+              "content": [
+                {
+                  "id": "55377bf3-7c3f-4b2c-b950-2d0c3cb4e704",
+                  "name": "Icon/Number",
+                  "type": "heading3",
+                  "content": "🛡️",
+                  "className": "text-4xl mb-2"
+                },
+                {
+                  "id": "350cfe1e-e0ad-42ee-aa28-937c73e7bf06",
+                  "name": "Title",
+                  "type": "heading4",
+                  "content": "Secure Sandbox"
+                },
+                {
+                  "id": "36fe2277-c949-4a38-92bf-c2d98b8f5579",
+                  "name": "Description",
+                  "type": "paragraph",
+                  "content": "Isolated execution environments for third-party code and scripts.",
+                  "className": "text-sm",
+                  "placeholder": "Brief description"
+                }
+              ],
+              "className": "text-center p-4 rounded-lg border"
+            },
+            {
+              "id": "1cfbc72c-a6e7-421b-9f8c-91e3dc77a8eb",
+              "name": "Item 4",
+              "type": "column",
+              "content": [
+                {
+                  "id": "2a88fd6c-c84f-4b5c-b3bc-b1c87b5b2b0e",
+                  "name": "Icon/Number",
+                  "type": "heading3",
+                  "content": "📈",
+                  "className": "text-4xl mb-2"
+                },
+                {
+                  "id": "205d1f8f-8f3b-4a20-b397-8af8facbead3",
+                  "name": "Title",
+                  "type": "heading4",
+                  "content": "Live Context"
+                },
+                {
+                  "id": "8aab4a35-f591-449c-880e-4a43100b75b4",
+                  "name": "Description",
+                  "type": "paragraph",
+                  "content": "Real-time data streaming directly into interactive slide components.",
+                  "className": "text-sm",
+                  "placeholder": "Brief description"
+                }
+              ],
+              "className": "text-center p-4 rounded-lg border"
+            }
+          ]
+        }
+      ]
+    },
+    "className": "p-8 mx-auto min-h-[400px]",
+    "slideName": "MCP Server Architecture: Modular Extension Ecosystem [concept]"
+  },
+  {
+    "id": "e139baa1-1df2-4274-bad2-e584cb8466f0",
+    "type": "comparisonLayout",
+    "content": {
+      "id": "0e8d3d95-0cc3-4a8e-b0e9-eafd0a037021",
+      "name": "Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "76fd7905-0423-4d13-b805-1c75c08633fd",
+          "name": "Title",
+          "type": "title",
+          "content": "Legacy Tools vs. Verto AI Native Workflow",
+          "className": "mb-6 text-center",
+          "placeholder": "Comparison Title"
+        },
+        {
+          "id": "9d16b4b7-aeb8-4ea0-890a-ef25b9474763",
+          "name": "Resizable column",
+          "type": "resizable-column",
+          "content": [
+            {
+              "id": "ac201433-fb42-431c-9588-4ad11bd768e5",
+              "name": "Column",
+              "type": "column",
+              "content": [
+                {
+                  "id": "d40351a3-e343-49db-8e60-81f6996faa9d",
+                  "name": "Heading3",
+                  "type": "heading3",
+                  "content": "Legacy Office Suites",
+                  "className": "text-center text-green-600 dark:text-green-400"
+                },
+                {
+                  "id": "5128fd5f-4197-4c0e-8d0c-c36738afa412",
+                  "name": "Bullet List",
+                  "type": "bulletList",
+                  "content": [
+                    "Manual pixel-pushing and alignment",
+                    "Static, disconnected data snapshots",
+                    "Linear, time-consuming workflows",
+                    "Disconnected from the dev stack"
+                  ]
+                }
+              ],
+              "className": "border-2 border-primary/20 rounded-lg p-6 bg-green-50 dark:bg-green-950/20"
+            },
+            {
+              "id": "2df8a90c-2b5e-4377-812c-e726b61cd45e",
+              "name": "Column",
+              "type": "column",
+              "content": [
+                {
+                  "id": "07e157d0-3904-43a0-b2fd-6e136281418a",
+                  "name": "Heading3",
+                  "type": "heading3",
+                  "content": "Verto AI Workspace",
+                  "className": "text-center text-blue-600 dark:text-blue-400"
+                },
+                {
+                  "id": "6cf568c7-7758-478c-b3d7-6f7e01bd31c8",
+                  "name": "Bullet List",
+                  "type": "bulletList",
+                  "content": [
+                    "Automated AI layout engine",
+                    "Live data streams via MCP servers",
+                    "Agentic parallel orchestration",
+                    "Developer-friendly API and SDK"
+                  ]
+                }
+              ],
+              "className": "border-2 border-primary/20 rounded-lg p-6 bg-blue-50 dark:bg-blue-950/20"
+            }
+          ]
+        }
+      ]
+    },
+    "className": "p-8 mx-auto min-h-[400px]",
+    "slideName": "Legacy Tools vs. Verto AI Native Workflow [comparison]"
+  },
+  {
+    "id": "a58fdc96-6e09-4fba-9db0-9f916b95c469",
+    "type": "sectionDivider",
+    "content": {
+      "id": "b2e99c0a-9644-4991-affc-48a36604f53f",
+      "name": "Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "c800fc8a-45c7-4cf6-9fc6-eb05b26aed5e",
+          "name": "Section Number",
+          "type": "heading1",
+          "content": "01",
+          "className": "text-7xl font-bold text-primary/30 mb-4"
+        },
+        {
+          "id": "f20a9339-835c-4c71-895f-b16e18c9620f",
+          "name": "Section Title",
+          "type": "title",
+          "content": "Technical Deep Dive: Scaling Intelligent Workspaces",
+          "className": "text-5xl",
+          "placeholder": "Section Name"
+        }
+      ],
+      "className": "text-center"
+    },
+    "className": "p-12 mx-auto flex items-center justify-center min-h-[400px] bg-linear-to-br from-primary/10 to-primary/5",
+    "slideName": "Technical Deep Dive: Scaling Intelligent Workspaces [sectionDivider]"
+  },
+  {
+    "id": "218cf258-0960-4b64-9d7d-93d22c907030",
+    "type": "bentoGrid",
+    "content": {
+      "id": "dfc855d3-42af-4212-b033-8e51a7a19ac3",
+      "name": "Main Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "23251698-d081-494d-bc57-c085b34e95a1",
+          "name": "Title",
+          "type": "title",
+          "content": "The Tech Stack: Modern, Fast, and Reliable",
+          "className": "mb-6"
+        },
+        {
+          "id": "4ac0892d-6452-454e-8ebd-566d57d0ae6e",
+          "name": "Bento Grid Layout",
+          "type": "resizable-column",
+          "content": [
+            {
+              "id": "e06d0068-f714-453a-9b55-272a70477edf",
+              "name": "Col 1",
+              "type": "column",
+              "content": [
+                {
+                  "id": "2f948d21-af04-431b-aae6-c8508212778b",
+                  "alt": "The Tech Stack: Modern, Fast, and Reliable",
+                  "name": "Image",
+                  "type": "image",
+                  "content": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=1200&q=80",
+                  "className": "h-full object-cover rounded-2xl"
+                }
+              ],
+              "className": "h-full bg-muted/20 rounded-3xl border border-border/50 p-2"
+            },
+            {
+              "id": "56f61ae8-4560-4765-880d-b1d1562ee301",
+              "name": "Col 2",
+              "type": "column",
+              "content": [
+                {
+                  "id": "701eb0ce-6b84-4370-903e-acf6e83ea2a8",
+                  "name": "Stat Box",
+                  "type": "statBox",
+                  "content": "50ms\nAPI Latency",
+                  "className": "flex-1"
+                },
+                {
+                  "id": "a7cd0807-1ceb-4ea8-b9c2-0bcbb50217b4",
+                  "name": "Stat Box",
+                  "type": "statBox",
+                  "content": "99.9%\nUptime",
+                  "className": "flex-1"
+                }
+              ],
+              "className": "flex flex-col gap-4"
+            },
+            {
+              "id": "f2491d5f-7af0-45e6-99a6-276a0002c456",
+              "name": "Col 3",
+              "type": "column",
+              "content": [
+                {
+                  "id": "f9243b55-93bd-4d17-bcf9-07c909dab1bf",
+                  "name": "Heading",
+                  "type": "heading2",
+                  "content": "Key Insights"
+                },
+                {
+                  "id": "e40f472a-91da-4e05-9c9b-66beec68cd1d",
+                  "name": "List",
+                  "type": "bulletList",
+                  "content": [
+                    "Key insight point 1",
+                    "Key insight point 2",
+                    "Key insight point 3"
+                  ]
+                }
+              ],
+              "className": "bg-primary/5 rounded-3xl p-6 flex flex-col justify-center"
+            }
+          ]
+        }
+      ]
+    },
+    "className": "h-full w-full p-6",
+    "slideName": "The Tech Stack: Modern, Fast, and Reliable [features]"
+  },
+  {
+    "id": "ffb73df9-8c2c-42b5-b77e-c713264bb643",
+    "type": "fullImageBackground",
+    "content": {
+      "id": "fd4f3b53-0872-4a08-a351-2eff0cf6def9",
+      "name": "Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "2579c067-9681-4322-b7c4-1562d8f44e1f",
+          "alt": "Interactive MCP UI Widgets and Live Components",
+          "name": "Background Image",
+          "type": "image",
+          "content": "https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&q=80",
+          "className": "absolute inset-0 w-full h-full object-cover opacity-30"
+        },
+        {
+          "id": "3a9c1378-32cc-40ff-abd7-dff2bfdfae38",
+          "name": "Content",
+          "type": "column",
+          "content": [
+            {
+              "id": "a9ddadb5-9a91-4fa6-88dd-1f64b595a6ac",
+              "name": "Title",
+              "type": "title",
+              "content": "Interactive MCP UI Widgets and Live Components",
+              "className": "text-white drop-shadow-lg",
+              "placeholder": "Overlay Title"
+            },
+            {
+              "id": "ef911cf4-9054-44de-a9fb-a497989d501d",
+              "name": "Paragraph",
+              "type": "paragraph",
+              "content": "Our UI isn't just a canvas; it's a collection of live, data-bound widgets that react to external triggers and user input.\n- React-based component library\n- Bi-directional MCP data binding\n- Low-latency state updates via CRDTs\n- Custom server-side rendering for widgets",
+              "className": "text-white drop-shadow-lg mt-4",
+              "placeholder": "Your message here..."
+            }
+          ],
+          "className": "relative z-10 p-12 flex flex-col justify-center h-full"
+        }
+      ]
+    },
+    "className": "relative min-h-[500px]",
+    "slideName": "Interactive MCP UI Widgets and Live Components [visual showcase]"
+  },
+  {
+    "id": "61197d15-fcb7-41fc-87e5-024008efa3cd",
+    "type": "accentLeft",
+    "content": {
+      "id": "46061a31-75ce-406b-bc43-cb58d697b82d",
+      "name": "Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "d03096dd-7b4c-4411-a09a-6c66c1b972fc",
+          "name": "Resizable column",
+          "type": "resizable-column",
+          "content": [
+            {
+              "id": "5e346f55-4490-4883-98e5-b55d6609d1de",
+              "alt": "Engineering Challenges: State Persistence and Streaming",
+              "name": "Image",
+              "type": "image",
+              "content": "https://images.unsplash.com/photo-1551434678-e076c223a692?w=1200&q=80"
+            },
+            {
+              "id": "6019ff0f-5d2a-4023-b064-d65b56657658",
+              "name": "Column",
+              "type": "column",
+              "content": [
+                {
+                  "id": "749ea3c3-67ab-4d3c-8849-5c62e39c90bb",
+                  "name": "Slide Title",
+                  "type": "heading1",
+                  "content": "Engineering Challenges: State Persistence and Streaming"
+                },
+                {
+                  "id": "210e79ed-09f7-4341-b744-330e8e0b9183",
+                  "name": "Subtitle",
+                  "type": "paragraph",
+                  "content": "Overcoming the hurdles of real-time AI",
+                  "className": "text-2xl text-muted-foreground mt-2 mb-4"
+                },
+                {
+                  "id": "762b3961-c3c5-4e5e-ab45-a8481f080780",
+                  "name": "Bullet Points",
+                  "type": "bulletList",
+                  "content": [
+                    "Solving the complexities of long-running agentic processes and real-time LLM feedback loops.",
+                    "Implementing efficient CRDTs for collaborative editing",
+                    "Optimizing LLM stream chunking for instant UI updates",
+                    "Managing complex state persistence in LangGraph"
+                  ]
+                }
+              ],
+              "className": "w-full h-full p-8 flex justify-center items-center"
+            }
+          ],
+          "restrictToDrop": true
+        }
+      ],
+      "restrictDropTo": true
+    },
+    "className": "min-h-[300px]",
+    "slideName": "Engineering Challenges: State Persistence and Streaming [concept]"
+  },
+  {
+    "id": "91b26daa-2f5b-453d-8182-f6120701317b",
+    "type": "statsRow",
+    "content": {
+      "id": "9c15a0f2-13db-4dd1-bb1d-e2079a6176c4",
+      "name": "Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "c67451ac-fd3b-43ef-ba1f-dd264d238569",
+          "name": "Section Title",
+          "type": "heading2",
+          "content": "Performance Benchmarks and Development Velocity",
+          "className": "text-center mb-12"
+        },
+        {
+          "id": "ce9abd45-b3c7-4983-aadd-78a09b878f01",
+          "name": "Stats Grid",
+          "type": "resizable-column",
+          "content": [
+            {
+              "id": "25a81326-0210-4986-9efc-79685c7f31ab",
+              "name": "Stat 1",
+              "type": "statBox",
+              "content": "10x\nCreation Speed"
+            },
+            {
+              "id": "a8095be5-59f5-4879-83ad-5dfc39e90ff3",
+              "name": "Stat 2",
+              "type": "statBox",
+              "content": "85%\nFewer Edits"
+            },
+            {
+              "id": "fbebdcbe-fd84-4c6d-b79a-f8ffb20f409b",
+              "name": "Stat 3",
+              "type": "statBox",
+              "content": "2.4s\nGen Time"
+            }
+          ]
+        }
+      ]
+    },
+    "className": "h-full w-full p-8 flex flex-col justify-center",
+    "slideName": "Performance Benchmarks and Development Velocity [statistics]"
+  },
+  {
+    "id": "697e9e97-4a6f-4676-9dac-9f3debbc8f5c",
+    "type": "titleAndContent",
+    "content": {
+      "id": "f0b6e584-3de0-4ea8-bda3-8fa0742b5326",
+      "name": "Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "1e363aaa-3da6-4225-84b3-c30fa788b163",
+          "name": "Title",
+          "type": "title",
+          "content": "Future Roadmap: Collaborative AI and Multi-Modal Support",
+          "className": "mb-6",
+          "placeholder": "Slide Title"
+        },
+        {
+          "id": "303c964a-11dc-4d08-819a-3ef314fbd979",
+          "name": "Bullet List",
+          "type": "bulletList",
+          "content": [
+            "The next phase of Verto involves expanding the capabilities of our agents and the richness of our media support.",
+            "Multi-modal input (Voice-to-Slide)",
+            "Advanced animation physics engine",
+            "Enterprise-grade private LLM nodes",
+            "Cross-workspace agent collaboration"
+          ]
+        }
+      ]
+    },
+    "className": "p-8 mx-auto flex flex-col min-h-[400px]",
+    "slideName": "Future Roadmap: Collaborative AI and Multi-Modal Support [timeline]"
+  },
+  {
+    "id": "1bfc982c-71b4-42ae-884d-87b1763f7714",
+    "type": "callToAction",
+    "content": {
+      "id": "1ac0ac51-0700-4e33-b84e-0ce9278d56bd",
+      "name": "Column",
+      "type": "column",
+      "content": [
+        {
+          "id": "7dea577b-0597-4c87-ab5a-50174202e819",
+          "name": "Title",
+          "type": "title",
+          "content": "Build the Future of Work with Verto",
+          "className": "mb-4",
+          "placeholder": "Ready to Get Started?"
+        },
+        {
+          "id": "87454c93-47ee-4a04-b8a0-2881416255f4",
+          "name": "Description",
+          "type": "paragraph",
+          "content": "We are looking for visionary software engineers and AI researchers to help us redefine communication for the next decade.",
+          "className": "text-xl mb-8 text-muted-foreground",
+          "placeholder": "Brief description of what action you want them to take..."
+        },
+        {
+          "id": "1ebb6f9b-1f55-48ef-8ed8-7f221fe17ac9",
+          "link": "#",
+          "name": "CTA Button",
+          "type": "customButton",
+          "bgColor": "#3b82f6",
+          "content": "Join the Team →",
+          "className": "inline-block px-8 py-4 rounded-lg font-semibold"
+        }
+      ],
+      "className": "max-w-3xl"
+    },
+    "className": "p-12 mx-auto flex flex-col items-center justify-center min-h-[400px] text-center",
+    "slideName": "Build the Future of Work with Verto [callToAction]"
+  }
+]
