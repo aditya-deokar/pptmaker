@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verto AI — Demo Slides</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0a0a0f;
+            color: #e2e8f0;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px 120px;
+            opacity: 0;
+            transform: translateX(60px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            background: linear-gradient(135deg, #0a0a1a 0%, #111127 50%, #0d0d20 100%);
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        .slide.exit {
+            opacity: 0;
+            transform: translateX(-60px);
+        }
+
+        /* Decorative gradient orb */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            bottom: -150px;
+            left: -150px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Section label */
+        .section-label {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #a78bfa;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-label::before {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 2px;
+            background: #7c3aed;
+            margin-right: 12px;
+            vertical-align: middle;
+        }
+
+        /* Title slide */
+        .slide-title {
+            font-size: 64px;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(135deg, #fff 0%, #c4b5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .slide-subtitle {
+            font-size: 22px;
+            font-weight: 300;
+            color: #94a3b8;
+            line-height: 1.5;
+            max-width: 700px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Content heading */
+        .content-heading {
+            font-size: 48px;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -1.5px;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+            color: #f1f5f9;
+        }
+
+        /* Bullet list */
+        .bullet-list {
+            list-style: none;
+            position: relative;
+            z-index: 1;
+        }
+
+        .bullet-list li {
+            font-size: 22px;
+            font-weight: 400;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 14px;
+            padding-left: 32px;
+            position: relative;
+        }
+
+        .bullet-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed, #3b82f6);
+        }
+
+        .bullet-list li strong {
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        .bullet-list li .highlight {
+            color: #a78bfa;
+            font-weight: 500;
+        }
+
+        /* Pipeline steps */
+        .pipeline-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pipeline-step {
+            background: rgba(124, 58, 237, 0.08);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .pipeline-step:hover {
+            background: rgba(124, 58, 237, 0.15);
+            border-color: rgba(124, 58, 237, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .step-number {
+            font-size: 14px;
+            font-weight: 700;
+            color: #7c3aed;
+            margin-bottom: 8px;
+        }
+
+        .step-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+        }
+
+        .step-desc {
+            font-size: 13px;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        /* Two-column */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .col-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 32px;
+        }
+
+        .col-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #a78bfa;
+            margin-bottom: 20px;
+        }
+
+        .col-card .bullet-list li {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        /* MCP badge row */
+        .badge-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .badge.purple { background: rgba(124,58,237,0.15); color: #c4b5fd; border: 1px solid rgba(124,58,237,0.3); }
+        .badge.blue { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+        .badge.green { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+        .badge.amber { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+
+        /* Progress indicator */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #7c3aed, #3b82f6);
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+
+        /* Slide counter */
+        .slide-counter {
+            position: fixed;
+            bottom: 32px;
+            right: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
+            z-index: 100;
+            letter-spacing: 1px;
+        }
+
+        /* Navigation hint */
+        .nav-hint {
+            position: fixed;
+            bottom: 32px;
+            left: 40px;
+            font-size: 13px;
+            color: #475569;
+            z-index: 100;
+        }
+
+        .nav-hint kbd {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: 'Inter', monospace;
+            font-size: 12px;
+        }
+
+        /* Title slide special */
+        .title-page .slide-title {
+            font-size: 80px;
+        }
+
+        .title-page .tagline {
+            font-size: 26px;
+            color: #94a3b8;
+            font-weight: 300;
+            margin-top: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .title-page .author {
+            font-size: 16px;
+            color: #64748b;
+            margin-top: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .url-display {
+            font-size: 15px;
+            color: #7c3aed;
+            font-weight: 500;
+            margin-top: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Accent line */
+        .accent-line {
+            width: 64px;
+            height: 4px;
+            background: linear-gradient(90deg, #7c3aed, #3b82f6);
+            border-radius: 4px;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="slide-counter" id="slideCounter"></div>
+    <div class="nav-hint"><kbd>←</kbd> <kbd>→</kbd> to navigate</div>
+
+    <div class="slide-container">
+
+        <!-- SLIDE 1: Title -->
+        <div class="slide title-page active" data-index="0">
+            <div class="section-label">Project Demo</div>
+            <h1 class="slide-title">Verto AI</h1>
+            <p class="tagline">AI-native presentation workspace with MCP backend</p>
+            <div class="url-display">verto.ai.aditya-deokar.me</div>
+            <p class="author">Aditya Deokar</p>
+        </div>
+
+        <!-- SLIDE 2: Problem -->
+        <div class="slide" data-index="1">
+            <div class="section-label">The Problem</div>
+            <h2 class="content-heading">Why another presentation tool?</h2>
+            <ul class="bullet-list">
+                <li>Making presentations is <strong>slow and painful</strong> — blank slides, font picking, layout fiddling</li>
+                <li>Existing AI tools <strong>dump text onto slides</strong> — no layout awareness, no visual intelligence</li>
+                <li>No tool lets <strong>AI agents create & manage decks</strong> programmatically through MCP</li>
+                <li>Needed: layout-first generation + visual editor + <strong>MCP server</strong> — all in one app</li>
+            </ul>
+        </div>
+
+        <!-- SLIDE 3: Architecture Overview -->
+        <div class="slide" data-index="2">
+            <div class="section-label">Architecture</div>
+            <h2 class="content-heading">System Overview</h2>
+            <ul class="bullet-list">
+                <li><strong>Next.js 16</strong> — App Router, React 19, Tailwind CSS, shadcn/ui</li>
+                <li><strong>PostgreSQL + Prisma</strong> — data layer for projects, slides, users, keys</li>
+                <li><strong>LangGraph</strong> — 8-agent pipeline for presentation generation</li>
+                <li><strong>MCP Server</strong> — Streamable HTTP + stdio, 11 tools, 4 resources</li>
+                <li><strong>Clerk</strong> auth · <strong>Inngest</strong> background jobs · <strong>Lemon Squeezy</strong> billing</li>
+            </ul>
+            <div class="badge-row">
+                <span class="badge purple">TypeScript</span>
+                <span class="badge blue">React 19</span>
+                <span class="badge green">LangGraph</span>
+                <span class="badge amber">MCP SDK</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Pipeline -->
+        <div class="slide" data-index="3">
+            <div class="section-label">AI Pipeline</div>
+            <h2 class="content-heading">8-Agent Generation Pipeline</h2>
+            <div class="pipeline-grid">
+                <div class="pipeline-step">
+                    <div class="step-number">01</div>
+                    <div class="step-name">Project Init</div>
+                    <div class="step-desc">Create DB record</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-number">02</div>
+                    <div class="step-name">Outline</div>
+                    <div class="step-desc">Break into slide outlines</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-number">03</div>
+                    <div class="step-name">Layout</div>
+                    <div class="step-desc">Pick visual layout first</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-number">04</div>
+                    <div class="step-name">Content</div>
+                    <div class="step-desc">Write layout-aware copy</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-number">05</div>
+                    <div class="step-name">Image Query</div>
+                    <div class="step-desc">Smart search queries</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-number">06</div>
+                    <div class="step-name">Image Fetch</div>
+                    <div class="step-desc">Find + attach images</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-number">07</div>
+                    <div class="step-name">JSON Compile</div>
+                    <div class="step-desc">Assemble final JSON</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-number">08</div>
+                    <div class="step-name">DB Persist</div>
+                    <div class="step-desc">Save to PostgreSQL</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: MCP Architecture -->
+        <div class="slide" data-index="4">
+            <div class="section-label">MCP Surface</div>
+            <h2 class="content-heading">MCP Server + Apps + UI</h2>
+            <div class="two-col">
+                <div class="col-card">
+                    <h3>🔧 MCP Server</h3>
+                    <ul class="bullet-list">
+                        <li><strong>11 tools</strong> — create, generate, list, get, update, publish, delete, recover</li>
+                        <li><strong>4 resources</strong> — themes, templates, presentations, app UI</li>
+                        <li><strong>Streamable HTTP</strong> + stdio transports</li>
+                        <li>Bearer token auth (<code>vk_live_...</code>)</li>
+                    </ul>
+                </div>
+                <div class="col-card">
+                    <h3>🖼️ MCP App UI</h3>
+                    <ul class="bullet-list">
+                        <li><strong>Presentation list</strong> widget card</li>
+                        <li><strong>Deck preview</strong> widget</li>
+                        <li><strong>Generation progress</strong> tracker</li>
+                        <li><strong>Action result</strong> card</li>
+                        <li>Self-contained HTML rendered in Claude/ChatGPT</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Technical Decisions -->
+        <div class="slide" data-index="5">
+            <div class="section-label">Technical Decisions</div>
+            <h2 class="content-heading">Why I Built It This Way</h2>
+            <ul class="bullet-list">
+                <li><strong>LangGraph over one prompt</strong> — each agent does one thing well, easier to debug and extend</li>
+                <li><strong>Layout before content</strong> — AI writes text that fits the slide shape, not the other way around</li>
+                <li><strong>Streamable HTTP for MCP</strong> — no repo clone needed, just URL + API key</li>
+                <li><strong>BYOK runtime</strong> — users bring Google/OpenAI/Groq keys, app routes through their preferred provider</li>
+                <li><strong>Inngest for mobile design</strong> — background jobs with retry for long-running HTML frame generation</li>
+                <li><strong>Clerk for auth</strong> — handles signup, login, sessions, webhooks out of the box</li>
+            </ul>
+        </div>
+
+        <!-- SLIDE 7: Challenges & Learnings -->
+        <div class="slide" data-index="6">
+            <div class="section-label">Challenges & Learnings</div>
+            <h2 class="content-heading">What Was Hard</h2>
+            <ul class="bullet-list">
+                <li><strong>MCP auth + session handling</strong> — initialize-first requirement tripped up different MCP clients</li>
+                <li><strong>Structured JSON from LLMs</strong> — models don't always output valid JSON, needed validation + retries</li>
+                <li><strong>Web ↔ MCP sync</strong> — both modify same data, both must go through same business logic</li>
+                <li><strong>Real-time streaming</strong> — progress from 8 agents to frontend + persisted state for MCP polling</li>
+                <li><strong>BYOK routing</strong> — 3 providers × user prefs × free-tier limits × MCP vs web sources</li>
+            </ul>
+        </div>
+
+        <!-- SLIDE 8: Future -->
+        <div class="slide" data-index="7">
+            <div class="section-label">What's Next</div>
+            <h2 class="content-heading">Future Improvements</h2>
+            <ul class="bullet-list">
+                <li><strong>Collaborative editing</strong> — real-time multi-user deck editing</li>
+                <li><strong>More MCP tools</strong> — template-based gen, slide-level editing, mobile design tools</li>
+                <li><strong>Voice-to-presentation</strong> — speak your idea, get a deck</li>
+                <li><strong>Version history</strong> — rollback to previous slide versions</li>
+                <li><strong>AI image generation</strong> — generate images instead of searching stock</li>
+            </ul>
+            <div class="accent-line" style="margin-top: 40px;"></div>
+            <div class="url-display" style="font-size: 20px;">verto.ai.aditya-deokar.me</div>
+            <p style="color: #64748b; font-size: 15px; margin-top: 8px; position: relative; z-index: 1;">Thanks for watching! ✌️</p>
+        </div>
+
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const total = slides.length;
+        let current = 0;
+
+        function updateUI() {
+            document.getElementById('slideCounter').textContent = `${current + 1} / ${total}`;
+            document.getElementById('progressBar').style.width = `${((current + 1) / total) * 100}%`;
+        }
+
+        function goTo(index) {
+            if (index < 0 || index >= total || index === current) return;
+
+            const prev = slides[current];
+            const next = slides[index];
+
+            // Determine direction
+            const forward = index > current;
+
+            prev.classList.remove('active');
+            prev.classList.add('exit');
+            prev.style.transform = forward ? 'translateX(-60px)' : 'translateX(60px)';
+
+            next.style.transform = forward ? 'translateX(60px)' : 'translateX(-60px)';
+            next.classList.remove('exit');
+
+            // Force reflow
+            void next.offsetWidth;
+
+            next.classList.add('active');
+            next.style.transform = 'translateX(0)';
+
+            setTimeout(() => {
+                prev.classList.remove('exit');
+                prev.style.transform = '';
+            }, 500);
+
+            current = index;
+            updateUI();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                goTo(current + 1);
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                goTo(current - 1);
+            }
+        });
+
+        // Touch support
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+        document.addEventListener('touchend', (e) => {
+            const diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                diff > 0 ? goTo(current + 1) : goTo(current - 1);
+            }
+        });
+
+        updateUI();
+    </script>
+</body>
+</html>

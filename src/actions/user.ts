@@ -22,10 +22,28 @@ export const onAuthenticateUser = async () => {
       return { status: 200, user: userExist };
     }
 
+    const email = user.emailAddresses[0].emailAddress;
+
+    // Check if user exists by email (e.g., they recreated their Clerk account)
+    const existingUserByEmail = await prisma.user.findUnique({
+      where: { email },
+      select: AUTHENTICATED_APP_USER_SELECT,
+    });
+
+    if (existingUserByEmail) {
+      // Update their Clerk ID to the new one
+      const updatedUser = await prisma.user.update({
+        where: { id: existingUserByEmail.id },
+        data: { clerkId: user.id },
+        select: AUTHENTICATED_APP_USER_SELECT,
+      });
+      return { status: 200, user: updatedUser };
+    }
+
     const newUser = await prisma.user.create({
       data: {
         clerkId: user.id,
-        email: user.emailAddresses[0].emailAddress,
+        email: email,
         name: user.firstName + " " + user.lastName,
         profileImage: user.imageUrl,
       },

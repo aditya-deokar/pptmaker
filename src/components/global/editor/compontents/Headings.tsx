@@ -65,7 +65,7 @@ const createHeading = (
         <div className="relative w-full">
           <textarea
             className={cn(
-              `w-full bg-transparent ${defaultClassName} placeholder:text-muted-foreground/30 focus:placeholder:text-muted-foreground/10 focus:outline-hidden transition-colors duration-200 resize-none leading-[1.1] tracking-tight hover:bg-black/5 dark:hover:bg-white/5 focus:bg-transparent rounded-md`,
+              `w-full bg-transparent ${defaultClassName} placeholder:text-muted-foreground/30 focus:placeholder:text-muted-foreground/10 focus:outline-hidden transition-colors duration-200 resize-none leading-[1.2] tracking-tight hover:bg-black/5 dark:hover:bg-white/5 focus:bg-transparent rounded-md overflow-hidden`,
               isPreview ? 'cursor-default pointer-events-none hover:bg-transparent dark:hover:bg-transparent' : '',
               className
             )}
@@ -73,9 +73,9 @@ const createHeading = (
               padding: 0,
               margin: 0,
               color: finalColor,
-              boxSizing: 'content-box',
-              lineHeight: '1.1em',
-              minHeight: '1.1em',
+              boxSizing: 'border-box',
+              lineHeight: '1.2em',
+              minHeight: '1.2em',
               textShadow: isDark ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
               fontFamily: tokens.headingFontFamily,
               ...restStyles,
