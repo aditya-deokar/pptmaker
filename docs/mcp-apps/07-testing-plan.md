@@ -319,3 +319,55 @@ Phase 7 is complete when:
 - Claude custom connector test is either passed or explicitly scheduled after ChatGPT approval.
 - Reviewer account is populated with safe sample decks.
 - Screenshots and logs are ready for Phase 8.
+
+## 13. MCP Apps SDK (`@modelcontextprotocol/ext-apps`) Verification
+
+The widget layer was migrated from OpenAI-specific metadata plus a hand-rolled
+postMessage bridge to the standardized MCP Apps SDK. Migration details:
+`00-migration-overview.md`, `02-api-mapping.md`, `03-migration-plan.md`.
+
+Automated evidence (completed on branch `migrate/mcp-ext-apps`):
+
+- `npm run mcp:phase7` — 275/275 checks pass, including the rewritten
+  SDK-pattern assertions (`registerAppTool(`, camelCase CSP, `ontoolresult`,
+  `callServerTool`).
+- Focused typecheck passes across 77 MCP/OAuth/app-hosting files.
+- In-memory transport smoke test: 12 tools listed with `_meta.ui.resourceUri`
+  + `visibility`; exactly 4 app-callable tools; 4 `ui://verto/*.html`
+  resources served as `text/html;profile=mcp-app` with camelCase
+  `connectDomains`/`resourceDomains`; unauthenticated tool calls still return
+  the structured unauthorized error with a WWW-Authenticate challenge.
+- `npm run mcp:phase9h` — all 10 widget states render in Puppeteer from the
+  SDK-bundled HTML (layout, contrast, keyboard order, reduced motion).
+
+Remaining live-host steps (manual):
+
+1. MCP Inspector re-check on the migrated server:
+
+   ```bash
+   npm run mcp:inspect
+   ```
+
+   Confirm the four `ui://verto/*.html` resources are readable and tool
+   results still include `structuredContent` widget payloads.
+
+2. Reference-host smoke test with `basic-host` from the ext-apps repo:
+
+   ```bash
+   # Terminal 1 — serve the migrated MCP endpoint
+   npm run dev
+
+   # Terminal 2 — reference host from a checkout of modelcontextprotocol/ext-apps
+   cd examples/basic-host && npm install
+   SERVERS='["http://localhost:3000/mcp"]' npm run start
+   # Open http://localhost:8080 and verify per widget:
+   #  - loads without console errors
+   #  - ontoolresult renders data (list / preview / progress / action result)
+   #  - in-widget actions (refresh, publish confirm, status check) work
+   #  - follow-up message path works where the host supports it
+   ```
+
+3. Re-run the ChatGPT Developer Mode and Claude Custom Connector flows from
+   sections above against the migrated widgets — the wire format for tools,
+   OAuth, and resources is unchanged; only widget metadata/transport moved to
+   the standardized SDK.

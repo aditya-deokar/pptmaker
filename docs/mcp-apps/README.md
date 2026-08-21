@@ -105,20 +105,39 @@ Claude:
 | `01-product-requirements.md` | Product requirement document: users, goals, features, launch criteria, metrics, risks. |
 | `02-technical-implementation.md` | Architecture and implementation guide tied to the current repo. |
 | `03-publishing-and-setup-checklist.md` | Step-by-step ChatGPT and Claude setup, credentials, testing, and submission checklist. |
-| `04-research-notes-and-sources.md` | Research summary with source links used to build this plan. |
+| `legacy/04-research-notes-and-sources.md` | **Archived.** Research summary with source links used to build the original plan (predates the ext-apps migration). |
 | `05-tool-review-matrix.md` | Tool titles, review annotations, and safety notes for app submission. |
 | `06-security-privacy-observability.md` | Phase 6 hardening notes, ownership matrix, prompt-injection tests, and validation checklist. |
 | `07-testing-plan.md` | Phase 7 automated checks, MCP Inspector steps, ChatGPT developer mode steps, Claude custom connector steps, and reviewer prompt matrix. |
 | `08-product-submission-packet.md` | Phase 8 app listing copy, reviewer instructions, data handling answers, screenshot plan, help article drafts, and owner submission steps. |
-| `09-premium-mcp-apps-ui-plan.md` | Phase 9 plan for making Verto's ChatGPT MCP Apps UI render reliably, then upgrading it into a premium in-chat presentation experience. |
+| `legacy/09-premium-mcp-apps-ui-plan.md` | **Archived.** Phase 9 plan for making Verto's ChatGPT MCP Apps UI render reliably, then upgrading it into a premium in-chat presentation experience (superseded by the ext-apps migration). |
 | `09h-visual-qa-evidence.md` | Phase 9H automated visual QA command plus exact ChatGPT prompts, widget button actions, accessibility checks, and screenshot evidence checklist. |
 | `submission-assets/` | Place final icons, screenshots, and evidence files here before app review. |
+
+## Widget Layer: MCP Apps SDK Migration (2026-08)
+
+The interactive widget layer now uses the standardized MCP Apps SDK
+(`@modelcontextprotocol/ext-apps`) instead of OpenAI-specific metadata and a
+hand-rolled postMessage bridge, so the same widgets render in ChatGPT, Claude,
+VS Code, Goose, and any other compliant host:
+
+- Tools register through `registerAppTool()`; UI resources through
+  `registerAppResource()` (`src/mcp/tools/presentation/index.ts`,
+  `src/mcp/resources/app-ui.ts`). All legacy `openai/*` metadata keys are gone.
+- Widgets run on the SDK `App` client (`src/mcp/apps/components/shared/runtime.ts`);
+  tool data arrives via `ontoolresult`, widget actions call tools through
+  `app.callServerTool()`.
+- Migration analysis, API mapping, and phase-by-phase plan:
+  `00-migration-overview.md`, `01-current-architecture.md`, `02-api-mapping.md`,
+  `03-migration-plan.md` in this folder.
+- Automated evidence: Phase 7 checks (275) and Phase 9H visual QA both pass on
+  the migrated stack; see `07-testing-plan.md` for live-host steps.
 
 ## Source Highlights
 
 - OpenAI says ChatGPT Apps use MCP servers and can be connected from ChatGPT developer mode before public submission: https://developers.openai.com/apps-sdk/deploy/connect-chatgpt
 - OpenAI's submission flow is the path to public ChatGPT app distribution: https://developers.openai.com/apps-sdk/deploy/submission
-- ChatGPT supports MCP Apps UI standard plus optional `window.openai` extensions: https://developers.openai.com/apps-sdk/mcp-apps-in-chatgpt
+- ChatGPT supports MCP Apps UI standard plus optional `window.openai` extensions: https://developers.openai.com/apps-sdk/mcp-apps-in-chatgpt (external reference only — Verto widgets no longer use these; see the migration note above)
 - Claude supports Streamable HTTP remote MCP connectors and directory submission: https://claude.com/docs/connectors/building
 - Claude directory submissions can include remote MCP servers and MCP Apps: https://claude.com/docs/connectors/building/submission
 - MCP Apps standard explains iframe UI resources, `ui://` resources, JSON-RPC over `postMessage`, and sandboxing: https://modelcontextprotocol.io/extensions/apps/overview

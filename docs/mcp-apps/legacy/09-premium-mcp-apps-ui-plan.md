@@ -1,3 +1,8 @@
+﻿> **LEGACY (archived 2026-08).** Superseded UI plan written before the
+> widget-layer migration to `@modelcontextprotocol/ext-apps`. The dual
+> metadata / `window.openai` bridge approach described here was replaced by
+> the SDK-only design — see [`../03-migration-plan.md`](../03-migration-plan.md)
+> and [`../02-api-mapping.md`](../02-api-mapping.md).
 # Phase 9: Premium MCP Apps UI Implementation Plan
 
 Last updated: 2026-06-18

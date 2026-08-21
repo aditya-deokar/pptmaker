@@ -4,6 +4,14 @@ Last updated: 2026-06-17
 
 Status: review draft. Do not implement until this plan is approved.
 
+> **Historical document (2026-06).** This is the original phase-by-phase log
+> that built the MCP server and its first widget layer. The widget layer has
+> since been migrated to the standardized MCP Apps SDK
+> (`@modelcontextprotocol/ext-apps`) — references to OpenAI-specific metadata
+> (`openai/outputTemplate`, `window.openai`, dual metadata) describe the
+> *former* implementation. See [`03-migration-plan.md`](./03-migration-plan.md)
+> for the current design.
+
 ## 1. Goal
 
 Turn the existing Verto AI MCP server into a public, review-ready app for:
