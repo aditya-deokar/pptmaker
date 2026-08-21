@@ -10,7 +10,12 @@ import type {
   McpServer,
   ToolCallback,
 } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type {
+  AnySchema,
+  ZodRawShapeCompat,
+} from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
+import { registerAppTool } from '@modelcontextprotocol/ext-apps/server';
 import {
   createToolUiMeta,
   MCP_APP_UI_RESOURCE_URIS,
@@ -184,7 +189,21 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
 };
 
-function registerPresentationTool<TInputSchema extends Record<string, z.ZodTypeAny>>(
+/**
+ * Callback type exactly as `registerAppTool` expects it: the SDK helper
+ * resolves its `InputArgs` through a conditional before handing it to
+ * `ToolCallback`, so the mirror conditional must appear in the cast too.
+ */
+type AppToolCallback<TInputSchema extends Record<string, z.ZodTypeAny> & ZodRawShapeCompat> =
+  ToolCallback<
+    TInputSchema extends undefined | ZodRawShapeCompat | AnySchema
+      ? TInputSchema
+      : AnySchema
+  >;
+
+function registerPresentationTool<
+  TInputSchema extends Record<string, z.ZodTypeAny> & ZodRawShapeCompat
+>(
   server: McpServer,
   toolName: (typeof TOOL_NAMES)[keyof typeof TOOL_NAMES],
   description: string,
@@ -195,9 +214,10 @@ function registerPresentationTool<TInputSchema extends Record<string, z.ZodTypeA
   const callback = createToolCallback<z.infer<z.ZodObject<TInputSchema>>>(
     toolName,
     handler
-  ) as ToolCallback<TInputSchema>;
+  ) as AppToolCallback<TInputSchema>;
 
-  server.registerTool(
+  registerAppTool(
+    server,
     toolName,
     {
       title: metadata.title,

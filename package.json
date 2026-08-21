@@ -36,6 +36,7 @@
     "@inngest/realtime": "^0.4.7",
     "@langchain/google-genai": "^0.2.16",
     "@langchain/langgraph": "^0.4.8",
+    "@modelcontextprotocol/ext-apps": "^1.7.5",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@openrouter/ai-sdk-provider": "1.5.3",
     "@prisma/client": "^6.7.0",

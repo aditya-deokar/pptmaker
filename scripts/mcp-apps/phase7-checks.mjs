@@ -304,7 +304,7 @@ check(
   countMatches(toolIndex, /\n\s*registerPresentationTool\(/g) === tools.length,
   `found ${countMatches(toolIndex, /\n\s*registerPresentationTool\(/g)}`
 );
-check('tools use SDK registerTool API', toolIndex.includes('server.registerTool('));
+check('tools use MCP Apps SDK registerAppTool API', toolIndex.includes('registerAppTool(') && !toolIndex.includes('server.registerTool('));
 check('presentation tools declare structured output schema', toolIndex.includes('outputSchema: MCP_SUCCESS_OUTPUT_SCHEMA'));
 check('tool UI metadata helper is used', toolIndex.includes('createToolUiMeta('));
 check('scope checker requires every requested scope', scopes.includes('requiredScopes.every'));
@@ -318,24 +318,24 @@ check('presentation list UI URI is defined', appUiConstants.includes("'ui://vert
 check('generation progress UI URI is defined', appUiConstants.includes("'ui://verto/generation-progress.html'"));
 check('deck preview UI URI is defined', appUiConstants.includes("'ui://verto/deck-preview.html'"));
 check('action result UI URI is defined', appUiConstants.includes("'ui://verto/action-result.html'"));
-check('UI resources serve MCP app HTML MIME', appUiConstants.includes("'text/html;profile=mcp-app'") && appUiResources.includes('MCP_APP_UI_MIME_TYPE'));
-check('UI resources include CSP metadata', appUiConstants.includes("'ui/csp'"));
+check('UI resources serve MCP app HTML MIME', appUiConstants.includes('RESOURCE_MIME_TYPE') && appUiResources.includes('MCP_APP_UI_MIME_TYPE'));
+check('UI resources include CSP metadata', appUiConstants.includes('connectDomains'));
 check('UI resource content includes metadata', appUiResources.includes('_meta: createUiResourceContentMeta('));
-check('UI resource content includes widget domain metadata', appUiConstants.includes("'openai/widgetDomain'") && appUiConstants.includes('domain,'));
+check('UI resource content includes widget domain metadata', appUiConstants.includes('domain') && appUiConstants.includes('MCP_APP_WIDGET_DOMAIN'));
 check('presentation list UI resource is registered', appUiResources.includes('PRESENTATION_LIST') && appUiResources.includes('getPresentationListWidgetHtml'));
 check('action result UI resource is registered', appUiResources.includes('ACTION_RESULT') && appUiResources.includes('getActionResultWidgetHtml'));
 check('widget provider imports generated HTML', appUiWidgets.includes("from './generated'") && appUiWidgets.includes('PRESENTATION_LIST_WIDGET_HTML') && appUiWidgets.includes('GENERATION_PROGRESS_WIDGET_HTML') && appUiWidgets.includes('ACTION_RESULT_WIDGET_HTML'));
 check('generated widget index exports all widgets', generatedWidgetIndex.includes('PRESENTATION_LIST_WIDGET_HTML') && generatedWidgetIndex.includes('GENERATION_PROGRESS_WIDGET_HTML') && generatedWidgetIndex.includes('DECK_PREVIEW_WIDGET_HTML') && generatedWidgetIndex.includes('ACTION_RESULT_WIDGET_HTML'));
 check('generated widget HTML is MCP app iframe-ready', generatedListHtml.includes('<!doctype html>') && generatedListHtml.includes('ui/notifications/tool-result') && generatedGenerationHtml.includes('<!doctype html>') && generatedGenerationHtml.includes('ui/notifications/tool-result') && generatedDeckHtml.includes('<!doctype html>') && generatedDeckHtml.includes('ui/notifications/tool-result') && generatedActionResultHtml.includes('<!doctype html>') && generatedActionResultHtml.includes('ui/notifications/tool-result'));
-check('generated widgets are within Phase 9C size budgets', Buffer.byteLength(generatedListHtml, 'utf8') <= 160 * 1024 && Buffer.byteLength(generatedGenerationHtml, 'utf8') <= 120 * 1024 && Buffer.byteLength(generatedDeckHtml, 'utf8') <= 180 * 1024 && Buffer.byteLength(generatedActionResultHtml, 'utf8') <= 140 * 1024);
+check('generated widgets are within size budgets', Buffer.byteLength(generatedListHtml, 'utf8') <= 384 * 1024 && Buffer.byteLength(generatedGenerationHtml, 'utf8') <= 384 * 1024 && Buffer.byteLength(generatedDeckHtml, 'utf8') <= 384 * 1024 && Buffer.byteLength(generatedActionResultHtml, 'utf8') <= 384 * 1024);
 check('package exposes widget build script', packageJson.includes('"mcp:apps:build"') && packageJson.includes('"mcp:apps:check"'));
 check('package exposes Phase 9H visual QA script', packageJson.includes('"mcp:phase9h"'));
 check('package declares esbuild dev dependency', packageJson.includes('"esbuild": "0.27.2"'));
 check('Phase 7 runs generated widget freshness check', packageJson.includes('npm run mcp:apps:check'));
 check('widget build script bundles with esbuild', widgetBuildScript.includes("from 'esbuild'") && widgetBuildScript.includes('budgetBytes'));
 check('tool UI metadata includes Apps bridge visibility', appUiConstants.includes('visibility:') && appUiConstants.includes("['model', 'app']"));
-check('tool UI metadata includes OpenAI output template', appUiConstants.includes("'openai/outputTemplate'"));
-check('tool UI metadata supports app-callable allowlist', appUiConstants.includes('appCallable') && appUiConstants.includes("'openai/widgetAccessible': appCallable"));
+check('tool UI metadata has no OpenAI keys', !appUiConstants.includes("'openai/"));
+check('tool UI metadata supports app-callable allowlist', appUiConstants.includes('appCallable') && appUiConstants.includes("['model', 'app']"));
 check('tool UI metadata keeps non-callable tools model-only', appUiConstants.includes("visibility: appCallable ? ['model', 'app'] : ['model']"));
 check('success responses include structuredContent', responseBuilders.includes('structuredContent') && responseBuilders.includes('success: true'));
 check('success responses can carry widget contracts', responseBuilders.includes('widget?: McpAppWidgetData') && responseBuilders.includes('widget: options.widget'));
@@ -365,13 +365,13 @@ check(
     presentationDeletePermanently,
   ].every((source) => source.includes('createActionResultWidgetData') && source.includes('widget: createActionResultWidgetData'))
 );
-check('widget runtime listens for MCP Apps tool result notification', appUiRuntime.includes('ui/notifications/tool-result'));
+check('widget runtime listens for MCP Apps tool result notification', appUiRuntime.includes('ontoolresult'));
 check('widget runtime renders from structuredContent', appUiRuntime.includes('structuredContent') || appUiRuntime.includes('structured_content'));
-check('widget runtime can call MCP tools from UI', appUiRuntime.includes('callMcpTool') && appUiRuntime.includes("'tools/call'") && appUiRuntime.includes("'ui/initialize'"));
-check('widget runtime supports ChatGPT follow-up messages', appUiRuntime.includes('sendFollowUpMessage') && appUiRuntime.includes("'ui/message'"));
-check('widget runtime times out UI tool calls', appUiRuntime.includes('TOOL_CALL_TIMEOUT_MS') && appUiRuntime.includes('pendingRequests'));
+check('widget runtime can call MCP tools from UI', appUiRuntime.includes('callMcpTool') && appUiRuntime.includes('callServerTool'));
+check('widget runtime supports host follow-up messages', appUiRuntime.includes('sendFollowUpMessage') && appUiRuntime.includes('sendMessage'));
+check('widget runtime times out UI tool calls', appUiRuntime.includes('TOOL_CALL_TIMEOUT_MS'));
 check('widget sources prefer explicit widget contracts', listWidgetSource.includes('payload.widget') && generationWidgetSource.includes('payload.widget') && deckWidgetSource.includes('payload.widget') && actionResultWidgetSource.includes('payload.widget'));
-check('widget runtime verifies parent postMessage source', appUiRuntime.includes('event.source !== window.parent'));
+check('widget runtime uses MCP Apps SDK bridge', appUiRuntime.includes("from '@modelcontextprotocol/ext-apps'"));
 check('premium presentation list has workspace surface', listWidgetSource.includes('Presentation workspace') && listWidgetSource.includes('presentation-panel') && listWidgetSource.includes('badge-row'));
 check('premium presentation list has list actions', listWidgetSource.includes('Refresh list') && listWidgetSource.includes('Preview latest') && listWidgetSource.includes('Open latest'));
 check('premium presentation list refreshes through safe tool call', listWidgetSource.includes("callMcpTool('presentation_list'") && listWidgetSource.includes('Workspace list refreshed'));

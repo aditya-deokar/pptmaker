@@ -9,6 +9,11 @@ const root = process.cwd();
 const checkOnly = process.argv.includes('--check');
 const generatedDir = path.join(root, 'src/mcp/apps/generated');
 
+// Budgets account for the @modelcontextprotocol/ext-apps App SDK bundled into
+// every standalone IIFE (~305 KB minified baseline: zod v4 + MCP Apps protocol
+// schemas) plus the widget UI itself (~20 KB).
+const WIDGET_BUDGET_BYTES = 384 * 1024;
+
 const widgets = [
   {
     name: 'presentation-list',
@@ -17,7 +22,7 @@ const widgets = [
     htmlFile: 'presentation-list.html',
     tsFile: 'presentation-list.ts',
     exportName: 'PRESENTATION_LIST_WIDGET_HTML',
-    budgetBytes: 160 * 1024,
+    budgetBytes: WIDGET_BUDGET_BYTES,
   },
   {
     name: 'generation-progress',
@@ -26,7 +31,7 @@ const widgets = [
     htmlFile: 'generation-progress.html',
     tsFile: 'generation-progress.ts',
     exportName: 'GENERATION_PROGRESS_WIDGET_HTML',
-    budgetBytes: 120 * 1024,
+    budgetBytes: WIDGET_BUDGET_BYTES,
   },
   {
     name: 'deck-preview',
@@ -35,7 +40,7 @@ const widgets = [
     htmlFile: 'deck-preview.html',
     tsFile: 'deck-preview.ts',
     exportName: 'DECK_PREVIEW_WIDGET_HTML',
-    budgetBytes: 180 * 1024,
+    budgetBytes: WIDGET_BUDGET_BYTES,
   },
   {
     name: 'action-result',
@@ -44,7 +49,7 @@ const widgets = [
     htmlFile: 'action-result.html',
     tsFile: 'action-result.ts',
     exportName: 'ACTION_RESULT_WIDGET_HTML',
-    budgetBytes: 140 * 1024,
+    budgetBytes: WIDGET_BUDGET_BYTES,
   },
 ];
 

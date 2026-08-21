@@ -1,35 +1,32 @@
+import { App } from '@modelcontextprotocol/ext-apps';
+
 type VertoPayload = Record<string, unknown>;
 
 type RenderHandler = (payload: VertoPayload) => void;
-type PendingRequest = {
-  resolve: (value: unknown) => void;
-  reject: (reason?: unknown) => void;
-  timeoutId: number;
-};
 
-const MCP_APPS_PROTOCOL_VERSION = '2026-01-26';
 const TOOL_CALL_TIMEOUT_MS = 15_000;
-const BRIDGE_INIT_TIMEOUT_MS = 5_000;
-
-let rpcId = 0;
-let bridgeReady: Promise<void> | null = null;
-const pendingRequests = new Map<number, PendingRequest>();
 
 declare global {
   interface Window {
-    openai?: {
-      toolOutput?: unknown;
-      toolResult?: unknown;
-      toolResponse?: unknown;
-      callTool?: (name: string, args: Record<string, unknown>) => Promise<unknown>;
-      sendFollowUpMessage?: (message: {
-        prompt: string;
-        scrollToBottom?: boolean;
-      }) => Promise<unknown> | unknown;
-    };
+    /**
+     * Standalone/test hook: pre-seeds a widget payload when the HTML is
+     * rendered outside an MCP Apps host (e.g. the Phase 9H visual QA
+     * harness). Real hosts deliver data via `ontoolresult` instead.
+     */
     __VERTO_MCP_PAYLOAD__?: VertoPayload;
   }
 }
+
+/**
+ * MCP Apps client bridge. Replaces the former hand-rolled postMessage
+ * JSON-RPC implementation (and its legacy host-global fallbacks) with the
+ * standardized SDK `App`, which auto-detects the host environment.
+ */
+const app = new App(
+  { name: 'verto-ai', version: '0.1.0' },
+  {},
+  { autoResize: true }
+);
 
 export const baseStyles = `
   :root {
@@ -137,39 +134,31 @@ export const baseStyles = `
 export function mountWidget(render: RenderHandler): void {
   injectStyles(baseStyles);
 
-  window.addEventListener('message', (event) => {
-    if (event.source !== window.parent) return;
+  // Handlers must be registered BEFORE connect(): the host may deliver the
+  // current tool result immediately after the ui/initialize handshake.
+  app.ontoolresult = (params) => {
+    renderFromPayload(params.structuredContent, render);
+  };
 
-    const message = event.data;
-    if (!message || typeof message !== 'object') return;
-
-    if (message.jsonrpc === '2.0') {
-      if (handleRpcResponse(message)) return;
-
-      if (message.method === 'ui/notifications/tool-result') {
-        renderFromPayload(message.params, render);
-      }
-      return;
-    }
-
-    renderFromPayload(message.result || message.payload || message, render);
-  });
-
-  initializeMcpAppsBridge().catch((error) => {
+  app.connect().catch((error) => {
     console.warn('Verto MCP Apps bridge was not initialized:', error);
   });
 
-  renderFromPayload(pickInitialPayload(), render);
+  // Standalone rendering (visual QA / static preview).
+  if (window.__VERTO_MCP_PAYLOAD__) {
+    renderFromPayload(window.__VERTO_MCP_PAYLOAD__, render);
+  }
 }
 
 export async function callMcpTool(
   name: string,
   args: Record<string, unknown>
 ): Promise<VertoPayload> {
-  const response = await callMcpToolRaw(name, args);
-  const payload = normalizePayload(response);
-  window.__VERTO_MCP_PAYLOAD__ = payload;
-  return payload;
+  const result = await app.callServerTool(
+    { name, arguments: args },
+    { timeout: TOOL_CALL_TIMEOUT_MS }
+  );
+  return normalizePayload(result);
 }
 
 export async function sendFollowUpMessage(prompt: string): Promise<void> {
@@ -177,20 +166,14 @@ export async function sendFollowUpMessage(prompt: string): Promise<void> {
     return;
   }
 
-  const openaiBridge = window.openai;
-  if (typeof openaiBridge?.sendFollowUpMessage === 'function') {
-    await openaiBridge.sendFollowUpMessage({ prompt, scrollToBottom: true });
-    return;
+  try {
+    await app.sendMessage({
+      role: 'user',
+      content: [{ type: 'text', text: prompt }],
+    });
+  } catch {
+    throw new Error('This host has not enabled follow-up messages for Verto AI yet.');
   }
-
-  if (!hasParentBridge()) {
-    throw new Error('This host has not enabled ChatGPT follow-up messages for the widget.');
-  }
-
-  rpcNotify('ui/message', {
-    role: 'user',
-    content: [{ type: 'text', text: prompt }],
-  });
 }
 
 export function byId(id: string): HTMLElement {
@@ -247,114 +230,8 @@ export function injectStyles(css: string): void {
   document.head.appendChild(style);
 }
 
-async function callMcpToolRaw(
-  name: string,
-  args: Record<string, unknown>
-): Promise<unknown> {
-  if (hasParentBridge()) {
-    try {
-      await initializeMcpAppsBridge();
-      return await rpcRequest('tools/call', {
-        name,
-        arguments: args,
-      }, TOOL_CALL_TIMEOUT_MS);
-    } catch (error) {
-      if (typeof window.openai?.callTool !== 'function') {
-        throw error;
-      }
-    }
-  }
-
-  if (typeof window.openai?.callTool === 'function') {
-    return window.openai.callTool(name, args);
-  }
-
-  throw new Error('This host has not enabled widget tool calls for Verto AI yet.');
-}
-
-function hasParentBridge(): boolean {
-  return typeof window !== 'undefined' && window.parent !== window;
-}
-
-function initializeMcpAppsBridge(): Promise<void> {
-  if (!hasParentBridge()) {
-    return Promise.resolve();
-  }
-
-  if (!bridgeReady) {
-    bridgeReady = rpcRequest('ui/initialize', {
-      appInfo: { name: 'verto-ai', version: '0.1.0' },
-      appCapabilities: {},
-      protocolVersion: MCP_APPS_PROTOCOL_VERSION,
-    }, BRIDGE_INIT_TIMEOUT_MS)
-      .then(() => {
-        rpcNotify('ui/notifications/initialized', {});
-      })
-      .catch((error) => {
-        bridgeReady = null;
-        throw error;
-      });
-  }
-
-  return bridgeReady;
-}
-
-function rpcNotify(method: string, params: Record<string, unknown>): void {
-  window.parent.postMessage({ jsonrpc: '2.0', method, params }, '*');
-}
-
-function rpcRequest(
-  method: string,
-  params: Record<string, unknown>,
-  timeoutMs: number
-): Promise<unknown> {
-  return new Promise((resolve, reject) => {
-    const id = ++rpcId;
-    const timeoutId = window.setTimeout(() => {
-      pendingRequests.delete(id);
-      reject(new Error(`Timed out waiting for ${method}.`));
-    }, timeoutMs);
-
-    pendingRequests.set(id, { resolve, reject, timeoutId });
-    window.parent.postMessage({ jsonrpc: '2.0', id, method, params }, '*');
-  });
-}
-
-function handleRpcResponse(message: Record<string, unknown>): boolean {
-  if (typeof message.id !== 'number' || typeof message.method === 'string') {
-    return false;
-  }
-
-  const pending = pendingRequests.get(message.id);
-  if (!pending) {
-    return false;
-  }
-
-  pendingRequests.delete(message.id);
-  window.clearTimeout(pending.timeoutId);
-
-  if (message.error) {
-    pending.reject(message.error);
-  } else {
-    pending.resolve(message.result);
-  }
-
-  return true;
-}
-
-function pickInitialPayload(): unknown {
-  if (window.__VERTO_MCP_PAYLOAD__) {
-    return window.__VERTO_MCP_PAYLOAD__;
-  }
-
-  const openai = window.openai || {};
-  return openai.toolOutput || openai.toolResult || openai.toolResponse || {};
-}
-
 function renderFromPayload(raw: unknown, render: RenderHandler): void {
-  const payload = normalizePayload(raw);
-  window.__VERTO_MCP_PAYLOAD__ = payload;
-  render(payload);
+  render(normalizePayload(raw));
 }
 
 function normalizePayload(raw: unknown): VertoPayload {
