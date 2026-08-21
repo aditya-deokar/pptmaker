@@ -164,7 +164,7 @@ export default function HeroV2() {
                                 <img
                                     src="/hero/image.png"
                                     alt="Dashboard Interface"
-                                    className="w-full h-auto object-cover"
+                                    className="w-full h-[350px] md:h-auto object-cover object-left-top md:object-center"
                                 />
                             </div>
                         </div>
