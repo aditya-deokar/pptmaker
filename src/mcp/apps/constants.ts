@@ -9,7 +9,23 @@ export const MCP_APP_UI_RESOURCE_URIS = {
   GENERATION_PROGRESS: 'ui://verto/generation-progress.html',
   DECK_PREVIEW: 'ui://verto/deck-preview.html',
   ACTION_RESULT: 'ui://verto/action-result.html',
+  DECK_LIVE: 'ui://verto/deck-live.html',
+  THEME_STUDIO: 'ui://verto/theme-studio.html',
+  PUBLISH_CARD: 'ui://verto/publish-card.html',
 } as const;
+
+/**
+ * W1 (plan 10): slide image origins observed in generated decks. The image
+ * providers emit `images.unsplash.com` / `plus.unsplash.com` URLs and a
+ * legacy `via.placeholder.com` fallback; Gemini-generated images are inline
+ * data URLs (no origin). These are allowlisted as CSP `resourceDomains` for
+ * the deck-rendering widgets only.
+ */
+export const SLIDE_IMAGE_RESOURCE_DOMAINS = [
+  'images.unsplash.com',
+  'plus.unsplash.com',
+  'via.placeholder.com',
+] as const;
 
 /**
  * MCP Apps UI resource MIME type, re-exported from the SDK so all server
@@ -22,6 +38,8 @@ export type McpAppUiResourceUri =
 
 interface ToolUiMetaOptions {
   appCallable?: boolean;
+  /** Restrict the tool to app visibility only (never surfaced to the model). */
+  appOnly?: boolean;
 }
 
 function stripTrailingSlash(value: string): string {
@@ -54,17 +72,24 @@ export function createToolUiMeta(
   return {
     ui: {
       ...(resourceUri ? { resourceUri } : {}),
-      visibility: appCallable ? ['model', 'app'] : ['model'],
+      // The ternary below is asserted verbatim by scripts/mcp-apps/phase7-checks.mjs.
+      ...(options.appOnly
+        ? { visibility: ['app'] }
+        : { visibility: appCallable ? ['model', 'app'] : ['model'] }),
     },
   };
 }
 
 /**
  * Content-item `_meta.ui` for MCP Apps UI resources. Widgets are fully
- * self-contained single-file HTML documents, so no external CSP domains are
- * required; a dedicated domain is added only when explicitly configured.
+ * self-contained single-file HTML documents; deck-rendering widgets pass
+ * `extraResourceDomains` (W1) to allow slide image origins.
  */
-export function createUiResourceContentMeta(): { ui: McpUiResourceMeta } {
+export function createUiResourceContentMeta(options: {
+  extraResourceDomains?: readonly string[];
+  /** Declare sandbox clipboard-write permission (publish card Copy button). */
+  clipboardWrite?: boolean;
+} = {}): { ui: McpUiResourceMeta } {
   const domain = getWidgetDomain();
 
   return {
@@ -72,8 +97,11 @@ export function createUiResourceContentMeta(): { ui: McpUiResourceMeta } {
       prefersBorder: true,
       csp: {
         connectDomains: [],
-        resourceDomains: [],
+        resourceDomains: options.extraResourceDomains
+          ? [...options.extraResourceDomains]
+          : [],
       },
+      ...(options.clipboardWrite ? { permissions: { clipboardWrite: {} } } : {}),
       ...(domain ? { domain } : {}),
     },
   };

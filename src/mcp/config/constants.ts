@@ -41,6 +41,10 @@ export const TOOL_NAMES = {
   // AI Generation
   PRESENTATION_GENERATE: 'presentation_generate',
   PRESENTATION_GENERATION_STATUS: 'presentation_generation_status',
+  // App-only presenter view (plan 10 F2)
+  PRESENTATION_RENDER_DECK: 'presentation_render_deck',
+  // App-only theme browser (plan 10 F4)
+  PRESENTATION_RENDER_THEME_STUDIO: 'presentation_render_theme_studio',
 } as const;
 
 // ─── Resource URIs ─────────────────────────────────────────────

@@ -3,3 +3,6 @@ export { PRESENTATION_LIST_WIDGET_HTML } from './presentation-list';
 export { GENERATION_PROGRESS_WIDGET_HTML } from './generation-progress';
 export { DECK_PREVIEW_WIDGET_HTML } from './deck-preview';
 export { ACTION_RESULT_WIDGET_HTML } from './action-result';
+export { DECK_LIVE_WIDGET_HTML } from './deck-live';
+export { THEME_STUDIO_WIDGET_HTML } from './theme-studio';
+export { PUBLISH_CARD_WIDGET_HTML } from './publish-card';

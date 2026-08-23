@@ -1,7 +1,169 @@
 {
-  "generatedAt": "2026-08-21T17:58:19.138Z",
+  "generatedAt": "2026-08-22T13:59:06.085Z",
   "source": "scripts/mcp-apps/phase9h-visual-qa.mjs",
   "results": [
+    {
+      "id": "phase10d-theme-studio-dark-desktop",
+      "label": "Theme studio catalog - dark desktop",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10d-theme-studio-dark-desktop.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 29,
+        "contrastChecked": 59,
+        "textElementCount": 59,
+        "bodyTextLength": 660,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10d-theme-studio-light-mobile",
+      "label": "Theme studio catalog - light mobile",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10d-theme-studio-light-mobile.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 29,
+        "contrastChecked": 59,
+        "textElementCount": 59,
+        "bodyTextLength": 658,
+        "screenshotWidth": 390
+      }
+    },
+    {
+      "id": "phase10d-publish-card-celebration-light-desktop",
+      "label": "Publish card celebration - light desktop",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10d-publish-card-celebration-light-desktop.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 5,
+        "contrastChecked": 17,
+        "textElementCount": 17,
+        "bodyTextLength": 360,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10d-publish-card-private-dark-mobile",
+      "label": "Publish card private - dark mobile",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10d-publish-card-private-dark-mobile.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 2,
+        "contrastChecked": 13,
+        "textElementCount": 15,
+        "bodyTextLength": 339,
+        "screenshotWidth": 390
+      }
+    },
+    {
+      "id": "phase10f-deck-preview-edit-mode-light-desktop",
+      "label": "Deck preview guided edit - light desktop",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10f-deck-preview-edit-mode-light-desktop.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 18,
+        "contrastChecked": 99,
+        "textElementCount": 103,
+        "bodyTextLength": 1607,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10c-deck-live-dark-desktop",
+      "label": "Deck live presenter - dark desktop",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10c-deck-live-dark-desktop.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 7,
+        "contrastChecked": 15,
+        "textElementCount": 16,
+        "bodyTextLength": 343,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10c-deck-live-grid-light-mobile",
+      "label": "Deck live presenter grid - light mobile",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10c-deck-live-grid-light-mobile.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 7,
+        "contrastChecked": 15,
+        "textElementCount": 16,
+        "bodyTextLength": 341,
+        "screenshotWidth": 390
+      }
+    },
+    {
+      "id": "phase10b-deck-renderer-rich-dark-desktop",
+      "label": "Deck renderer rich content - dark desktop",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10b-deck-renderer-rich-dark-desktop.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1475,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10b-deck-renderer-rich-light-mobile",
+      "label": "Deck renderer rich content - light mobile",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10b-deck-renderer-rich-light-mobile.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 88,
+        "textElementCount": 91,
+        "bodyTextLength": 1494,
+        "screenshotWidth": 390
+      }
+    },
     {
       "id": "phase9h-presentation-list-dark-desktop",
       "label": "Presentation list - dark desktop",
@@ -13,10 +175,10 @@
       "colorScheme": "dark",
       "failures": [],
       "metrics": {
-        "focusableCount": 7,
-        "contrastChecked": 66,
-        "textElementCount": 66,
-        "bodyTextLength": 826,
+        "focusableCount": 8,
+        "contrastChecked": 70,
+        "textElementCount": 70,
+        "bodyTextLength": 832,
         "screenshotWidth": 1200
       }
     },
@@ -31,10 +193,10 @@
       "colorScheme": "light",
       "failures": [],
       "metrics": {
-        "focusableCount": 7,
-        "contrastChecked": 60,
-        "textElementCount": 60,
-        "bodyTextLength": 777,
+        "focusableCount": 8,
+        "contrastChecked": 64,
+        "textElementCount": 64,
+        "bodyTextLength": 783,
         "screenshotWidth": 390
       }
     },
@@ -50,16 +212,16 @@
       "failures": [],
       "metrics": {
         "focusableCount": 1,
-        "contrastChecked": 27,
-        "textElementCount": 28,
-        "bodyTextLength": 498,
+        "contrastChecked": 33,
+        "textElementCount": 34,
+        "bodyTextLength": 771,
         "screenshotWidth": 1200
       }
     },
     {
-      "id": "phase9h-generation-complete-light-desktop",
-      "label": "Generation complete - light desktop",
-      "screenshot": "docs/mcp-apps/submission-assets/phase9h-generation-complete-light-desktop.png",
+      "id": "phase10e-generation-complete-light-desktop",
+      "label": "Generation complete with live preview - light desktop",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10e-generation-complete-light-desktop.png",
       "viewport": {
         "width": 1200,
         "height": 900
@@ -67,10 +229,10 @@
       "colorScheme": "light",
       "failures": [],
       "metrics": {
-        "focusableCount": 2,
-        "contrastChecked": 28,
-        "textElementCount": 28,
-        "bodyTextLength": 479,
+        "focusableCount": 3,
+        "contrastChecked": 43,
+        "textElementCount": 43,
+        "bodyTextLength": 896,
         "screenshotWidth": 1200
       }
     },
@@ -86,9 +248,9 @@
       "failures": [],
       "metrics": {
         "focusableCount": 1,
-        "contrastChecked": 28,
-        "textElementCount": 29,
-        "bodyTextLength": 621,
+        "contrastChecked": 32,
+        "textElementCount": 33,
+        "bodyTextLength": 851,
         "screenshotWidth": 390
       }
     },
@@ -103,10 +265,10 @@
       "colorScheme": "dark",
       "failures": [],
       "metrics": {
-        "focusableCount": 3,
-        "contrastChecked": 36,
-        "textElementCount": 36,
-        "bodyTextLength": 939,
+        "focusableCount": 9,
+        "contrastChecked": 52,
+        "textElementCount": 54,
+        "bodyTextLength": 1028,
         "screenshotWidth": 1200
       }
     },
@@ -121,10 +283,10 @@
       "colorScheme": "light",
       "failures": [],
       "metrics": {
-        "focusableCount": 3,
-        "contrastChecked": 36,
-        "textElementCount": 36,
-        "bodyTextLength": 964,
+        "focusableCount": 9,
+        "contrastChecked": 53,
+        "textElementCount": 55,
+        "bodyTextLength": 1047,
         "screenshotWidth": 1200
       }
     },
@@ -139,10 +301,10 @@
       "colorScheme": "light",
       "failures": [],
       "metrics": {
-        "focusableCount": 3,
-        "contrastChecked": 36,
-        "textElementCount": 36,
-        "bodyTextLength": 939,
+        "focusableCount": 9,
+        "contrastChecked": 52,
+        "textElementCount": 54,
+        "bodyTextLength": 1031,
         "screenshotWidth": 390
       }
     },
@@ -157,10 +319,10 @@
       "colorScheme": "dark",
       "failures": [],
       "metrics": {
-        "focusableCount": 4,
-        "contrastChecked": 22,
-        "textElementCount": 22,
-        "bodyTextLength": 356,
+        "focusableCount": 5,
+        "contrastChecked": 26,
+        "textElementCount": 26,
+        "bodyTextLength": 366,
         "screenshotWidth": 1200
       }
     },
@@ -179,6 +341,258 @@
         "contrastChecked": 18,
         "textElementCount": 20,
         "bodyTextLength": 436,
+        "screenshotWidth": 390
+      }
+    },
+    {
+      "id": "phase10g-matrix-default-light",
+      "label": "Theme matrix Default - light",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-default-light.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1457,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10g-matrix-default-dark",
+      "label": "Theme matrix Default - dark",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-default-dark.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1457,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10g-matrix-dark-elegance-light",
+      "label": "Theme matrix Dark Elegance - light",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-dark-elegance-light.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1475,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10g-matrix-dark-elegance-dark",
+      "label": "Theme matrix Dark Elegance - dark",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-dark-elegance-dark.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1475,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10g-matrix-sunset-glow-light",
+      "label": "Theme matrix Sunset Glow - light",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-sunset-glow-light.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1469,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10g-matrix-sunset-glow-dark",
+      "label": "Theme matrix Sunset Glow - dark",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-sunset-glow-dark.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1469,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10g-matrix-neon-nights-light",
+      "label": "Theme matrix Neon Nights - light",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-neon-nights-light.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1469,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10g-matrix-neon-nights-dark",
+      "label": "Theme matrix Neon Nights - dark",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-neon-nights-dark.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1469,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10g-matrix-arctic-aurora-light",
+      "label": "Theme matrix Arctic Aurora - light",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-arctic-aurora-light.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1475,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10g-matrix-arctic-aurora-dark",
+      "label": "Theme matrix Arctic Aurora - dark",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-arctic-aurora-dark.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1475,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10g-matrix-sakura-blossom-light",
+      "label": "Theme matrix Sakura Blossom - light",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-sakura-blossom-light.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1478,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10g-matrix-sakura-blossom-dark",
+      "label": "Theme matrix Sakura Blossom - dark",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-sakura-blossom-dark.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1478,
+        "screenshotWidth": 1200
+      }
+    },
+    {
+      "id": "phase10g-matrix-mobile-default-light",
+      "label": "Theme matrix mobile Default - light",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-mobile-default-light.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "colorScheme": "light",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1457,
+        "screenshotWidth": 390
+      }
+    },
+    {
+      "id": "phase10g-matrix-mobile-arctic-aurora-dark",
+      "label": "Theme matrix mobile Arctic Aurora - dark",
+      "screenshot": "docs/mcp-apps/submission-assets/phase10g-matrix-mobile-arctic-aurora-dark.png",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "colorScheme": "dark",
+      "failures": [],
+      "metrics": {
+        "focusableCount": 11,
+        "contrastChecked": 87,
+        "textElementCount": 90,
+        "bodyTextLength": 1475,
         "screenshotWidth": 390
       }
     }

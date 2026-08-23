@@ -9,6 +9,12 @@ import {
   mountWidget,
   sendFollowUpMessage,
 } from './shared/runtime';
+import {
+  extractThemeName,
+  extractWidgetLinks,
+  renderDeepLinkMenu,
+  setWidgetTheme,
+} from './shared/verto-skin';
 
 const actionResultStyles = `
   .result-shell {
@@ -24,6 +30,7 @@ const actionResultStyles = `
     display: grid;
     gap: 6px;
     margin-bottom: 8px;
+    padding-right: 48px;
   }
   .result-kicker {
     color: var(--accent);
@@ -100,9 +107,20 @@ const actionResultStyles = `
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
   }
   .summary-panel {
+    position: relative;
     display: grid;
     gap: 16px;
     padding: 24px;
+    overflow: hidden;
+  }
+  .summary-panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--vt-fill);
   }
   .summary-title {
     margin: 0;
@@ -136,6 +154,10 @@ const actionResultStyles = `
     font-weight: 700;
     color: var(--fg);
     overflow-wrap: anywhere;
+  }
+  .metric-value .vt-swatch {
+    margin-right: 6px;
+    vertical-align: -1px;
   }
   .affected-panel {
     display: grid;
@@ -271,6 +293,7 @@ function ensureMarkup(): void {
 
   document.body.innerHTML = `
     <main class="result-shell" id="verto-action-result-widget">
+      <div class="vt-links" id="result-links"></div>
       <section class="result-header" aria-labelledby="title">
         <div class="result-kicker">Verto AI result</div>
         <h1 class="result-title" id="title">Action complete</h1>
@@ -378,6 +401,9 @@ function renderActionResultPayload(payload: Record<string, unknown>): void {
 
   const result = toActionResultViewModel(payload);
 
+  setWidgetTheme(extractThemeName(payload));
+  renderDeepLinkMenu(byId('result-links'), extractWidgetLinks(payload));
+
   byId('title').textContent = result.title;
   byId('message').textContent = result.message;
 
@@ -419,8 +445,13 @@ function renderSummary(result: ActionResultViewModel): void {
 
   const presentation = result.presentation;
   title.textContent = presentation.title;
+  const themeMetric = createMetric('Theme', presentation.themeName);
+  const themeSwatch = document.createElement('span');
+  themeSwatch.className = 'vt-swatch';
+  themeSwatch.setAttribute('aria-hidden', 'true');
+  themeMetric.querySelector('.metric-value')?.prepend(themeSwatch);
   grid.appendChild(createMetric('Slides', `${presentation.slideCount}`));
-  grid.appendChild(createMetric('Theme', presentation.themeName));
+  grid.appendChild(themeMetric);
   grid.appendChild(createMetric('Status', presentation.isDeleted ? 'Deleted' : presentation.isPublished ? 'Published' : 'Draft'));
   grid.appendChild(createMetric('Updated', formatUpdatedAt(presentation.updatedAt)));
 }

@@ -112,6 +112,7 @@ Claude:
 | `08-product-submission-packet.md` | Phase 8 app listing copy, reviewer instructions, data handling answers, screenshot plan, help article drafts, and owner submission steps. |
 | `legacy/09-premium-mcp-apps-ui-plan.md` | **Archived.** Phase 9 plan for making Verto's ChatGPT MCP Apps UI render reliably, then upgrading it into a premium in-chat presentation experience (superseded by the ext-apps migration). |
 | `09h-visual-qa-evidence.md` | Phase 9H automated visual QA command plus exact ChatGPT prompts, widget button actions, accessibility checks, and screenshot evidence checklist. |
+| `10-in-chat-verto-experience-plan.md` | Phase 10 upgrade plan: real themed slide rendering, in-chat presenter mode, theme studio, live generation, and model-context sync — bringing the full dashboard experience into any MCP Apps host. |
 | `submission-assets/` | Place final icons, screenshots, and evidence files here before app review. |
 
 ## Widget Layer: MCP Apps SDK Migration (2026-08)
@@ -130,8 +131,33 @@ VS Code, Goose, and any other compliant host:
 - Migration analysis, API mapping, and phase-by-phase plan:
   `00-migration-overview.md`, `01-current-architecture.md`, `02-api-mapping.md`,
   `03-migration-plan.md` in this folder.
-- Automated evidence: Phase 7 checks (275) and Phase 9H visual QA both pass on
+- Automated evidence: Phase 7 checks and Phase 9H visual QA both pass on
   the migrated stack; see `07-testing-plan.md` for live-host steps.
+
+## The Immersive In-Chat Experience (Plan 10 — shipped)
+
+The successor plan [`10-in-chat-verto-experience-plan.md`](./10-in-chat-verto-experience-plan.md)
+closed the gap between chat widgets and the real dashboard. All phases
+(10A–10H) are delivered. Architecture deep-dive (layers, data flows,
+decisions): [`11-immersive-widgets-architecture.md`](./11-immersive-widgets-architecture.md).
+
+| Area | What ships in-chat |
+| --- | --- |
+| Verto skin + theme engine | Every widget paints with the deck's actual theme (`--vt-*` tokens from a generated 65-theme catalog), host light/dark + fonts adopted |
+| Real slides | Faithful vanilla renderer for ~95% of generated content types (stats, timelines, callouts, tables, columns, images) |
+| `deck_live` presenter | Fullscreen presenting with keyboard nav, grid overview, progress bar, safe-area insets; inline fallback |
+| Theme studio | Browse/search/filter all 65 themes visually, apply live via `presentation_update_theme`, model-context push |
+| Publish card | Celebration moment, share URL + copy, in-widget QR code, unpublish/re-publish loop |
+| Live generation | Auto-polling with countdown ring and adaptive backoff, real run-step timeline, elapsed/ETA chips, inline first-slide preview on completion |
+| Guided slide edits | Single-slide text editing with themed fields, full-replacement save, diff confirmation strip, undo chip |
+| Adaptive layout | Mobile/touch hit-target ≥44px, bottom-sheet action rows, PiP compact variant, Present button gated by host display modes |
+
+App-visible tool surface grew by two app-only entries:
+`presentation_render_deck` (presenter) and `presentation_render_theme_studio`
+(theme browser). Widget payloads are version 2 with editor/present/share deep
+links. Automated gates: `npm run mcp:phase7` (358 checks + focused typecheck)
+and `npm run mcp:phase9h` (33 scenarios including a themes × schemes contrast
+matrix).
 
 ## Source Highlights
 

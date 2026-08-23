@@ -6,8 +6,27 @@ import {
   getRecord,
   getString,
   injectStyles,
+  logWidgetWarning,
   mountWidget,
+  onTeardown,
+  pushModelContext,
 } from './shared/runtime';
+import {
+  canPresentFullscreen,
+  extractThemeName,
+  extractWidgetLinks,
+  findTheme,
+  renderDeepLinkMenu,
+  resolveThemeTokens,
+  setWidgetTheme,
+} from './shared/verto-skin';
+import { renderSlideContent } from './shared/slide-renderer';
+import {
+  applyPatchesToSlides,
+  createSlideEditor,
+  type SlideEditPatch,
+  type SlideEditorHandle,
+} from './shared/slide-editor';
 
 const deckStyles = `
   .deck-shell {
@@ -23,6 +42,7 @@ const deckStyles = `
     display: grid;
     gap: 6px;
     margin-bottom: 8px;
+    padding-right: 48px;
   }
   .deck-kicker {
     color: var(--accent);
@@ -85,23 +105,23 @@ const deckStyles = `
     min-height: 242px;
     aspect-ratio: 16 / 9;
     border: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
-    border-radius: 16px;
     padding: 24px;
-    overflow: hidden;
-    background: color-mix(in srgb, var(--surface) 75%, transparent);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
   }
   .cover-meta {
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    color: var(--muted);
+    color: var(--vt-slide-muted);
     font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+  }
+  .cover-theme-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    max-width: 100%;
   }
   .cover-title {
     max-width: 78%;
@@ -114,7 +134,7 @@ const deckStyles = `
   .cover-text {
     max-width: 68%;
     margin: 0;
-    color: var(--muted);
+    color: var(--vt-slide-muted);
     font-size: 15px;
     overflow-wrap: anywhere;
   }
@@ -127,7 +147,7 @@ const deckStyles = `
   .cover-line {
     height: 8px;
     border-radius: 8px;
-    background: color-mix(in srgb, var(--accent) 20%, transparent);
+    background: color-mix(in srgb, var(--vt-slide-fg) 20%, transparent);
   }
   .cover-line:nth-child(2) { width: 72%; }
   .cover-line:nth-child(3) { width: 48%; }
@@ -187,6 +207,17 @@ const deckStyles = `
   .button.primary:hover:not(:disabled) {
     opacity: 0.9;
     box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  .button.present-btn {
+    border-color: transparent;
+    /* Solid fallback doubles as the WCAG-measured background for white text */
+    background-color: #dc2626;
+    background-image: var(--vt-brand-gradient);
+    color: #ffffff;
+  }
+  .button.present-btn:hover:not(:disabled) {
+    opacity: 1;
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
   }
   .button[aria-disabled="true"],
   .button:disabled {
@@ -259,61 +290,38 @@ const deckStyles = `
     aspect-ratio: auto;
     min-height: 120px;
     border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
-    border-radius: 12px;
     padding: 16px;
-    overflow: hidden;
-    background: color-mix(in srgb, var(--surface) 60%, transparent);
-    transition: all 0.2s;
+    transition: filter 0.2s;
   }
   .slide-preview:hover {
-    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    filter: brightness(1.05);
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   }
   .slide-content-html {
-    font-size: 13px;
-    line-height: 1.5;
-    color: var(--fg);
-    margin-top: 24px;
-  }
-  .slide-content-html h1, .slide-content-html h2, .slide-content-html h3 {
-    margin: 0 0 8px;
-    color: var(--fg);
-  }
-  .slide-content-html p {
-    margin: 0 0 8px;
-    color: var(--muted);
-  }
-  .slide-content-html ul, .slide-content-html ol {
-    margin: 0 0 8px;
-    padding-left: 20px;
-    color: var(--muted);
-  }
-  .slide-preview:hover {
-    background: color-mix(in srgb, var(--surface) 80%, transparent);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-top: 0;
+    min-width: 0;
   }
   .slide-number {
-    position: absolute;
-    top: 8px;
-    left: 8px;
+    display: inline-flex;
+    align-self: flex-start;
     min-width: 24px;
-    border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
+    border: 1px solid color-mix(in srgb, var(--vt-slide-fg) 18%, transparent);
     border-radius: 99px;
     padding: 2px 8px;
-    background: color-mix(in srgb, var(--surface) 80%, transparent);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    color: var(--fg);
+    background: color-mix(in srgb, var(--vt-slide-fg) 10%, transparent);
+    color: var(--vt-slide-fg);
     font-size: 11px;
     font-weight: 700;
     text-align: center;
+    margin-bottom: 8px;
   }
   .slide-title {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     margin: 0;
-    color: var(--fg);
+    color: var(--vt-slide-fg);
+    font-family: var(--vt-heading-font);
     font-size: 13px;
     font-weight: 700;
     overflow: hidden;
@@ -325,7 +333,7 @@ const deckStyles = `
     -webkit-line-clamp: 2;
     min-height: 36px;
     margin: 0;
-    color: var(--muted);
+    color: var(--vt-slide-muted);
     font-size: 13px;
     overflow: hidden;
     overflow-wrap: anywhere;
@@ -392,6 +400,7 @@ function ensureMarkup(): void {
 
   document.body.innerHTML = `
     <main class="deck-shell" id="verto-deck-widget">
+      <div class="vt-links" id="deck-links"></div>
       <section class="deck-header" aria-labelledby="title">
         <div class="deck-kicker">Verto AI deck</div>
         <h1 class="deck-title" id="title">Deck preview</h1>
@@ -399,13 +408,13 @@ function ensureMarkup(): void {
         <div class="badge-row" id="badges" aria-label="Deck metadata"></div>
       </section>
       <section class="deck-stage" aria-label="Deck overview">
-        <article class="cover-preview" id="cover-preview">
+        <article class="cover-preview vt-slide-surface" id="cover-preview">
           <div class="cover-meta">
-            <span id="cover-theme">Theme</span>
+            <span class="cover-theme-chip"><span class="vt-swatch" aria-hidden="true"></span><span id="cover-theme">Theme</span></span>
             <span id="cover-count">0 slides</span>
           </div>
           <div>
-            <h2 class="cover-title" id="cover-title">Deck preview</h2>
+            <h2 class="cover-title vt-slide-heading" id="cover-title">Deck preview</h2>
             <p class="cover-text" id="cover-text">Slide preview will appear here.</p>
             <div class="cover-lines" aria-hidden="true">
               <span class="cover-line"></span>
@@ -416,7 +425,10 @@ function ensureMarkup(): void {
         </article>
         <aside class="action-panel" aria-label="Deck actions">
           <p class="action-title">Next action</p>
-          <a class="button primary" id="open-link">Open in Verto</a>
+          <button class="button primary present-btn" id="present-action" type="button">Present live</button>
+          <button class="button" id="edit-action" type="button">Edit this slide</button>
+          <button class="button" id="theme-action" type="button">Change theme</button>
+          <a class="button" id="open-link">Open in Verto</a>
           <button class="button" id="secondary-action" type="button">Copy link</button>
           <button class="button" id="refresh-action" type="button">Refresh preview</button>
           <p class="action-note" id="action-note">Open the deck to continue editing in Verto.</p>
@@ -429,12 +441,12 @@ function ensureMarkup(): void {
         </div>
         <div class="filmstrip-grid" id="slides"></div>
       </section>
+      <section id="slide-editor" aria-label="Guided slide editor"></section>
     </main>
   `;
 }
 
-function getDeckPayload(payload: Record<string, unknown>): {
-  presentation: Record<string, unknown>;
+function getDeckPayload(payload: Record<string, unknown>): {  presentation: Record<string, unknown>;
   slides: unknown[];
   actions: Record<string, unknown>;
 } {
@@ -530,8 +542,25 @@ function renderBadges(deck: DeckViewModel): void {
   badges.textContent = '';
   badges.appendChild(renderBadge(deck.isPublished ? 'Published' : 'Draft', deck.isPublished ? 'is-published' : ''));
   badges.appendChild(renderBadge(slideCountLabel(deck.slideCount)));
-  badges.appendChild(renderBadge(deck.themeName));
+  badges.appendChild(renderThemeBadge(deck.themeName));
   badges.appendChild(renderBadge(formatUpdatedAt(deck.updatedAt)));
+}
+
+function renderThemeBadge(themeName: string): HTMLElement {
+  const badge = document.createElement('span');
+  badge.className = 'badge';
+  const swatch = document.createElement('span');
+  swatch.className = 'vt-swatch';
+  swatch.setAttribute('aria-hidden', 'true');
+  swatch.style.background = themeGradient(themeName);
+  badge.appendChild(swatch);
+  badge.appendChild(document.createTextNode(themeName));
+  return badge;
+}
+
+function themeGradient(themeName: string): string {
+  const theme = findTheme(themeName);
+  return theme ? resolveThemeTokens(theme).accentGradient : 'var(--vt-brand-gradient)';
 }
 
 function renderCover(deck: DeckViewModel): void {
@@ -550,6 +579,7 @@ function configureOpenLink(deck: DeckViewModel): void {
 
   if (!(link instanceof HTMLAnchorElement)) return;
 
+  link.classList.remove('primary');
   link.textContent = 'Open in Verto';
 
   if (!deck.openUrl) {
@@ -562,6 +592,88 @@ function configureOpenLink(deck: DeckViewModel): void {
   link.target = '_blank';
   link.rel = 'noopener noreferrer';
   link.setAttribute('aria-disabled', 'false');
+}
+
+function configurePresentAction(deck: DeckViewModel): void {
+  const button = byId('present-action');
+
+  if (!(button instanceof HTMLButtonElement)) return;
+
+  // Plan 10 F10: when the host advertises its display modes and fullscreen
+  // is not among them, the presenter would only duplicate this preview —
+  // hide the hero entry point.
+  const fullscreenAvailable = canPresentFullscreen();
+  button.hidden = fullscreenAvailable === false;
+
+  if (!deck.id) {
+    button.disabled = true;
+    button.setAttribute('aria-disabled', 'true');
+    button.onclick = null;
+    return;
+  }
+
+  button.disabled = false;
+  button.setAttribute('aria-disabled', 'false');
+  button.onclick = () => presentDeck(deck, button, byId('action-note'));
+}
+
+async function presentDeck(
+  deck: DeckViewModel,
+  button: HTMLButtonElement,
+  note: HTMLElement
+): Promise<void> {
+  await runButtonAction(button, note, 'Opening presenter…', async () => {
+    await callMcpTool('presentation_render_deck', {
+      presentation_id: deck.id,
+    });
+    note.textContent = 'Presenter opened. Use ← → to navigate.';
+  });
+}
+
+function configureThemeAction(deck: DeckViewModel): void {
+  const button = byId('theme-action');
+  const note = byId('action-note');
+
+  if (!(button instanceof HTMLButtonElement)) return;
+
+  if (!deck.id) {
+    button.disabled = true;
+    button.setAttribute('aria-disabled', 'true');
+    button.onclick = null;
+    return;
+  }
+
+  button.disabled = false;
+  button.setAttribute('aria-disabled', 'false');
+  button.onclick = () =>
+    openThemeStudio(deck, button, note);
+}
+
+function configureEditAction(deck: DeckViewModel): void {
+  const button = byId('edit-action');
+
+  if (!(button instanceof HTMLButtonElement)) return;
+
+  const canEdit = Boolean(deck.id)
+    && Boolean(deck.actions.canUpdateSlides)
+    && deck.rawSlides.length > 0;
+
+  button.disabled = !canEdit;
+  button.setAttribute('aria-disabled', canEdit ? 'false' : 'true');
+  button.onclick = canEdit ? () => openSlideEditor(deck) : null;
+}
+
+async function openThemeStudio(
+  deck: DeckViewModel,
+  button: HTMLButtonElement,
+  note: HTMLElement
+): Promise<void> {
+  await runButtonAction(button, note, 'Opening theme studio…', async () => {
+    await callMcpTool('presentation_render_theme_studio', {
+      presentation_id: deck.id,
+    });
+    note.textContent = 'Theme studio opened. Pick a look and apply it live.';
+  });
 }
 
 function configureSecondaryAction(deck: DeckViewModel): void {
@@ -615,6 +727,134 @@ function configureRefreshAction(deck: DeckViewModel): void {
 }
 
 let pendingPublishPresentationId = '';
+
+let currentDeck: DeckViewModel | null = null;
+let slideEditorHandle: SlideEditorHandle | null = null;
+let teardownWired = false;
+
+function wireEditorTeardown(): void {
+  if (teardownWired) return;
+  teardownWired = true;
+
+  onTeardown(() => {
+    if (slideEditorHandle?.hasUnsavedEdits()) {
+      logWidgetWarning(
+        'Verto deck preview was torn down with unsaved guided slide edits.'
+      );
+    }
+  });
+}
+
+/**
+ * Plan 10 F6: opens the guided single-slide editor. Saving re-fetches the
+ * deck, applies patches onto the fresh tree, and performs a full-replacement
+ * `presentation_update_slides` call before confirming with a diff strip.
+ */
+function openSlideEditor(deck: DeckViewModel): void {
+  slideEditorHandle?.close();
+  currentDeck = deck;
+
+  slideEditorHandle = createSlideEditor({
+    container: byId('slide-editor'),
+    getSlides: () => currentDeck?.rawSlides ?? [],
+    canUpdate: Boolean(deck.actions.canUpdateSlides) && deck.rawSlides.length > 0,
+    save: (patches) => saveSlideEdits(patches),
+    onClose: (hadUnsavedEdits) => {
+      if (hadUnsavedEdits) {
+        logWidgetWarning('Verto guided slide editor closed with unsaved edits.');
+      }
+    },
+  });
+
+  slideEditorHandle.open();
+}
+
+async function saveSlideEdits(patches: SlideEditPatch[]): Promise<void> {
+  const deck = currentDeck;
+
+  if (!deck?.id) {
+    throw new Error('This deck is not available for editing.');
+  }
+
+  const freshPayload = await callMcpTool('presentation_get', {
+    presentation_id: deck.id,
+    include_slides: true,
+  });
+
+  const freshSlides = extractRawSlides(freshPayload);
+
+  if (freshSlides.length === 0) {
+    throw new Error('Could not read the current slides from Verto.');
+  }
+
+  const nextSlides = applyPatchesToSlides(freshSlides, patches);
+
+  const result = await callMcpTool('presentation_update_slides', {
+    presentation_id: deck.id,
+    slides: nextSlides,
+  });
+
+  assertSuccess(result);
+  syncAfterSave(deck, nextSlides, patches);
+}
+
+/** Raw slides prefer the full presentation payload (slideName/type intact). */
+function extractRawSlides(payload: Record<string, unknown>): unknown[] {
+  const data = getRecord(payload.data || payload);
+  const presentation = getRecord(data.presentation || data);
+
+  const fromData = Array.isArray(presentation.slides)
+    ? presentation.slides
+    : [];
+
+  return fromData.length > 0 ? fromData : getArray(getRecord(payload.widget).slides);
+}
+
+function assertSuccess(payload: Record<string, unknown>): void {
+  if (payload.success === false) {
+    const error = getRecord(payload.error);
+    throw new Error(getString(error.message, 'Verto could not complete that action.'));
+  }
+}
+
+function syncAfterSave(
+  deck: DeckViewModel,
+  nextSlides: unknown[],
+  patches: SlideEditPatch[]
+): void {
+  renderDeckPayload({
+    success: true,
+    data: {
+      presentation: {
+        id: deck.id,
+        title: deck.title,
+        theme_name: deck.themeName,
+        slide_count: nextSlides.length,
+        updated_at: new Date().toISOString(),
+        is_published: deck.isPublished,
+        share_url: deck.shareUrl,
+        open_url: deck.openUrl,
+        slides: nextSlides,
+      },
+    },
+  });
+  byId('action-note').textContent = 'Slide edits saved to Verto.';
+
+  void pushModelContext(
+    {
+      event: 'slides_edited',
+      presentationId: deck.id,
+      editedBlocks: patches.length,
+      edits: patches.map((patch) => ({
+        slideTitle: patch.slideTitle,
+        originalText: patch.originalText,
+        newText: patch.newText,
+      })),
+    },
+    `User edited ${patches.length} text ${patches.length === 1 ? 'block' : 'blocks'} on `
+      + `"${patches[0].slideTitle}" of presentation ${deck.title} (${deck.id}) from chat.`
+  );
+}
 
 function confirmOrPublishDeck(
   deck: DeckViewModel,
@@ -732,43 +972,6 @@ async function copyShareLink(
   }
 }
 
-function renderContentItem(item: unknown): string {
-  if (!item) return '';
-  if (typeof item === 'string') return item;
-  if (Array.isArray(item)) return item.map(renderContentItem).join('');
-
-  if (typeof item === 'object') {
-    const record = item as Record<string, unknown>;
-    const type = typeof record.type === 'string' ? record.type : '';
-    const content = record.content;
-
-    switch (type) {
-      case 'title':
-      case 'heading1': return `<h1>${renderContentItem(content)}</h1>`;
-      case 'heading2': return `<h2>${renderContentItem(content)}</h2>`;
-      case 'heading3':
-      case 'heading4': return `<h3>${renderContentItem(content)}</h3>`;
-      case 'paragraph':
-      case 'text': return `<p>${renderContentItem(content)}</p>`;
-      case 'bulletedList':
-      case 'bulletList':
-      case 'numberedList': {
-        const items = Array.isArray(content) ? content : [content];
-        return `<ul>${items.map(c => `<li>${renderContentItem(c)}</li>`).join('')}</ul>`;
-      }
-      case 'image':
-      case 'imageAndText':
-        return `<i>[Image${record.alt ? `: ${record.alt}` : ''}]</i>`;
-      case 'column':
-      case 'multiColumn':
-        return `<div style="display: flex; gap: 8px;">${renderContentItem(content)}</div>`;
-      default:
-        if (content) return `<div>${renderContentItem(content)}</div>`;
-    }
-  }
-  return '';
-}
-
 async function reorderSlide(deck: DeckViewModel, index: number, direction: -1 | 1, button: HTMLButtonElement): Promise<void> {
   const newIndex = index + direction;
   if (newIndex < 0 || newIndex >= deck.rawSlides.length) return;
@@ -842,7 +1045,7 @@ function renderSlides(deck: DeckViewModel): void {
     }
 
     const preview = document.createElement('div');
-    preview.className = 'slide-preview';
+    preview.className = 'slide-preview vt-slide-surface';
 
     const number = document.createElement('span');
     number.className = 'slide-number';
@@ -862,7 +1065,7 @@ function renderSlides(deck: DeckViewModel): void {
     if (record.content) {
       const contentHtml = document.createElement('div');
       contentHtml.className = 'slide-content-html';
-      contentHtml.innerHTML = renderContentItem(record.content);
+      contentHtml.innerHTML = renderSlideContent(record.content);
       preview.appendChild(contentHtml);
     } else {
       const previewText = document.createElement('p');
@@ -879,6 +1082,7 @@ function renderSlides(deck: DeckViewModel): void {
 function renderLoading(): void {
   const root = byId('verto-deck-widget');
   root.classList.add('is-loading');
+  currentDeck = null;
   byId('title').textContent = 'Loading deck preview';
   byId('summary').textContent = 'Waiting for Verto deck data from ChatGPT.';
   renderBadges({
@@ -917,6 +1121,45 @@ function renderLoading(): void {
     shareUrl: '',
     openUrl: '',
     actions: {},
+    slides: [],
+    rawSlides: [],
+  });
+  configurePresentAction({
+    id: '',
+    title: 'Deck preview',
+    themeName: 'Theme pending',
+    slideCount: 0,
+    updatedAt: '',
+    isPublished: false,
+    shareUrl: '',
+    openUrl: '',
+    actions: {},
+    slides: [],
+    rawSlides: [],
+  });
+  configureThemeAction({
+    id: '',
+    title: 'Deck preview',
+    themeName: 'Theme pending',
+    slideCount: 0,
+    updatedAt: '',
+    isPublished: false,
+    shareUrl: '',
+    openUrl: '',
+    actions: {},
+    slides: [],
+    rawSlides: [],
+  });
+  configureEditAction({
+    id: '',
+    title: 'Deck preview',
+    themeName: 'Theme pending',
+    slideCount: 0,
+    updatedAt: '',
+    isPublished: false,
+    shareUrl: '',
+    openUrl: '',
+    actions: { canUpdateSlides: false },
     slides: [],
     rawSlides: [],
   });
@@ -964,6 +1207,7 @@ function renderLoading(): void {
 function renderDeckPayload(payload: Record<string, unknown>): void {
   ensureDeckStyles();
   ensureMarkup();
+  wireEditorTeardown();
 
   const deck = toDeckViewModel(payload);
   const root = byId('verto-deck-widget');
@@ -972,6 +1216,11 @@ function renderDeckPayload(payload: Record<string, unknown>): void {
     renderLoading();
     return;
   }
+
+  currentDeck = deck;
+
+  setWidgetTheme(extractThemeName(payload));
+  renderDeepLinkMenu(byId('deck-links'), extractWidgetLinks(payload));
 
   root.classList.remove('is-loading');
   byId('title').textContent = deck.title;
@@ -982,6 +1231,9 @@ function renderDeckPayload(payload: Record<string, unknown>): void {
   renderBadges(deck);
   renderCover(deck);
   configureOpenLink(deck);
+  configurePresentAction(deck);
+  configureThemeAction(deck);
+  configureEditAction(deck);
   configureSecondaryAction(deck);
   configureRefreshAction(deck);
   renderSlides(deck);

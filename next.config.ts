@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
 
   reactCompiler: true,
+  /* Pin the Turbopack workspace root: multiple lockfiles above this project
+     otherwise make Turbopack pick a wrong root and miss new routes. */
+  turbopack: {
+    root: __dirname,
+  },
   /* config options here */
   images: {
     remotePatterns: [

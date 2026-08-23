@@ -371,3 +371,24 @@ Remaining live-host steps (manual):
    sections above against the migrated widgets — the wire format for tools,
    OAuth, and resources is unchanged; only widget metadata/transport moved to
    the standardized SDK.
+
+## Phase 10 Manual Test Matrix (immersive in-chat experience)
+
+Automated gates first: `npm run mcp:phase7` (358 contract checks + focused
+typecheck) and `npm run mcp:phase9h` (33 visual scenarios, including a
+themes × schemes contrast matrix). Then cover these flows once in
+`basic-host` and once in ChatGPT Developer Mode (reviewer account:
+adityadeokar80@gmail.com):
+
+| # | Flow | Steps | Expected |
+| --- | --- | --- | --- |
+| P10-1 | Zero-touch generation | "Generate a 7 slide investor pitch deck about AI tutoring" → leave the card alone | Progress card auto-refreshes (countdown ring, elapsed/ETA chips, real step names), then flips to completion with inline first-slide preview + Open deck; the model's next reply already knows the deck is ready (no re-ask) |
+| P10-2 | Presenter | Deck preview → Present live → ←/→/Space/G/Esc; resize to mobile width | Fullscreen stage with keyboard nav and grid overview; safe-area padding respected on notched viewports; falls back to inline when host lacks fullscreen |
+| P10-3 | Theme studio | Deck preview → Change theme → search "ocean", filter Dark, apply one | Grid paints theme swatches; confirm strip applies via `presentation_update_theme`; success state + follow-up prompt reflects new theme without repeating it |
+| P10-4 | Publish card | Publish from chat (confirm) → Copy link → scan QR → Unpublish (confirm) → Publish again | Celebration card with share URL; QR resolves to `/share/{id}`; unpublish flips to private state; republish re-celebrates |
+| P10-5 | Guided edits | Edit this slide → change title + two bullets → Save → Undo changes | Themed fields; save shows "Updated 3 text blocks" diff strip; undo restores originals; leaving mid-edit logs a teardown warning |
+| P10-6 | Adaptive layout | Run flows at ≤560 px width and with platform:mobile host config | Buttons ≥44 px, action footers become bottom-sheet rows, hover-only hints hidden |
+
+Regression pins for every automated check above live in
+`scripts/mcp-apps/phase7-checks.mjs`; update them alongside any tool or
+widget contract change.

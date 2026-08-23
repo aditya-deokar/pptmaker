@@ -29,8 +29,182 @@ const actionResultHtml = await readFile(
   path.join(generatedDir, 'action-result.html'),
   'utf8'
 );
+const deckLiveHtml = await readFile(
+  path.join(generatedDir, 'deck-live.html'),
+  'utf8'
+);
+const themeStudioHtml = await readFile(
+  path.join(generatedDir, 'theme-studio.html'),
+  'utf8'
+);
+const publishCardHtml = await readFile(
+  path.join(generatedDir, 'publish-card.html'),
+  'utf8'
+);
 
 const scenarios = [
+  {
+    id: 'phase10d-theme-studio-dark-desktop',
+    label: 'Theme studio catalog - dark desktop',
+    html: themeStudioHtml,
+    payload: themeStudioPayload({ theme: 'Dark Elegance' }),
+    viewport: { width: 1200, height: 900 },
+    colorScheme: 'dark',
+    expectations: {
+      text: ['Verto AI theme studio', 'Dark Elegance', 'All', 'Light', 'Dark', 'Current', 'NEW', 'Show more themes (6 more)'],
+      rendererCounts: {
+        '.ts-card': 24,
+        '.ts-tab': 3,
+      },
+    },
+  },
+  {
+    id: 'phase10d-theme-studio-light-mobile',
+    label: 'Theme studio catalog - light mobile',
+    html: themeStudioHtml,
+    payload: themeStudioPayload({ theme: 'Sunset Glow' }),
+    viewport: { width: 390, height: 900 },
+    colorScheme: 'light',
+    expectations: {
+      text: ['Verto AI theme studio', 'Sunset Glow', 'catalog themes', 'Show more themes (6 more)'],
+      rendererCounts: {
+        '.ts-mock': 24,
+      },
+    },
+  },
+  {
+    id: 'phase10d-publish-card-celebration-light-desktop',
+    label: 'Publish card celebration - light desktop',
+    html: publishCardHtml,
+    payload: publishCardPayload({ published: true }),
+    viewport: { width: 1200, height: 900 },
+    colorScheme: 'light',
+    expectations: {
+      text: ['Verto AI publish', 'Your deck is live!', 'Copy link', 'Open share page', 'Unpublish deck', 'Scan to open the deck'],
+      rendererCounts: {
+        '.pc-piece': 28,
+      },
+    },
+  },
+  {
+    id: 'phase10d-publish-card-private-dark-mobile',
+    label: 'Publish card private - dark mobile',
+    html: publishCardHtml,
+    payload: publishCardPayload({ published: false }),
+    viewport: { width: 390, height: 900 },
+    colorScheme: 'dark',
+    expectations: {
+      text: ['Verto AI publish', 'This deck is private', 'Publish again'],
+      rendererCounts: {
+        '.pc-piece': 0,
+      },
+    },
+  },
+  {
+    id: 'phase10f-deck-preview-edit-mode-light-desktop',
+    label: 'Deck preview guided edit - light desktop',
+    html: deckHtml,
+    payload: deckPayload({ published: false, theme: 'Sunset Glow', slides: richSlides() }),
+    viewport: { width: 1200, height: 900 },
+    colorScheme: 'light',
+    preClicks: ['#edit-action'],
+    setValueSteps: [
+      { selector: '#vte-f-0', value: 'Renamed headline for guided edit QA' },
+    ],
+    expectations: {
+      text: [
+        'Verto AI deck',
+        'Slide 1 of 6',
+        'Quarterly growth review',
+        '1 unsaved edit',
+        'Save changes',
+        'Cancel',
+      ],
+      minCounts: {
+        '.vte-field': 3,
+      },
+    },
+  },
+  {
+    id: 'phase10c-deck-live-dark-desktop',
+    label: 'Deck live presenter - dark desktop',
+    html: deckLiveHtml,
+    payload: deckLivePayload({ theme: 'Dark Elegance' }),
+    viewport: { width: 1200, height: 900 },
+    colorScheme: 'dark',
+    expectations: {
+      text: ['Verto AI presenter', '1 / 3', 'Present fullscreen', 'Grid'],
+      rendererCounts: {
+        '.vt-stage': 1,
+        '.vt-progress-fill': 1,
+        '.dot-btn': 3,
+      },
+      keyboardSteps: [
+        { keys: ['ArrowRight'], expectCounter: '2 / 3' },
+        { keys: ['ArrowRight'], expectCounter: '3 / 3' },
+        { keys: ['ArrowLeft'], expectCounter: '2 / 3' },
+      ],
+    },
+  },
+  {
+    id: 'phase10c-deck-live-grid-light-mobile',
+    label: 'Deck live presenter grid - light mobile',
+    html: deckLiveHtml,
+    payload: deckLivePayload({ theme: 'Sunset Glow' }),
+    viewport: { width: 390, height: 900 },
+    colorScheme: 'light',
+    expectations: {
+      text: ['Verto AI presenter', 'Present fullscreen', 'Grid'],
+      rendererCounts: {
+        '.vt-stage': 1,
+        '.vt-thumb': 0,
+      },
+      keyboardSteps: [
+        { keys: ['g'], expectCount: { selector: '.vt-thumb', value: 3 } },
+        { keys: ['Escape'], expectCount: { selector: '.vt-grid.open', value: 0 } },
+      ],
+    },
+  },
+  {
+    id: 'phase10b-deck-renderer-rich-dark-desktop',
+    label: 'Deck renderer rich content - dark desktop',
+    html: deckHtml,
+    payload: deckPayload({ published: false, theme: 'Dark Elegance', slides: richSlides() }),
+    viewport: { width: 1200, height: 900 },
+    colorScheme: 'dark',
+    expectations: {
+      text: ['Verto AI deck', 'Quarterly growth review', 'Market momentum'],
+      minSlides: 6,
+      rendererCounts: {
+        '.vts-stat': 1,
+        '.vts-timeline': 2,
+        '.vts-callout.success': 1,
+        '.vts-code': 1,
+        '.vts-table': 1,
+        '.vts-blockquote': 1,
+        '.vts-divider': 1,
+      },
+    },
+  },
+  {
+    id: 'phase10b-deck-renderer-rich-light-mobile',
+    label: 'Deck renderer rich content - light mobile',
+    html: deckHtml,
+    payload: deckPayload({ published: true, theme: 'Sunset Glow', slides: richSlides() }),
+    viewport: { width: 390, height: 900 },
+    colorScheme: 'light',
+    expectations: {
+      text: ['Verto AI deck', 'Copy share link'],
+      minSlides: 6,
+      rendererCounts: {
+        '.vts-stat': 1,
+        '.vts-timeline': 2,
+        '.vts-callout.warning': 1,
+        '.vts-list li .vts-num-badge': 3,
+        '.vts-todo-check.checked': 1,
+      },
+    },
+  },
   {
     id: 'phase9h-presentation-list-dark-desktop',
     label: 'Presentation list - dark desktop',
@@ -62,7 +236,7 @@ const scenarios = [
     payload: generationPayload({
       status: 'RUNNING',
       progress: 68,
-      currentStepName: 'Design Layout',
+      currentStepName: 'Visual Search',
       isComplete: false,
       isFailed: false,
       presentationId: null,
@@ -72,18 +246,18 @@ const scenarios = [
     viewport: { width: 1200, height: 900 },
     colorScheme: 'dark',
     expectations: {
-      text: ['Verto AI generation', '68%', 'Design Layout', 'Check status'],
-      stageCount: 6,
+      text: ['Verto AI generation', '68%', 'Visual Search', 'Elapsed', 'Check status'],
+      stageCount: 8,
     },
   },
   {
-    id: 'phase9h-generation-complete-light-desktop',
-    label: 'Generation complete - light desktop',
+    id: 'phase10e-generation-complete-light-desktop',
+    label: 'Generation complete with live preview - light desktop',
     html: generationHtml,
     payload: generationPayload({
       status: 'COMPLETED',
       progress: 100,
-      currentStepName: 'Complete',
+      currentStepName: 'Finalization',
       isComplete: true,
       isFailed: false,
       presentationId: 'deck_demo_123',
@@ -93,8 +267,11 @@ const scenarios = [
     viewport: { width: 1200, height: 900 },
     colorScheme: 'light',
     expectations: {
-      text: ['Verto AI generation', '100%', 'Open deck', 'Inspect with ChatGPT'],
-      stageCount: 6,
+      text: ['Verto AI generation', '100%', 'Open deck', 'Inspect with ChatGPT', 'FIRST SLIDE', 'Built in'],
+      stageCount: 8,
+      rendererCounts: {
+        '.vts-stat': 1,
+      },
     },
   },
   {
@@ -115,14 +292,14 @@ const scenarios = [
     colorScheme: 'dark',
     expectations: {
       text: ['Verto AI generation', 'FAILED', 'Ask ChatGPT to retry', 'Needs retry'],
-      stageCount: 6,
+      stageCount: 8,
     },
   },
   {
     id: 'phase9h-deck-preview-dark-desktop',
     label: 'Deck preview - dark desktop',
     html: deckHtml,
-    payload: deckPayload({ published: false }),
+    payload: deckPayload({ published: false, theme: 'Dark Elegance' }),
     viewport: { width: 1200, height: 900 },
     colorScheme: 'dark',
     expectations: {
@@ -134,7 +311,7 @@ const scenarios = [
     id: 'phase9h-deck-publish-success-light-desktop',
     label: 'Publish success - light desktop',
     html: deckHtml,
-    payload: deckPayload({ published: true }),
+    payload: deckPayload({ published: true, theme: 'Sunset Glow' }),
     viewport: { width: 1200, height: 900 },
     colorScheme: 'light',
     expectations: {
@@ -146,7 +323,7 @@ const scenarios = [
     id: 'phase9h-deck-preview-light-mobile',
     label: 'Deck preview - light mobile',
     html: deckHtml,
-    payload: deckPayload({ published: false }),
+    payload: deckPayload({ published: false, theme: 'Sakura Blossom' }),
     viewport: { width: 390, height: 900 },
     colorScheme: 'light',
     expectations: {
@@ -188,6 +365,60 @@ const scenarios = [
   },
 ];
 
+/**
+ * Plan 10G F12 — contrast sampling matrix: representative catalog themes
+ * across BOTH host schemes (plus a mobile pipeline pair), rendered through
+ * the full deck-preview pipeline. The harness's per-element contrast,
+ * keyboard, and overflow checks do the heavy lifting; every cell must pass.
+ */
+const MATRIX_THEMES = [
+  'Default',
+  'Dark Elegance',
+  'Sunset Glow',
+  'Neon Nights',
+  'Arctic Aurora',
+  'Sakura Blossom',
+];
+
+function themeSlug(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+}
+
+for (const theme of MATRIX_THEMES) {
+  for (const colorScheme of ['light', 'dark']) {
+    scenarios.push({
+      id: `phase10g-matrix-${themeSlug(theme)}-${colorScheme}`,
+      label: `Theme matrix ${theme} - ${colorScheme}`,
+      html: deckHtml,
+      payload: deckPayload({ published: false, theme, slides: richSlides() }),
+      viewport: { width: 1200, height: 900 },
+      colorScheme,
+      expectations: {
+        text: ['Verto AI deck', 'Open in Verto'],
+        minSlides: 6,
+      },
+    });
+  }
+}
+
+for (const combo of [
+  { theme: 'Default', colorScheme: 'light' },
+  { theme: 'Arctic Aurora', colorScheme: 'dark' },
+]) {
+  scenarios.push({
+    id: `phase10g-matrix-mobile-${themeSlug(combo.theme)}-${combo.colorScheme}`,
+    label: `Theme matrix mobile ${combo.theme} - ${combo.colorScheme}`,
+    html: deckHtml,
+    payload: deckPayload({ published: false, theme: combo.theme, slides: richSlides() }),
+    viewport: { width: 390, height: 900 },
+    colorScheme: combo.colorScheme,
+    expectations: {
+      text: ['Verto AI deck', 'Publish from chat'],
+      minSlides: 6,
+    },
+  });
+}
+
 const browser = await puppeteer.launch({
   headless: 'new',
   args: ['--no-sandbox'],
@@ -220,6 +451,8 @@ for (const scenario of scenarios) {
   await page.setContent(injectPayload(scenario.html, scenario.payload), {
     waitUntil: 'load',
   });
+
+  await runInteractions(page, scenario);
 
   const screenshotFile = `${scenario.id}.png`;
   const screenshotPath = path.join(assetsDir, screenshotFile);
@@ -290,6 +523,32 @@ function injectPayload(html, payload) {
   );
 }
 
+/**
+ * Plan 10F: scenarios may drive the widget into interactive states
+ * (open the guided editor, type an edit) before evidence is captured.
+ */
+async function runInteractions(page, scenario) {
+  for (const selector of scenario.preClicks ?? []) {
+    await page.click(selector);
+  }
+
+  for (const step of scenario.setValueSteps ?? []) {
+    await page.evaluate(
+      ({ selector, value }) => {
+        const element = document.querySelector(selector);
+
+        if (!element) return;
+
+        element.focus();
+        element.value = value;
+        element.dispatchEvent(new Event('input', { bubbles: true }));
+      },
+      { selector: step.selector, value: step.value }
+    );
+    await new Promise((resolve) => setTimeout(resolve, 120));
+  }
+}
+
 function generationPayload(options) {
   const presentation = options.presentationId && options.presentationOpenUrl
     ? {
@@ -298,10 +557,21 @@ function generationPayload(options) {
       }
     : null;
 
+  // Recent relative timestamps so Elapsed/Built-in chips read naturally.
+  const createdAt = new Date(Date.now() - 95_000).toISOString();
+  const completedAt = new Date(Date.now() - 4_000).toISOString();
+
   return {
     widget: {
       widget: 'generation_progress',
-      version: 1,
+      version: 2,
+      links: presentation
+        ? {
+            editorUrl: options.presentationOpenUrl,
+            presentUrl: options.presentationOpenUrl.replace('/presentation/', '/present/'),
+            shareUrl: null,
+          }
+        : { editorUrl: null, presentUrl: null, shareUrl: null },
       generation: {
         runId: 'run_demo_123456',
         topic: 'AI tutoring investor pitch deck',
@@ -310,21 +580,42 @@ function generationPayload(options) {
         currentStepName: options.currentStepName,
         error: options.error,
         presentationId: options.presentationId,
-        updatedAt: '2026-06-18T00:00:00.000Z',
+        createdAt,
+        completedAt: options.isComplete ? completedAt : null,
+        updatedAt: new Date().toISOString(),
         isComplete: options.isComplete,
         isFailed: options.isFailed,
         pollHint: options.isComplete
           ? null
           : 'Generation is still running. Check again after a short delay.',
       },
-      steps: [
-        { id: 'queued', name: 'Project Setup', status: 'completed' },
-        { id: 'outline', name: 'Structure', status: 'completed' },
-        { id: 'content', name: 'Content Writing', status: options.isFailed ? 'failed' : 'completed' },
-        { id: 'design', name: 'Design Layout', status: options.isComplete ? 'completed' : 'running' },
-        { id: 'finalizing', name: 'Assembly', status: options.isComplete ? 'completed' : 'pending' },
-        { id: 'complete', name: 'Finalization', status: options.isComplete ? 'completed' : 'pending' },
-      ],
+      steps: generationSteps(options),
+      ...(options.isComplete
+        ? {
+            completion: {
+              slideCount: 7,
+              themeName: 'Sunset Glow',
+              previewSlide: {
+                id: 's1',
+                title: 'Market shift',
+                order: 0,
+                previewText: 'AI tutoring is becoming a daily learning layer for students.',
+                content: [
+                  { id: 'p1t', type: 'title', name: 'Title', content: 'Market shift' },
+                  { id: 'p1d', type: 'divider', name: 'Divider' },
+                  {
+                    id: 'p1p',
+                    type: 'paragraph',
+                    name: 'Paragraph',
+                    content:
+                      'Students reach for instant help every evening, and Verto meets them there with guided practice.',
+                  },
+                  { id: 'p1s', type: 'statBox', name: 'Stat box', icon: '📈', label: 'Homework minutes helped', content: '+42%' },
+                ],
+              },
+            },
+          }
+        : {}),
       presentation,
       actions: {
         canRefresh: !options.isComplete && !options.isFailed,
@@ -336,24 +627,71 @@ function generationPayload(options) {
   };
 }
 
-function deckPayload({ published }) {
+/** Real run-step names/statuses mirroring GENERATION_STEP_DEFINITIONS. */
+function generationSteps(options) {
+  const definitions = [
+    ['projectInitializer', 'Project Setup', 'Preparing your presentation workspace'],
+    ['outlineGenerator', 'Structure', 'Organizing the presentation flow'],
+    ['contentWriter', 'Content Writing', 'Creating engaging text for all slides'],
+    ['layoutSelector', 'Design Layout', 'Selecting the best look for your slides'],
+    ['imageQueryGenerator', 'Visual Search', 'Finding the right visuals for each slide'],
+    ['imageFetcher', 'Image Integration', 'Adding beautiful visuals'],
+    ['jsonCompiler', 'Assembly', 'Formatting and polishing your slides'],
+    ['databasePersister', 'Finalization', 'Saving your masterpiece'],
+  ];
+
+  const runningIndex = Math.max(
+    0,
+    definitions.findIndex(([, name]) => name === options.currentStepName)
+  );
+
+  const stepStatus = (index) => {
+    if (options.isComplete) return 'completed';
+    if (options.isFailed) {
+      if (index < 2) return 'completed';
+      if (index === 2) return 'error';
+      return 'pending';
+    }
+
+    if (index < runningIndex) return 'completed';
+    if (index === runningIndex) return 'running';
+    return 'pending';
+  };
+
+  return definitions.map(([id, name, description], index) => ({
+    id,
+    name,
+    description,
+    status: stepStatus(index),
+  }));
+}
+
+function deckPayload({ published, theme = 'Dark Elegance', slides = null }) {
+  const openUrl = 'https://verto.ai.aditya-deokar.me/presentation/deck_demo_123';
   return {
     widget: {
       widget: 'deck_preview',
-      version: 1,
+      version: 2,
+      links: {
+        editorUrl: openUrl,
+        presentUrl: 'https://verto.ai.aditya-deokar.me/present/deck_demo_123',
+        shareUrl: published
+          ? 'https://verto.ai.aditya-deokar.me/share/deck_demo_123'
+          : null,
+      },
       presentation: {
         id: 'deck_demo_123',
         title: 'AI tutoring investor pitch deck',
-        themeName: 'Aurora',
+        themeName: theme,
         slideCount: 7,
         updatedAt: '2026-06-18T00:00:00.000Z',
         isPublished: published,
         shareUrl: published
           ? 'https://verto.ai.aditya-deokar.me/share/deck_demo_123'
           : null,
-        openUrl: 'https://verto.ai.aditya-deokar.me/presentation/deck_demo_123',
+        openUrl,
       },
-      slides: [
+      slides: slides ?? [
         { id: 's1', title: 'Market shift', order: 0, previewText: 'AI tutoring is becoming a daily learning layer for students, parents, and teachers.' },
         { id: 's2', title: 'Problem', order: 1, previewText: 'Students need immediate help, but human tutoring is expensive and hard to scale.' },
         { id: 's3', title: 'Product', order: 2, previewText: 'Personalized guidance, generated practice, and teacher-ready learning diagnostics.' },
@@ -367,6 +705,306 @@ function deckPayload({ published }) {
         canPublish: !published,
         canUnpublish: published,
         canCopyShareLink: published,
+        canUpdateSlides: true,
+      },
+    },
+  };
+}
+
+/**
+ * Phase 10B fixture: one slide per renderer family, mirroring the dashboard
+ * editor's ContentItem shapes (src/lib/types.ts + layout presets).
+ */
+function richSlides() {
+  return [
+    {
+      id: 'r1',
+      title: 'Quarterly growth review',
+      order: 0,
+      previewText: 'Revenue is up 42% year over year across all regions.',
+      content: [
+        { id: 'r1t', type: 'title', name: 'Title', content: 'Quarterly growth review' },
+        { id: 'r1d', type: 'divider', name: 'Divider' },
+        { id: 'r1h', type: 'heading2', name: 'Heading 2', content: 'Market momentum' },
+        {
+          id: 'r1p',
+          type: 'paragraph',
+          name: 'Paragraph',
+          content:
+            'Expansion in <em>enterprise</em> accounts drove the majority of new bookings this quarter & retention stayed above target.',
+        },
+      ],
+    },
+    {
+      id: 'r2',
+      title: 'Key metrics',
+      order: 1,
+      previewText: 'Stat box, numbered list, and bullet list.',
+      content: [
+        { id: 'r2h', type: 'heading2', name: 'Heading 2', content: 'Key metrics' },
+        { id: 'r2s', type: 'statBox', name: 'Stat box', icon: '📈', label: 'Growth', content: '+42%' },
+        {
+          id: 'r2n',
+          type: 'numberedList',
+          name: 'Numbered list',
+          content: ['Sign three anchor customers', 'Launch the partner portal', 'Hire two designers'],
+        },
+        {
+          id: 'r2b',
+          type: 'bulletList',
+          name: 'Bullet list',
+          content: ['Churn below 4%', 'NPS at an all-time high'],
+        },
+        {
+          id: 'r2t',
+          type: 'todoList',
+          name: 'Todo list',
+          content: ['[x] Ship onboarding revamp', '[ ] Draft board update'],
+        },
+      ],
+    },
+    {
+      id: 'r3',
+      title: 'Roadmap',
+      order: 2,
+      previewText: 'Timeline cards and a success callout.',
+      content: [
+        { id: 'r3h', type: 'heading2', name: 'Heading 2', content: 'Roadmap' },
+        {
+          id: 'r3c',
+          type: 'calloutBox',
+          name: 'Callout',
+          callOutType: 'success',
+          content: 'Series B term sheet signed with lead investor.',
+        },
+        {
+          id: 'r3t1',
+          type: 'timelineCard',
+          name: 'Timeline card',
+          icon: '2026',
+          content: 'Q3 platform GA',
+          placeholder: 'Multi-tenant rollout completes for all enterprise workspaces.',
+        },
+        {
+          id: 'r3t2',
+          type: 'timelineCard',
+          name: 'Timeline card',
+          icon: '2027',
+          content: 'Global expansion',
+          placeholder: 'Open EU and APAC data regions with local support teams.',
+        },
+      ],
+    },
+    {
+      id: 'r4',
+      title: 'Engineering notes',
+      order: 3,
+      previewText: 'Code block, blockquote, and table.',
+      content: [
+        { id: 'r4h', type: 'heading2', name: 'Heading 2', content: 'Engineering notes' },
+        {
+          id: 'r4code',
+          type: 'codeBlock',
+          name: 'Code block',
+          language: 'typescript',
+          code: "export const uptime = 99.99;\nconsole.log(`SLA met: ${uptime}`);",
+        },
+        {
+          id: 'r4q',
+          type: 'blockquote',
+          name: 'Quote',
+          content: 'The fastest roadmap is the one the whole team can read.',
+        },
+        {
+          id: 'r4table',
+          type: 'table',
+          name: 'Table',
+          initialRows: 3,
+          initialColumns: 2,
+          content: [
+            ['Region', 'Uptime'],
+            ['US-East', '99.99%'],
+            ['EU-West', '99.98%'],
+          ],
+        },
+      ],
+    },
+    {
+      id: 'r5',
+      title: 'Agenda',
+      order: 4,
+      previewText: 'Table of contents, warning callout, and a two column row.',
+      content: [
+        { id: 'r5h', type: 'heading2', name: 'Heading 2', content: 'Agenda' },
+        {
+          id: 'r5toc',
+          type: 'tableOfContents',
+          name: 'Table of contents',
+          content: ['Market momentum', 'Key metrics', 'Roadmap', 'Engineering notes'],
+        },
+        {
+          id: 'r5w',
+          type: 'calloutBox',
+          name: 'Callout',
+          callOutType: 'warning',
+          content: 'Headcount plan assumes hiring freezes stay lifted.',
+        },
+        {
+          id: 'r5row',
+          type: 'resizable-column',
+          name: 'Columns',
+          content: [
+            {
+              id: 'r5col1',
+              type: 'column',
+              name: 'Column',
+              content: [{ id: 'r5ch', type: 'heading4', name: 'Heading 4', content: 'Left column' }],
+            },
+            {
+              id: 'r5col2',
+              type: 'column',
+              name: 'Column',
+              content: [
+                {
+                  id: 'r5cp',
+                  type: 'paragraph',
+                  name: 'Paragraph',
+                  content: 'Right column copy that wraps across multiple lines in narrow cards.',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'r6',
+      title: 'Links',
+      order: 5,
+      previewText: 'Link and custom button rendering.',
+      content: [
+        { id: 'r6h', type: 'heading2', name: 'Heading 2', content: 'Keep exploring' },
+        { id: 'r6l', type: 'link', name: 'Link', link: 'https://verto.ai.aditya-deokar.me/docs', content: 'Read the launch docs' },
+        {
+          id: 'r6btn',
+          type: 'customButton',
+          name: 'Button',
+          bgColor: '#ef4444',
+          link: 'https://verto.ai.aditya-deokar.me',
+          content: 'Open dashboard',
+        },
+      ],
+    },
+  ];
+}
+
+function deckLivePayload({ theme }) {
+  return {
+    widget: {
+      widget: 'deck_live',
+      version: 2,
+      links: {
+        editorUrl: 'https://verto.ai.aditya-deokar.me/presentation/deck_demo_123',
+        presentUrl: 'https://verto.ai.aditya-deokar.me/present/deck_demo_123',
+        shareUrl: null,
+      },
+      presentation: {
+        id: 'deck_demo_123',
+        title: 'AI tutoring investor pitch deck',
+        themeName: theme,
+        slideCount: 3,
+      },
+      slides: richSlides().slice(0, 3),
+      actions: { canRefresh: true },
+    },
+  };
+}
+
+/**
+ * Plan 10 F4 fixture: 30-entry catalog (24 visible + "show more" tail) with
+ * a NEW-badged theme inside the first page and the current theme marked.
+ */
+function themeStudioPayload({ theme }) {
+  const catalog = [
+    { name: 'Default', type: 'light', bg: '#ffffff', accent: '#3b82f6', font: '#000000' },
+    { name: 'Dark Elegance', type: 'dark', bg: 'linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%)', accent: '#ffd700', font: '#ffffff' },
+    { name: 'Nature Fresh', type: 'light', bg: '#e8f5e9', accent: '#4caf50', font: '#1b4332' },
+    { name: 'Tech Vibrant', type: 'dark', bg: '#0d1117', accent: '#00e5ff', font: '#e6edf3' },
+    { name: 'Pastel Dream', type: 'light', bg: '#fdf2f8', accent: '#ec4899', font: '#831843' },
+    { name: 'Ocean Breeze', type: 'light', bg: '#e0f2fe', accent: '#0284c7', font: '#0c4a6e' },
+    { name: 'Sunset Glow', type: 'light', bg: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', accent: '#f97316', font: '#7c2d12' },
+    { name: 'Minimalist Mono', type: 'light', bg: '#fafafa', accent: '#171717', font: '#171717' },
+    { name: 'Neon Nights', type: 'dark', bg: '#09090b', accent: '#a3e635', font: '#fafafa' },
+    { name: 'Earthy Tones', type: 'light', bg: '#f5f5f4', accent: '#b45309', font: '#44403c' },
+    { name: 'Retro Pop', type: 'light', bg: '#fef9c3', accent: '#e11d48', font: '#450a0a' },
+    { name: 'Zen Garden', type: 'light', bg: '#ecfccb', accent: '#65a30d', font: '#365314' },
+    { name: 'Arctic Frost', type: 'light', bg: '#f0f9ff', accent: '#38bdf8', font: '#0c4a6e' },
+    { name: 'Vintage Warmth', type: 'light', bg: '#fefce8', accent: '#ca8a04', font: '#713f12' },
+    { name: 'Cosmic Delight', type: 'dark', bg: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)', accent: '#c084fc', font: '#ede9fe' },
+    { name: 'Midnight Bloom', type: 'dark', bg: '#111827', accent: '#f472b6', font: '#f9fafb' },
+    { name: 'Coral Sunset', type: 'light', bg: '#fff1f2', accent: '#fb7185', font: '#881337' },
+    { name: 'Emerald City', type: 'dark', bg: '#022c22', accent: '#34d399', font: '#ecfdf5' },
+    { name: 'Lavender Mist', type: 'light', bg: '#f5f3ff', accent: '#8b5cf6', font: '#4c1d95' },
+    { name: 'Golden Hour', type: 'light', bg: '#fffbeb', accent: '#f59e0b', font: '#78350f' },
+    { name: 'Arctic Aurora', type: 'dark', bg: 'linear-gradient(160deg, #172554 0%, #0f172a 100%)', accent: '#22d3ee', font: '#e0f2fe' },
+    { name: 'Sakura Blossom', type: 'light', bg: '#fdf4ff', accent: '#d946ef', font: '#701a75' },
+    { name: 'Urban Jungle', type: 'dark', bg: '#1c1917', accent: '#84cc16', font: '#fafaf9' },
+    { name: 'Modern Dark', type: 'dark', bg: '#18181b', accent: '#60a5fa', font: '#fafafa', isNew: true },
+  ];
+
+  return {
+    widget: {
+      widget: 'theme_studio',
+      version: 2,
+      presentation: {
+        id: 'deck_demo_123',
+        title: 'AI tutoring investor pitch deck',
+        currentThemeName: theme,
+      },
+      themes: [
+        ...catalog.map((entry) => ({
+          name: entry.name,
+          colors: [entry.bg, entry.accent, entry.font],
+          description: entry.type === 'dark' ? 'Dark theme' : 'Light theme',
+          ...(entry.isNew ? { isNew: true } : {}),
+        })),
+        ...['Royal Sapphire', 'Terracotta Clay', 'Graphite Pro', 'Mint Cream', 'Nordic Fjord', 'Amber Glow'].map((name) => ({
+          name,
+          colors: ['#f8fafc', '#64748b', '#0f172a'],
+          description: 'Light theme',
+        })),
+      ],
+      actions: {
+        canApplyTheme: true,
+      },
+    },
+  };
+}
+
+function publishCardPayload({ published }) {
+  const shareUrl = published
+    ? 'https://verto.ai.aditya-deokar.me/share/deck_demo_123'
+    : null;
+
+  return {
+    widget: {
+      widget: 'publish_card',
+      version: 2,
+      links: {
+        editorUrl: 'https://verto.ai.aditya-deokar.me/presentation/deck_demo_123',
+        presentUrl: 'https://verto.ai.aditya-deokar.me/present/deck_demo_123',
+        shareUrl,
+      },
+      presentation: {
+        id: 'deck_demo_123',
+        title: 'AI tutoring investor pitch deck',
+        isPublished: published,
+        shareUrl,
+      },
+      actions: {
+        canCopyShareLink: published,
+        canOpenShareLink: published,
+        canUnpublish: published,
       },
     },
   };
@@ -378,7 +1016,7 @@ function actionResultPayload({ kind, title, message, published = false, affected
     : {
         id: 'deck_demo_123',
         title: 'AI tutoring investor pitch deck',
-        themeName: 'Aurora',
+        themeName: 'Crimson Velvet',
         slideCount: 7,
         updatedAt: '2026-06-18T00:00:00.000Z',
         isPublished: published,
@@ -389,10 +1027,19 @@ function actionResultPayload({ kind, title, message, published = false, affected
         openUrl: 'https://verto.ai.aditya-deokar.me/presentation/deck_demo_123',
       };
 
+  const links = presentation
+    ? {
+        editorUrl: presentation.openUrl,
+        presentUrl: 'https://verto.ai.aditya-deokar.me/present/deck_demo_123',
+        shareUrl: presentation.shareUrl,
+      }
+    : { editorUrl: null, presentUrl: null, shareUrl: null };
+
   return {
     widget: {
       widget: 'action_result',
-      version: 1,
+      version: 2,
+      links,
       operation: {
         kind,
         title,
@@ -430,7 +1077,12 @@ function listPayload() {
     },
     widget: {
       widget: 'presentation_list',
-      version: 1,
+      version: 2,
+      links: {
+        editorUrl: presentations[0].open_url,
+        presentUrl: presentations[0].open_url.replace('/presentation/', '/present/'),
+        shareUrl: presentations[0].share_url,
+      },
       presentations: presentations.map((presentation) => ({
         id: presentation.id,
         title: presentation.title,
@@ -513,7 +1165,7 @@ function listPresentations() {
     {
       id: 'deck_workspace_005',
       title: 'AI tutoring investor pitch',
-      theme_name: 'Aurora',
+      theme_name: 'Arctic Aurora',
       slide_count: 7,
       updated_at: '2026-06-07T06:00:00.000Z',
       is_published: true,
@@ -524,7 +1176,7 @@ function listPresentations() {
     {
       id: 'deck_workspace_006',
       title: 'Privacy-first analytics startup',
-      theme_name: 'Clean Startup',
+      theme_name: 'Mint Cream',
       slide_count: 9,
       updated_at: '2026-06-07T05:00:00.000Z',
       is_published: false,
@@ -619,6 +1271,55 @@ async function checkScenarioExpectations(page, scenario) {
     const slideCount = await page.evaluate(() => document.querySelectorAll('.slide-card').length);
     if (slideCount < scenario.expectations.minSlides) {
       failures.push(`Expected at least ${scenario.expectations.minSlides} slide cards, found ${slideCount}.`);
+    }
+  }
+
+  for (const [selector, expected] of Object.entries(scenario.expectations.rendererCounts ?? {})) {
+    const actual = await page.evaluate(
+      (sel) => document.querySelectorAll(sel).length,
+      selector
+    );
+    if (actual !== expected) {
+      failures.push(`Renderer snapshot mismatch: expected ${expected} × "${selector}", found ${actual}.`);
+    }
+  }
+
+  for (const [selector, minimum] of Object.entries(scenario.expectations.minCounts ?? {})) {
+    const actual = await page.evaluate(
+      (sel) => document.querySelectorAll(sel).length,
+      selector
+    );
+    if (actual < minimum) {
+      failures.push(`Renderer minimum not met: expected ≥${minimum} × "${selector}", found ${actual}.`);
+    }
+  }
+
+  for (const step of scenario.expectations.keyboardSteps ?? []) {
+    for (const key of step.keys) {
+      await page.keyboard.press(key);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 120));
+
+    if (step.expectCounter != null) {
+      const counter = await page.evaluate(() => {
+        const element = document.getElementById('counter');
+        return element ? element.textContent.trim() : '';
+      });
+      if (counter !== step.expectCounter) {
+        failures.push(`Keyboard step [${step.keys.join('+')}] expected counter "${step.expectCounter}", found "${counter}".`);
+      }
+    }
+
+    if (step.expectCount != null) {
+      const actual = await page.evaluate(
+        (sel) => document.querySelectorAll(sel).length,
+        step.expectCount.selector
+      );
+      if (actual !== step.expectCount.value) {
+        failures.push(
+          `Keyboard step [${step.keys.join('+')}] expected ${step.expectCount.value} × "${step.expectCount.selector}", found ${actual}.`
+        );
+      }
     }
   }
 

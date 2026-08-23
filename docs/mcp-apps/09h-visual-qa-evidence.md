@@ -293,3 +293,30 @@ chatgpt-03-progress-ui.png
 chatgpt-04-deck-preview.png
 chatgpt-05-publish-link.png
 ```
+
+## Phase 10G Extension — Themes × Schemes Contrast Matrix
+
+The harness now also renders the full deck-preview pipeline (rich content
+fixtures) across six representative catalog themes in BOTH host schemes, plus
+two mobile-width cells:
+
+```text
+Default / Dark Elegance / Sunset Glow / Neon Nights / Arctic Aurora /
+Sakura Blossom  x  light + dark   (desktop 1200x900)
+Default (light) + Arctic Aurora (dark)  (mobile 390x900)
+```
+
+Every cell passes the same per-element contrast sampling (WCAG 4.5:1 body,
+3:1 large/bold), keyboard reachability, focus visibility, label coverage,
+overflow, and reduced-motion checks. Two accessibility fixes came out of this
+matrix:
+
+- `.vt-slide-surface` now paints an opaque averaged underlay beneath gradient
+  themes so effective backgrounds always resolve (`--vt-slide-bg-solid`).
+- Accent-tinted small text (list badges, year chips, links) and callout
+  variant colors adapt to the resolved surface at WCAG thresholds via
+  `ensureReadable` instead of fixed hues.
+
+Evidence files follow the `phase10g-matrix-*.png` naming in
+`submission-assets/`; the full pass/fail table is in
+`phase9h-visual-qa-report.json`.

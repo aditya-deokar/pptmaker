@@ -9,6 +9,14 @@ import {
   mountWidget,
   sendFollowUpMessage,
 } from './shared/runtime';
+import {
+  extractWidgetLinks,
+  extractThemeName,
+  findTheme,
+  renderDeepLinkMenu,
+  resolveThemeTokens,
+  setWidgetTheme,
+} from './shared/verto-skin';
 
 const listStyles = `
   .list-shell {
@@ -24,6 +32,7 @@ const listStyles = `
     display: grid;
     gap: 6px;
     margin-bottom: 8px;
+    padding-right: 48px;
   }
   .list-kicker {
     color: var(--accent);
@@ -76,12 +85,24 @@ const listStyles = `
   }
   .presentation-panel,
   .action-panel {
+    position: relative;
+    overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
     border-radius: 16px;
     background: color-mix(in srgb, var(--surface) 75%, transparent);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+  }
+  .presentation-panel::before,
+  .action-panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-image: var(--vt-brand-gradient);
   }
   .presentation-panel {
     display: grid;
@@ -90,9 +111,9 @@ const listStyles = `
   }
   .list-head {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) 72px 112px 100px 94px 220px;
+    grid-template-columns: minmax(0, 1.35fr) 64px 116px 92px 88px 236px;
     gap: 12px;
-    padding: 0 12px 12px;
+    padding: 4px 12px 12px;
     border-bottom: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
     color: var(--muted);
     font-size: 12px;
@@ -102,10 +123,10 @@ const listStyles = `
   }
   .presentation-row {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) 72px 112px 100px 94px 220px;
+    grid-template-columns: minmax(0, 1.35fr) 64px 116px 92px 88px 236px;
     gap: 12px;
     align-items: center;
-    min-height: 60px;
+    min-height: 64px;
     border: 1px solid transparent;
     border-radius: 12px;
     padding: 10px 12px;
@@ -113,8 +134,45 @@ const listStyles = `
   }
   .presentation-row:hover {
     background: color-mix(in srgb, var(--surface) 95%, var(--accent-soft));
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07);
     transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+  .title-cell {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+  }
+  /* Mini slide mock painted in the row's deck theme (plan 10 polish). */
+  .row-thumb {
+    position: relative;
+    flex: none;
+    display: grid;
+    align-content: center;
+    gap: 4px;
+    width: 62px;
+    aspect-ratio: 16 / 9;
+    border-radius: 8px;
+    padding: 7px 9px;
+    box-shadow:
+      inset 0 0 0 1px rgba(127, 127, 127, 0.28),
+      0 1px 3px rgba(0, 0, 0, 0.14);
+  }
+  .row-thumb .bar {
+    height: 3px;
+    border-radius: 99px;
+  }
+  .row-thumb .bar.b1 { width: 72%; height: 5px; }
+  .row-thumb .bar.b2 { width: 90%; opacity: 0.58; }
+  .row-thumb .bar.b3 { width: 54%; opacity: 0.32; }
+  .row-thumb .chip {
+    position: absolute;
+    top: 5px;
+    right: 6px;
+    width: 11px;
+    height: 3px;
+    border-radius: 99px;
   }
   .presentation-title {
     min-width: 0;
@@ -135,15 +193,21 @@ const listStyles = `
     border: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
     border-radius: 99px;
     padding: 4px 10px;
-    color: var(--fg);
+    color: var(--muted);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 650;
     background: color-mix(in srgb, var(--surface) 60%, transparent);
   }
   .status-pill.published {
-    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-    color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    border-color: color-mix(in srgb, #15803d 45%, transparent);
+    color: #15803d;
+    background: color-mix(in srgb, #15803d 10%, transparent);
+  }
+  @media (prefers-color-scheme: dark) {
+    .status-pill.published {
+      border-color: color-mix(in srgb, #4ade80 45%, transparent);
+      color: #4ade80;
+    }
   }
   .status-pill.deleted {
     border-color: #fca5a5;
@@ -157,6 +221,15 @@ const listStyles = `
       background: color-mix(in srgb, #450a0a 60%, transparent);
     }
   }
+  .theme-cell {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+  }
+  .theme-cell .theme-name {
+    overflow-wrap: anywhere;
+  }
   .open-link {
     font-size: 13px;
     font-weight: 700;
@@ -169,34 +242,48 @@ const listStyles = `
   }
   .row-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     justify-content: flex-end;
+    flex-wrap: wrap;
   }
   .row-action-btn {
-    background: none;
-    border: none;
-    padding: 4px 8px;
-    font-size: 13px;
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 650;
     color: var(--fg);
     cursor: pointer;
-    border-radius: 4px;
-    transition: background 0.2s;
+    border: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+    border-radius: 99px;
+    background: color-mix(in srgb, var(--surface) 65%, transparent);
+    transition: all 0.18s ease;
+    white-space: nowrap;
   }
   .row-action-btn:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
     background: color-mix(in srgb, var(--accent) 10%, transparent);
     color: var(--accent);
   }
   .row-action-btn.danger {
-    color: #ef4444;
+    color: #dc2626;
   }
-  @media (prefers-color-scheme: light) {
+  @media (prefers-color-scheme: dark) {
     .row-action-btn.danger {
-      color: #dc2626;
+      color: #fca5a5;
     }
   }
   .row-action-btn.danger:hover:not(:disabled) {
+    border-color: color-mix(in srgb, #ef4444 45%, transparent);
     background: color-mix(in srgb, #ef4444 10%, transparent);
+    color: #dc2626;
+  }
+  @media (prefers-color-scheme: dark) {
+    .row-action-btn.danger:hover:not(:disabled) {
+      color: #fca5a5;
+    }
   }
   .row-action-btn:disabled {
     opacity: 0.5;
@@ -245,13 +332,14 @@ const listStyles = `
     transform: translateY(-1px);
   }
   .button.primary {
-    border-color: var(--accent);
-    background: var(--accent);
-    color: var(--bg);
+    border-color: transparent;
+    background-color: #dc2626;
+    background-image: var(--vt-brand-gradient);
+    color: #ffffff;
   }
   .button.primary:hover:not(:disabled) {
-    opacity: 0.9;
-    box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 30%, transparent);
+    opacity: 1;
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
   }
   .button:disabled,
   .button[aria-disabled="true"] {
@@ -282,6 +370,10 @@ const listStyles = `
       margin-bottom: 8px;
     }
     .presentation-title { grid-column: 1 / -1; }
+    .title-cell {
+      grid-column: 1 / -1;
+      align-items: flex-start;
+    }
     .presentation-meta,
     .presentation-date,
     .status-pill {
@@ -346,6 +438,7 @@ function ensureMarkup(): void {
 
   document.body.innerHTML = `
     <main class="list-shell" id="verto-list-widget">
+      <div class="vt-links" id="list-links"></div>
       <section class="list-header" aria-labelledby="title">
         <div class="list-kicker">Verto AI workspace</div>
         <h1 class="list-title" id="title">Presentation workspace</h1>
@@ -431,6 +524,9 @@ function renderListPayload(payload: Record<string, unknown>): void {
 
   const list = toListViewModel(payload);
 
+  setWidgetTheme(extractThemeName(payload));
+  renderDeepLinkMenu(byId('list-links'), extractWidgetLinks(payload));
+
   byId('title').textContent = 'Presentation workspace';
   byId('summary').textContent = list.presentations.length > 0
     ? `Showing ${list.presentations.length} of ${list.totalCount} Verto presentations, sorted by latest updated.`
@@ -462,6 +558,11 @@ function createBadge(text: string): HTMLElement {
   return badge;
 }
 
+function themeGradient(themeName: string): string {
+  const theme = findTheme(themeName);
+  return theme ? resolveThemeTokens(theme).accentGradient : 'var(--vt-brand-gradient)';
+}
+
 function renderRows(list: PresentationListViewModel): void {
   const container = byId('presentations');
   container.textContent = '';
@@ -489,8 +590,16 @@ function renderRows(list: PresentationListViewModel): void {
     row.appendChild(slides);
 
     const theme = document.createElement('div');
-    theme.className = 'presentation-meta';
-    theme.textContent = presentation.themeName;
+    theme.className = 'presentation-meta theme-cell';
+    const swatch = document.createElement('span');
+    swatch.className = 'vt-swatch';
+    swatch.setAttribute('aria-hidden', 'true');
+    swatch.style.background = themeGradient(presentation.themeName);
+    theme.appendChild(swatch);
+    const themeName = document.createElement('span');
+    themeName.className = 'theme-name';
+    themeName.textContent = presentation.themeName;
+    theme.appendChild(themeName);
     row.appendChild(theme);
 
     const status = document.createElement('span');

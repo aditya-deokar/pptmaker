@@ -1,4 +1,8 @@
 import { App } from '@modelcontextprotocol/ext-apps';
+import {
+  attachHostAdaptation,
+  vertoSkinStyles,
+} from './verto-skin';
 
 type VertoPayload = Record<string, unknown>;
 
@@ -28,111 +32,12 @@ const app = new App(
   { autoResize: true }
 );
 
-export const baseStyles = `
-  :root {
-    color-scheme: light dark;
-    --bg: #fbfbfc;
-    --fg: #18181b;
-    --muted: #6b7280;
-    --line: #d7dce2;
-    --accent: #0f766e;
-    --accent-soft: #ccfbf1;
-    --surface: #ffffff;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0b0c0f;
-      --fg: #f4f4f5;
-      --muted: #a1a1aa;
-      --line: #2f333a;
-      --accent: #5eead4;
-      --accent-soft: #123532;
-      --surface: #111318;
-    }
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-width: 260px;
-    background: var(--bg);
-    color: var(--fg);
-    font-size: 14px;
-    line-height: 1.45;
-  }
-  main {
-    width: 100%;
-    min-height: 180px;
-    padding: 18px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-  }
-  h1 {
-    margin: 0 0 12px;
-    font-size: 18px;
-    line-height: 1.25;
-    letter-spacing: 0;
-  }
-  .muted { color: var(--muted); }
-  .row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    border-top: 1px solid var(--line);
-    padding: 10px 0;
-  }
-  .row:first-of-type { border-top: 0; }
-  .label { color: var(--muted); }
-  .value { font-weight: 650; text-align: right; overflow-wrap: anywhere; }
-  .bar {
-    height: 8px;
-    overflow: hidden;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--line) 70%, transparent);
-    margin: 14px 0 6px;
-  }
-  .fill {
-    width: var(--progress, 0%);
-    height: 100%;
-    background: var(--accent);
-    transition: width 180ms ease;
-  }
-  .slides {
-    display: grid;
-    gap: 8px;
-    margin-top: 12px;
-  }
-  .slide {
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 10px;
-    background: color-mix(in srgb, var(--surface) 88%, var(--accent-soft));
-  }
-  .slide-title {
-    font-weight: 650;
-    overflow-wrap: anywhere;
-  }
-  .status {
-    display: inline-flex;
-    align-items: center;
-    border-radius: 999px;
-    padding: 3px 8px;
-    background: var(--accent-soft);
-    color: var(--fg);
-    font-size: 12px;
-    font-weight: 650;
-  }
-  a {
-    color: var(--accent);
-    font-weight: 650;
-    text-decoration: none;
-  }
-`;
-
 export function mountWidget(render: RenderHandler): void {
-  injectStyles(baseStyles);
+  injectStyles(vertoSkinStyles);
+
+  // Host adaptation must be registered BEFORE connect(): the host may deliver
+  // theme/context immediately after the ui/initialize handshake.
+  const refreshHostAdaptation = attachHostAdaptation(app);
 
   // Handlers must be registered BEFORE connect(): the host may deliver the
   // current tool result immediately after the ui/initialize handshake.
@@ -140,9 +45,13 @@ export function mountWidget(render: RenderHandler): void {
     renderFromPayload(params.structuredContent, render);
   };
 
-  app.connect().catch((error) => {
-    console.warn('Verto MCP Apps bridge was not initialized:', error);
-  });
+  app.connect()
+    .then(() => {
+      refreshHostAdaptation();
+    })
+    .catch((error) => {
+      console.warn('Verto MCP Apps bridge was not initialized:', error);
+    });
 
   // Standalone rendering (visual QA / static preview).
   if (window.__VERTO_MCP_PAYLOAD__) {
@@ -173,6 +82,68 @@ export async function sendFollowUpMessage(prompt: string): Promise<void> {
     });
   } catch {
     throw new Error('This host has not enabled follow-up messages for Verto AI yet.');
+  }
+}
+
+/**
+ * Plan 10 F7/§4: widgets register cleanup (poll timers, pending edits) that
+ * runs when the host tears the view down.
+ */
+export function onTeardown(handler: () => void): void {
+  app.onteardown = async () => {
+    handler();
+    return {};
+  };
+}
+
+/**
+ * Plan 10 F6/§4: structured widget telemetry into host logs. Used for the
+ * unsaved-changes warning when the host tears a view down mid-edit.
+ * Falls back to console when the host has no sendLog support.
+ */
+export function logWidgetWarning(message: string): void {
+  const logger = app as unknown as {
+    sendLog?: (params: { level: string; message: string }) => Promise<unknown>;
+  };
+
+  if (typeof logger.sendLog === 'function') {
+    void logger.sendLog({ level: 'warning', message }).catch(() => {});
+    return;
+  }
+
+  console.warn(message);
+}
+
+let lastContextDigest = '';
+
+/**
+ * Plan 10 F8: pushes widget-side state back to the LLM so follow-up turns
+ * stay grounded. Capability-guarded and de-duplicated by digest; a silent
+ * no-op on hosts without updateModelContext support.
+ */
+export async function pushModelContext(
+  structuredContent: Record<string, unknown>,
+  textDigest: string
+): Promise<boolean> {
+  const trimmed = textDigest.trim();
+
+  if (!trimmed || trimmed === lastContextDigest) {
+    return false;
+  }
+
+  if (!app.getHostCapabilities()?.updateModelContext) {
+    return false;
+  }
+
+  try {
+    await app.updateModelContext({
+      content: [{ type: 'text', text: trimmed }],
+      structuredContent,
+    });
+    lastContextDigest = trimmed;
+    return true;
+  } catch {
+    return false;
   }
 }
 

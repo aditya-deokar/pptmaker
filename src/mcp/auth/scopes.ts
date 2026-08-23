@@ -51,6 +51,8 @@ export function getRequiredScopesForTool(toolName: string): McpOAuthScope[] {
   switch (toolName) {
     case TOOL_NAMES.PRESENTATION_LIST:
     case TOOL_NAMES.PRESENTATION_GET:
+    case TOOL_NAMES.PRESENTATION_RENDER_DECK:
+    case TOOL_NAMES.PRESENTATION_RENDER_THEME_STUDIO:
       return ['presentations:read'];
 
     case TOOL_NAMES.PRESENTATION_GENERATE:

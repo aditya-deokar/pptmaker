@@ -4,8 +4,9 @@ import type {
 } from '../lib/presentation-generation-runs';
 import type { PaginationMeta } from '../tools/_shared/pagination';
 import type { PresentationMCPResponse } from '../tools/presentation/mappers';
+import { VERTO_THEMES } from './generated/themes-data';
 
-const WIDGET_DATA_VERSION = 1;
+const WIDGET_DATA_VERSION = 2;
 const FALLBACK_PUBLIC_APP_URL = 'https://verto.ai.aditya-deokar.me';
 const MAX_DECK_PREVIEW_SLIDES = 50;
 const MAX_PREVIEW_TEXT_LENGTH = 180;
@@ -13,6 +14,7 @@ const MAX_PREVIEW_TEXT_LENGTH = 180;
 export type VertoMcpAppWidgetKind =
   | 'presentation_list'
   | 'deck_preview'
+  | 'deck_live'
   | 'generation_progress'
   | 'action_result'
   | 'publish_card'
@@ -21,6 +23,16 @@ export type VertoMcpAppWidgetKind =
 export interface BaseWidgetData {
   widget: VertoMcpAppWidgetKind;
   version: typeof WIDGET_DATA_VERSION;
+}
+
+/**
+ * Deep links into the real product (plan 10 F9): editor, presenter, and
+ * public share routes for the primary presentation of a widget payload.
+ */
+export interface WidgetLinks {
+  editorUrl: string | null;
+  presentUrl: string | null;
+  shareUrl: string | null;
 }
 
 export interface DeckPreviewSlide {
@@ -47,6 +59,7 @@ export interface PresentationListItem {
 export interface PresentationListWidgetData extends BaseWidgetData {
   widget: 'presentation_list';
   presentations: PresentationListItem[];
+  links: WidgetLinks;
   pagination: {
     nextCursor: string | null;
     hasMore: boolean;
@@ -79,6 +92,7 @@ export interface DeckPreviewWidgetData extends BaseWidgetData {
     shareUrl: string | null;
     openUrl: string | null;
   };
+  links: WidgetLinks;
   slides: DeckPreviewSlide[];
   actions: {
     canOpen: boolean;
@@ -90,11 +104,38 @@ export interface DeckPreviewWidgetData extends BaseWidgetData {
   };
 }
 
+export interface DeckLiveWidgetData extends BaseWidgetData {
+  widget: 'deck_live';
+  presentation: {
+    id: string;
+    title: string;
+    themeName: string | null;
+    slideCount: number;
+  };
+  links: WidgetLinks;
+  slides: DeckPreviewSlide[];
+  actions: {
+    canRefresh: boolean;
+  };
+}
+
 export interface GenerationProgressStep {
   id: string;
   name: string;
   status: string;
+  description?: string;
   details?: string;
+}
+
+/**
+ * Plan 10 F7: completion snapshot embedded in the progress payload so the
+ * widget can celebrate inline (first-slide preview + slide count) without a
+ * second tool round-trip.
+ */
+export interface GenerationCompletionInfo {
+  slideCount: number;
+  themeName: string | null;
+  previewSlide: DeckPreviewSlide | null;
 }
 
 export type ActionResultKind =
@@ -132,6 +173,7 @@ export interface ActionResultWidgetData extends BaseWidgetData {
     shareUrl: string | null;
     openUrl: string | null;
   } | null;
+  links: WidgetLinks;
   affectedPresentations: ActionResultAffectedPresentation[];
   actions: {
     canOpen: boolean;
@@ -150,16 +192,20 @@ export interface GenerationProgressWidgetData extends BaseWidgetData {
     currentStepName: string | null;
     error: string | null;
     presentationId: string | null;
+    createdAt: string | null;
+    completedAt: string | null;
     updatedAt: string | null;
     isComplete: boolean;
     isFailed: boolean;
     pollHint: string | null;
   };
   steps: GenerationProgressStep[];
+  links: WidgetLinks;
   presentation: {
     id: string;
     openUrl: string;
   } | null;
+  completion?: GenerationCompletionInfo | null;
   actions: {
     canRefresh: boolean;
     canOpenPresentation: boolean;
@@ -183,6 +229,14 @@ export interface PublishCardWidgetData extends BaseWidgetData {
   };
 }
 
+export interface ThemeStudioThemeOption {
+  name: string;
+  /** [background, accent, font] preview colors for the mini slide mock. */
+  colors: [string, string, string];
+  description?: string;
+  isNew?: boolean;
+}
+
 export interface ThemeStudioWidgetData extends BaseWidgetData {
   widget: 'theme_studio';
   presentation: {
@@ -190,11 +244,7 @@ export interface ThemeStudioWidgetData extends BaseWidgetData {
     title: string;
     currentThemeName: string | null;
   };
-  themes: Array<{
-    name: string;
-    colors: string[];
-    description?: string;
-  }>;
+  themes: ThemeStudioThemeOption[];
   actions: {
     canApplyTheme: boolean;
   };
@@ -203,6 +253,7 @@ export interface ThemeStudioWidgetData extends BaseWidgetData {
 export type McpAppWidgetData =
   | PresentationListWidgetData
   | DeckPreviewWidgetData
+  | DeckLiveWidgetData
   | GenerationProgressWidgetData
   | ActionResultWidgetData
   | PublishCardWidgetData
@@ -218,6 +269,24 @@ function getPublicAppUrl(): string {
 
 function buildPresentationOpenUrl(presentationId: string | null | undefined): string | null {
   return presentationId ? `${getPublicAppUrl()}/presentation/${presentationId}` : null;
+}
+
+function buildPresentationPresentUrl(presentationId: string | null | undefined): string | null {
+  return presentationId ? `${getPublicAppUrl()}/present/${presentationId}` : null;
+}
+
+function buildWidgetLinks(options: {
+  presentationId: string | null | undefined;
+  shareUrl?: string | null;
+  openUrl?: string | null;
+}): WidgetLinks {
+  const editorUrl = options.openUrl || buildPresentationOpenUrl(options.presentationId);
+
+  return {
+    editorUrl,
+    presentUrl: buildPresentationPresentUrl(options.presentationId),
+    shareUrl: options.shareUrl || null,
+  };
 }
 
 function readString(value: unknown, key: string): string | null {
@@ -315,6 +384,11 @@ export function createDeckPreviewWidgetData(
       shareUrl: presentation.share_url,
       openUrl,
     },
+    links: buildWidgetLinks({
+      presentationId: presentation.id,
+      shareUrl: presentation.share_url,
+      openUrl,
+    }),
     slides: mapDeckSlides(presentation.slides),
     actions: {
       canOpen: Boolean(openUrl),
@@ -323,6 +397,98 @@ export function createDeckPreviewWidgetData(
       canUnpublish: presentation.is_published && !presentation.is_deleted,
       canCopyShareLink: presentation.is_published && !presentation.is_deleted,
       canUpdateSlides: Boolean(presentation.id && !presentation.is_deleted),
+    },
+  };
+}
+
+/**
+ * Slim payload for the app-only presenter view (plan 10 F2/§7.3): slides
+ * with full content trees plus theme metadata — no action-result prose.
+ */
+export function createDeckLiveWidgetData(
+  presentation: PresentationMCPResponse
+): DeckLiveWidgetData {
+  const openUrl = presentation.open_url || buildPresentationOpenUrl(presentation.id);
+
+  return {
+    widget: 'deck_live',
+    version: WIDGET_DATA_VERSION,
+    presentation: {
+      id: presentation.id,
+      title: presentation.title,
+      themeName: presentation.theme_name || null,
+      slideCount: presentation.slide_count,
+    },
+    links: buildWidgetLinks({
+      presentationId: presentation.id,
+      shareUrl: presentation.share_url,
+      openUrl,
+    }),
+    slides: mapDeckSlides(presentation.slides),
+    actions: {
+      canRefresh: true,
+    },
+  };
+}
+
+/**
+ * Visual theme browser payload (plan 10 F4). The catalog mirrors the
+ * dashboard's 65 themes (generated/themes-data.ts) so widgets and server
+ * never drift; colors are [background, accent, font] preview triplets.
+ */
+export function createThemeStudioWidgetData(options: {
+  presentation: Pick<PresentationMCPResponse, 'id' | 'title' | 'theme_name'>;
+}): ThemeStudioWidgetData {
+  const themes: ThemeStudioThemeOption[] = VERTO_THEMES.map((theme) => ({
+    name: theme.name,
+    colors: [
+      theme.gradientBackground || theme.slideBackgroundColor || theme.backgroundColor,
+      theme.accentColor,
+      theme.fontColor,
+    ],
+    description: theme.type === 'dark' ? 'Dark theme' : 'Light theme',
+    isNew: NEW_THEME_NAMES.has(theme.name),
+  }));
+
+  return {
+    widget: 'theme_studio',
+    version: WIDGET_DATA_VERSION,
+    presentation: {
+      id: options.presentation.id,
+      title: options.presentation.title,
+      currentThemeName: options.presentation.theme_name || null,
+    },
+    themes,
+    actions: {
+      canApplyTheme: true,
+    },
+  };
+}
+
+/** Newest catalog additions flagged with a "NEW" badge in the studio. */
+const NEW_THEME_NAMES = new Set([
+  'Obsidian Flame',
+  'Modern Dark',
+  'Vibrant Glass',
+  'Premium Gradient',
+]);
+
+export function createPublishCardWidgetData(
+  presentation: PresentationMCPResponse
+): PublishCardWidgetData {
+  return {
+    widget: 'publish_card',
+    version: WIDGET_DATA_VERSION,
+    presentation: {
+      id: presentation.id,
+      title: presentation.title,
+      isPublished: presentation.is_published,
+      shareUrl: presentation.share_url,
+    },
+    actions: {
+      canCopyShareLink: Boolean(presentation.share_url) && !presentation.is_deleted,
+      canOpenShareLink: Boolean(presentation.share_url) && !presentation.is_deleted,
+      canUnpublish: presentation.is_published && !presentation.is_deleted,
     },
   };
 }
@@ -348,6 +514,11 @@ export function createPresentationListWidgetData(
     widget: 'presentation_list',
     version: WIDGET_DATA_VERSION,
     presentations: items,
+    links: buildWidgetLinks({
+      presentationId: latest?.id ?? null,
+      shareUrl: latest?.shareUrl ?? null,
+      openUrl: latest?.openUrl ?? null,
+    }),
     pagination: {
       nextCursor: pagination.next_cursor,
       hasMore: pagination.has_more,
@@ -369,8 +540,26 @@ export function createPresentationListWidgetData(
   };
 }
 
+/**
+ * F7: builds the completion snapshot from a finished deck's slide array.
+ */
+export function createGenerationCompletionInfo(
+  slides: unknown,
+  themeName?: string | null
+): GenerationCompletionInfo {
+  const list = Array.isArray(slides) ? slides : [];
+  const mapped = list.length > 0 ? mapDeckSlides(list.slice(0, 1)) : [];
+
+  return {
+    slideCount: list.length,
+    themeName: themeName || null,
+    previewSlide: mapped[0] ?? null,
+  };
+}
+
 export function createGenerationProgressWidgetData(
-  status: PresentationGenerationStatusMcpResponse
+  status: PresentationGenerationStatusMcpResponse,
+  completion: GenerationCompletionInfo | null = null
 ): GenerationProgressWidgetData {
   const run = status.generation_run;
   const openUrl = buildPresentationOpenUrl(status.presentation_id);
@@ -386,6 +575,8 @@ export function createGenerationProgressWidgetData(
       currentStepName: run.current_step_name,
       error: run.error,
       presentationId: status.presentation_id,
+      createdAt: run.created_at || null,
+      completedAt: run.completed_at || null,
       updatedAt: run.updated_at,
       isComplete: status.is_complete,
       isFailed: status.is_failed,
@@ -395,14 +586,20 @@ export function createGenerationProgressWidgetData(
       id: step.id,
       name: step.name,
       status: step.status,
+      ...(step.description ? { description: step.description } : {}),
       ...(step.details ? { details: step.details } : {}),
     })),
+    links: buildWidgetLinks({
+      presentationId: status.presentation_id,
+      openUrl,
+    }),
     presentation: status.presentation_id && openUrl
       ? {
           id: status.presentation_id,
           openUrl,
         }
       : null,
+    ...(completion ? { completion } : {}),
     actions: {
       canRefresh: !status.is_complete && !status.is_failed,
       canOpenPresentation: Boolean(status.presentation_id && openUrl),
@@ -449,6 +646,13 @@ export function createActionResultWidgetData(options: {
         }
       : null,
     affectedPresentations: options.affectedPresentations || [],
+    links: presentation
+      ? buildWidgetLinks({
+          presentationId: presentation.id,
+          shareUrl: presentation.share_url,
+          openUrl,
+        })
+      : { editorUrl: null, presentUrl: null, shareUrl: null },
     actions: {
       canOpen: Boolean(openUrl && !presentation?.is_deleted),
       canPreview: Boolean(presentation?.id && !presentation?.is_deleted),
