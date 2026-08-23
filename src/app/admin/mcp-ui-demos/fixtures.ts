@@ -502,7 +502,19 @@ export function publishCardPayload({ published }: { published: boolean }): Fixtu
   };
 }
 
-function listPresentations(): FixturePayload[] {
+interface FixturePresentationRow {
+  id: string;
+  title: string;
+  theme_name: string;
+  slide_count: number;
+  updated_at: string;
+  is_published: boolean;
+  is_deleted: boolean;
+  share_url: string | null;
+  open_url: string;
+}
+
+function listPresentations(): FixturePresentationRow[] {
   return [
     {
       id: 'deck_workspace_001',
