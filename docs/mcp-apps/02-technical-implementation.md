@@ -241,20 +241,24 @@ Implementation status:
 - Tool responses still return JSON text fallback.
 - Vite and `@modelcontextprotocol/ext-apps` are deferred until the widgets need a heavier build pipeline.
 
-Use the MCP Apps standard first:
+Use the MCP Apps standard through the official SDK (`@modelcontextprotocol/ext-apps`):
 
-- Tool metadata points to a UI resource using `_meta.ui.resourceUri`.
-- UI resource uses a `ui://...` URI.
+- Tools register via `registerAppTool()` with `_meta.ui.resourceUri` and `ui.visibility`.
+- UI resources register via `registerAppResource()` using a `ui://...` URI and the
+  `text/html;profile=mcp-app` MIME type.
 - UI runs in a sandboxed iframe.
-- UI and host communicate using `ui/*` JSON-RPC over `postMessage`.
-- ChatGPT-only capabilities should be feature-detected via `window.openai`.
+- Widgets use the SDK `App` client: tool data arrives via the `ontoolresult`
+  handler, widget actions call tools through `app.callServerTool()`, and host
+  capabilities are feature-detected via `app.getHostCapabilities()`.
 
-Recommended first UI resources:
+Registered UI resources:
 
 | UI resource | URI | Used by |
 | --- | --- | --- |
-| Generation progress | `ui://verto/generation-progress.html` | `presentation_generate` |
-| Deck preview | `ui://verto/deck-preview.html` | `presentation_get`, completed `presentation_generate` |
+| Presentation workspace list | `ui://verto/presentation-list.html` | `presentation_list` |
+| Generation progress | `ui://verto/generation-progress.html` | `presentation_generate`, `presentation_generation_status` |
+| Deck preview | `ui://verto/deck-preview.html` | `presentation_get` |
+| Action result | `ui://verto/action-result.html` | create/delete/recover/update/publish/unpublish tools |
 
 Recommended libraries:
 
@@ -469,11 +473,11 @@ Build for the portable standard first:
 - `tools/call`
 - text and structured fallback output
 
-Then add optional ChatGPT extensions only when they improve UX:
+Add host-specific enhancements through the SDK `App` instance only when they improve UX:
 
-- `window.openai.requestDisplayMode`
-- `window.openai.openExternal`
-- `window.openai.uploadFile` or file APIs, if future deck import/export needs them
+- `app.requestDisplayMode({ mode })` — check `app.getHostContext()?.availableDisplayModes` first
+- `app.openLink({ url })` — check `app.getHostCapabilities()?.openLinks` first
+- File upload/download APIs are not yet part of the MCP Apps spec; revisit if deck import/export needs them
 
 Claude-specific logic should be minimal. Use Claude `clientInfo` only for telemetry, not authorization.
 

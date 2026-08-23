@@ -15,6 +15,9 @@ const isPublicRoute = createRouteMatcher([
   '/.well-known/oauth-authorization-server(.*)',
   '/features(.*)',
   '/',
+  // Internal visual playground for the built widget bundles (fake fixtures
+  // only — the bundles themselves are public via MCP ui:// resources).
+  '/admin/mcp-ui-demos(.*)',
 ]);
 
 export const proxy = clerkMiddleware(async (auth, req) => {

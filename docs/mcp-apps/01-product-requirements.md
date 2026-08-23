@@ -158,7 +158,7 @@ Minimum listing copy:
 | Security | Validate all inputs, enforce ownership, never return secrets, redact logs. |
 | Privacy | Do not collect ChatGPT/Claude conversation data unless needed for the tool action and disclosed. |
 | Observability | Log tool name, user ID, trace ID, status, latency, and error code. |
-| Compatibility | Prefer MCP Apps standard `_meta.ui.resourceUri` and `ui/*` bridge. Use `window.openai` only as optional ChatGPT enhancement. |
+| Compatibility | Standardized MCP Apps SDK (`@modelcontextprotocol/ext-apps`): tools register via `registerAppTool()`, widgets run on the SDK `App` bridge. No host-specific globals. |
 
 ## 9. Success Metrics
 

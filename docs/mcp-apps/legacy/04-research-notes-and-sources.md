@@ -1,3 +1,8 @@
+﻿> **LEGACY (archived 2026-08).** Historical research snapshot from the original
+> MCP Apps planning phase. It predates the widget-layer migration to
+> `@modelcontextprotocol/ext-apps` and is kept for reference only — the
+> `window.openai` guidance below is superseded. See
+> [`../03-migration-plan.md`](../03-migration-plan.md) for the current design.
 # Research Notes And Sources
 
 Last updated: 2026-06-14

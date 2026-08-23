@@ -319,3 +319,76 @@ Phase 7 is complete when:
 - Claude custom connector test is either passed or explicitly scheduled after ChatGPT approval.
 - Reviewer account is populated with safe sample decks.
 - Screenshots and logs are ready for Phase 8.
+
+## 13. MCP Apps SDK (`@modelcontextprotocol/ext-apps`) Verification
+
+The widget layer was migrated from OpenAI-specific metadata plus a hand-rolled
+postMessage bridge to the standardized MCP Apps SDK. Migration details:
+`00-migration-overview.md`, `02-api-mapping.md`, `03-migration-plan.md`.
+
+Automated evidence (completed on branch `migrate/mcp-ext-apps`):
+
+- `npm run mcp:phase7` — 275/275 checks pass, including the rewritten
+  SDK-pattern assertions (`registerAppTool(`, camelCase CSP, `ontoolresult`,
+  `callServerTool`).
+- Focused typecheck passes across 77 MCP/OAuth/app-hosting files.
+- In-memory transport smoke test: 12 tools listed with `_meta.ui.resourceUri`
+  + `visibility`; exactly 4 app-callable tools; 4 `ui://verto/*.html`
+  resources served as `text/html;profile=mcp-app` with camelCase
+  `connectDomains`/`resourceDomains`; unauthenticated tool calls still return
+  the structured unauthorized error with a WWW-Authenticate challenge.
+- `npm run mcp:phase9h` — all 10 widget states render in Puppeteer from the
+  SDK-bundled HTML (layout, contrast, keyboard order, reduced motion).
+
+Remaining live-host steps (manual):
+
+1. MCP Inspector re-check on the migrated server:
+
+   ```bash
+   npm run mcp:inspect
+   ```
+
+   Confirm the four `ui://verto/*.html` resources are readable and tool
+   results still include `structuredContent` widget payloads.
+
+2. Reference-host smoke test with `basic-host` from the ext-apps repo:
+
+   ```bash
+   # Terminal 1 — serve the migrated MCP endpoint
+   npm run dev
+
+   # Terminal 2 — reference host from a checkout of modelcontextprotocol/ext-apps
+   cd examples/basic-host && npm install
+   SERVERS='["http://localhost:3000/mcp"]' npm run start
+   # Open http://localhost:8080 and verify per widget:
+   #  - loads without console errors
+   #  - ontoolresult renders data (list / preview / progress / action result)
+   #  - in-widget actions (refresh, publish confirm, status check) work
+   #  - follow-up message path works where the host supports it
+   ```
+
+3. Re-run the ChatGPT Developer Mode and Claude Custom Connector flows from
+   sections above against the migrated widgets — the wire format for tools,
+   OAuth, and resources is unchanged; only widget metadata/transport moved to
+   the standardized SDK.
+
+## Phase 10 Manual Test Matrix (immersive in-chat experience)
+
+Automated gates first: `npm run mcp:phase7` (358 contract checks + focused
+typecheck) and `npm run mcp:phase9h` (33 visual scenarios, including a
+themes × schemes contrast matrix). Then cover these flows once in
+`basic-host` and once in ChatGPT Developer Mode (reviewer account:
+adityadeokar80@gmail.com):
+
+| # | Flow | Steps | Expected |
+| --- | --- | --- | --- |
+| P10-1 | Zero-touch generation | "Generate a 7 slide investor pitch deck about AI tutoring" → leave the card alone | Progress card auto-refreshes (countdown ring, elapsed/ETA chips, real step names), then flips to completion with inline first-slide preview + Open deck; the model's next reply already knows the deck is ready (no re-ask) |
+| P10-2 | Presenter | Deck preview → Present live → ←/→/Space/G/Esc; resize to mobile width | Fullscreen stage with keyboard nav and grid overview; safe-area padding respected on notched viewports; falls back to inline when host lacks fullscreen |
+| P10-3 | Theme studio | Deck preview → Change theme → search "ocean", filter Dark, apply one | Grid paints theme swatches; confirm strip applies via `presentation_update_theme`; success state + follow-up prompt reflects new theme without repeating it |
+| P10-4 | Publish card | Publish from chat (confirm) → Copy link → scan QR → Unpublish (confirm) → Publish again | Celebration card with share URL; QR resolves to `/share/{id}`; unpublish flips to private state; republish re-celebrates |
+| P10-5 | Guided edits | Edit this slide → change title + two bullets → Save → Undo changes | Themed fields; save shows "Updated 3 text blocks" diff strip; undo restores originals; leaving mid-edit logs a teardown warning |
+| P10-6 | Adaptive layout | Run flows at ≤560 px width and with platform:mobile host config | Buttons ≥44 px, action footers become bottom-sheet rows, hover-only hints hidden |
+
+Regression pins for every automated check above live in
+`scripts/mcp-apps/phase7-checks.mjs`; update them alongside any tool or
+widget contract change.

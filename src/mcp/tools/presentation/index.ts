@@ -10,7 +10,12 @@ import type {
   McpServer,
   ToolCallback,
 } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type {
+  AnySchema,
+  ZodRawShapeCompat,
+} from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
+import { registerAppTool } from '@modelcontextprotocol/ext-apps/server';
 import {
   createToolUiMeta,
   MCP_APP_UI_RESOURCE_URIS,
@@ -36,6 +41,8 @@ import { getCurrentTransport, setCurrentTransport } from '../../lib/transport-co
 
 import { handlePresentationList } from './list';
 import { handlePresentationGet } from './get';
+import { handlePresentationRenderDeck } from './render-deck';
+import { handlePresentationRenderThemeStudio } from './render-theme-studio';
 import { handlePresentationCreate } from './create';
 import { handlePresentationDelete } from './delete';
 import { handlePresentationRecover } from './recover';
@@ -52,6 +59,8 @@ interface PresentationToolMetadata {
   annotations: ToolAnnotations;
   uiResourceUri?: McpAppUiResourceUri;
   appCallable?: boolean;
+  /** App-visible only: the tool is never surfaced to the model. */
+  appOnly?: boolean;
 }
 
 const PRESENTATION_TOOL_METADATA: Record<
@@ -73,6 +82,28 @@ const PRESENTATION_TOOL_METADATA: Record<
     title: 'Get presentation',
     uiResourceUri: MCP_APP_UI_RESOURCE_URIS.DECK_PREVIEW,
     appCallable: true,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_RENDER_DECK]: {
+    title: 'Render deck presenter view',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.DECK_LIVE,
+    appOnly: true,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  [TOOL_NAMES.PRESENTATION_RENDER_THEME_STUDIO]: {
+    title: 'Render theme studio',
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.THEME_STUDIO,
+    appOnly: true,
     annotations: {
       readOnlyHint: true,
       destructiveHint: false,
@@ -123,6 +154,9 @@ const PRESENTATION_TOOL_METADATA: Record<
   [TOOL_NAMES.PRESENTATION_UPDATE_SLIDES]: {
     title: 'Replace presentation slides',
     uiResourceUri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
+    // Plan 10 F6: the guided slide editor saves through this tool from
+    // inside the widget, so it must be visible to the app surface.
+    appCallable: true,
     annotations: {
       readOnlyHint: false,
       destructiveHint: false,
@@ -132,7 +166,8 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
   [TOOL_NAMES.PRESENTATION_UPDATE_THEME]: {
     title: 'Update presentation theme',
-    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.THEME_STUDIO,
+    appCallable: true,
     annotations: {
       readOnlyHint: false,
       destructiveHint: false,
@@ -142,7 +177,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
   [TOOL_NAMES.PRESENTATION_PUBLISH]: {
     title: 'Publish presentation',
-    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
+    uiResourceUri: MCP_APP_UI_RESOURCE_URIS.PUBLISH_CARD,
     appCallable: true,
     annotations: {
       readOnlyHint: false,
@@ -154,6 +189,7 @@ const PRESENTATION_TOOL_METADATA: Record<
   [TOOL_NAMES.PRESENTATION_UNPUBLISH]: {
     title: 'Unpublish presentation',
     uiResourceUri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
+    appCallable: true,
     annotations: {
       readOnlyHint: false,
       destructiveHint: false,
@@ -184,7 +220,21 @@ const PRESENTATION_TOOL_METADATA: Record<
   },
 };
 
-function registerPresentationTool<TInputSchema extends Record<string, z.ZodTypeAny>>(
+/**
+ * Callback type exactly as `registerAppTool` expects it: the SDK helper
+ * resolves its `InputArgs` through a conditional before handing it to
+ * `ToolCallback`, so the mirror conditional must appear in the cast too.
+ */
+type AppToolCallback<TInputSchema extends Record<string, z.ZodTypeAny> & ZodRawShapeCompat> =
+  ToolCallback<
+    TInputSchema extends undefined | ZodRawShapeCompat | AnySchema
+      ? TInputSchema
+      : AnySchema
+  >;
+
+function registerPresentationTool<
+  TInputSchema extends Record<string, z.ZodTypeAny> & ZodRawShapeCompat
+>(
   server: McpServer,
   toolName: (typeof TOOL_NAMES)[keyof typeof TOOL_NAMES],
   description: string,
@@ -195,9 +245,10 @@ function registerPresentationTool<TInputSchema extends Record<string, z.ZodTypeA
   const callback = createToolCallback<z.infer<z.ZodObject<TInputSchema>>>(
     toolName,
     handler
-  ) as ToolCallback<TInputSchema>;
+  ) as AppToolCallback<TInputSchema>;
 
-  server.registerTool(
+  registerAppTool(
+    server,
     toolName,
     {
       title: metadata.title,
@@ -207,6 +258,7 @@ function registerPresentationTool<TInputSchema extends Record<string, z.ZodTypeA
       annotations: metadata.annotations,
       _meta: createToolUiMeta(metadata.uiResourceUri, {
         appCallable: metadata.appCallable,
+        appOnly: metadata.appOnly,
       }),
     },
     callback
@@ -332,6 +384,28 @@ function registerPresentationTools(server: McpServer): void {
         .describe('If true, includes the full slide JSON content. Set to false for metadata-only.'),
     },
     handlePresentationGet
+  );
+
+  registerPresentationTool(
+    server,
+    TOOL_NAMES.PRESENTATION_RENDER_DECK,
+    'Open the immersive presenter view for a deck inside the chat app. App-widget-only: never surfaced to the model. Returns the full slide JSON bound to the deck-live presenter UI (fullscreen, keyboard navigation, grid overview).',
+    {
+      presentation_id: z.string().min(1)
+        .describe('The unique identifier of the presentation to present.'),
+    },
+    handlePresentationRenderDeck
+  );
+
+  registerPresentationTool(
+    server,
+    TOOL_NAMES.PRESENTATION_RENDER_THEME_STUDIO,
+    "Open the visual theme studio for a deck inside the chat app. App-widget-only: never surfaced to the model. Returns the theme catalog bound to the theme-studio UI (browse, search, and apply themes live).",
+    {
+      presentation_id: z.string().min(1)
+        .describe('The unique identifier of the presentation to restyle.'),
+    },
+    handlePresentationRenderThemeStudio
   );
 
   registerPresentationTool(

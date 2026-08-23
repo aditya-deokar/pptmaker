@@ -3,11 +3,38 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+import { spawnSync } from 'node:child_process';
 import { build } from 'esbuild';
 
 const root = process.cwd();
 const checkOnly = process.argv.includes('--check');
 const generatedDir = path.join(root, 'src/mcp/apps/generated');
+
+// Budgets account for the @modelcontextprotocol/ext-apps App SDK bundled into
+// every standalone IIFE (~305 KB minified baseline: zod v4 + MCP Apps protocol
+// schemas) plus the widget UI itself (~20 KB).
+const WIDGET_BUDGET_BYTES = 384 * 1024;
+
+ensureThemesData();
+
+/**
+ * Plan 10 §7.1: regenerate (or freshness-check) the widget theme catalog
+ * before bundling so widgets always paint with current dashboard themes.
+ */
+function ensureThemesData() {
+  const script = path.join(root, 'scripts/mcp-apps/gen-themes.mjs');
+  const args = checkOnly ? [script, '--check'] : [script];
+  const result = spawnSync(process.execPath, args, { stdio: 'inherit' });
+
+  if (result.error) {
+    console.error(`[FAIL] Could not run gen-themes.mjs: ${result.error.message}`);
+    process.exit(1);
+  }
+  if (result.status !== 0) {
+    console.error('[FAIL] Theme data generation failed; aborting widget build.');
+    process.exit(result.status ?? 1);
+  }
+}
 
 const widgets = [
   {
@@ -17,7 +44,7 @@ const widgets = [
     htmlFile: 'presentation-list.html',
     tsFile: 'presentation-list.ts',
     exportName: 'PRESENTATION_LIST_WIDGET_HTML',
-    budgetBytes: 160 * 1024,
+    budgetBytes: WIDGET_BUDGET_BYTES,
   },
   {
     name: 'generation-progress',
@@ -26,7 +53,10 @@ const widgets = [
     htmlFile: 'generation-progress.html',
     tsFile: 'generation-progress.ts',
     exportName: 'GENERATION_PROGRESS_WIDGET_HTML',
-    budgetBytes: 120 * 1024,
+    // Plan 10 §8/F7: the live-generation card bundles the shared slide
+    // renderer for inline first-slide previews plus the auto-poll engine,
+    // so it carries a dedicated budget instead of the standard one.
+    budgetBytes: 416 * 1024,
   },
   {
     name: 'deck-preview',
@@ -35,7 +65,9 @@ const widgets = [
     htmlFile: 'deck-preview.html',
     tsFile: 'deck-preview.ts',
     exportName: 'DECK_PREVIEW_WIDGET_HTML',
-    budgetBytes: 180 * 1024,
+    // Plan 10 §8/F6: the guided slide editor rides along with the preview
+    // surface, so it carries a dedicated budget instead of the standard one.
+    budgetBytes: 448 * 1024,
   },
   {
     name: 'action-result',
@@ -44,7 +76,38 @@ const widgets = [
     htmlFile: 'action-result.html',
     tsFile: 'action-result.ts',
     exportName: 'ACTION_RESULT_WIDGET_HTML',
-    budgetBytes: 140 * 1024,
+    budgetBytes: WIDGET_BUDGET_BYTES,
+  },
+  // Plan 10 §8: presenter bundles renderer + stage + grid, so it carries a
+  // dedicated larger budget instead of the standard one.
+  {
+    name: 'deck-live',
+    title: 'Verto live presenter',
+    entry: 'src/mcp/apps/components/deck-live.ts',
+    htmlFile: 'deck-live.html',
+    tsFile: 'deck-live.ts',
+    exportName: 'DECK_LIVE_WIDGET_HTML',
+    budgetBytes: 512 * 1024,
+  },
+  // Plan 10 F4/F5: theme studio (catalog + apply flow) and publish card
+  // (celebration + QR + unpublish) wire the existing payload contracts.
+  {
+    name: 'theme-studio',
+    title: 'Verto theme studio',
+    entry: 'src/mcp/apps/components/theme-studio.ts',
+    htmlFile: 'theme-studio.html',
+    tsFile: 'theme-studio.ts',
+    exportName: 'THEME_STUDIO_WIDGET_HTML',
+    budgetBytes: WIDGET_BUDGET_BYTES,
+  },
+  {
+    name: 'publish-card',
+    title: 'Verto publish card',
+    entry: 'src/mcp/apps/components/publish-card.ts',
+    htmlFile: 'publish-card.html',
+    tsFile: 'publish-card.ts',
+    exportName: 'PUBLISH_CARD_WIDGET_HTML',
+    budgetBytes: WIDGET_BUDGET_BYTES,
   },
 ];
 
@@ -87,6 +150,9 @@ generatedArtifacts.push({
     "export { GENERATION_PROGRESS_WIDGET_HTML } from './generation-progress';",
     "export { DECK_PREVIEW_WIDGET_HTML } from './deck-preview';",
     "export { ACTION_RESULT_WIDGET_HTML } from './action-result';",
+    "export { DECK_LIVE_WIDGET_HTML } from './deck-live';",
+    "export { THEME_STUDIO_WIDGET_HTML } from './theme-studio';",
+    "export { PUBLISH_CARD_WIDGET_HTML } from './publish-card';",
     '',
   ].join('\n'),
 });

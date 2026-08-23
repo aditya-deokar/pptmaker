@@ -1,89 +1,117 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { registerAppResource } from '@modelcontextprotocol/ext-apps/server';
 import {
   createUiResourceContentMeta,
-  createUiResourceMeta,
   MCP_APP_UI_MIME_TYPE,
   MCP_APP_UI_RESOURCE_URIS,
+  SLIDE_IMAGE_RESOURCE_DOMAINS,
 } from '../apps/constants';
 import {
   getActionResultWidgetHtml,
+  getDeckLiveWidgetHtml,
   getDeckPreviewWidgetHtml,
   getGenerationProgressWidgetHtml,
   getPresentationListWidgetHtml,
+  getPublishCardWidgetHtml,
+  getThemeStudioWidgetHtml,
 } from '../apps/widgets';
 import { registerResourcePlugin } from './registry';
 
-const PRESENTATION_LIST_DESCRIPTION =
-  'Shows a visual Verto AI presentation workspace list.';
-const GENERATION_PROGRESS_DESCRIPTION =
-  'Shows Verto AI presentation generation progress.';
-const DECK_PREVIEW_DESCRIPTION = 'Shows a compact Verto AI deck preview.';
-const ACTION_RESULT_DESCRIPTION = 'Shows a visual Verto AI action result.';
+interface AppUiResourceDescriptor {
+  name: string;
+  uri: string;
+  description: string;
+  getHtml: () => string;
+  /**
+   * W1 (plan 10): allowlist slide image origins (Unsplash hosts and the
+   * legacy placeholder fallback) so real slide imagery renders in sandboxed
+   * widget iframes. Data-URL images need no origin.
+   */
+  slideImageDomains?: boolean;
+  /** Sandbox clipboard-write permission for in-widget Copy buttons. */
+  clipboardWrite?: boolean;
+}
+
+const APP_UI_RESOURCES: AppUiResourceDescriptor[] = [
+  {
+    name: 'verto-presentation-list-ui',
+    uri: MCP_APP_UI_RESOURCE_URIS.PRESENTATION_LIST,
+    description: 'Shows a visual Verto AI presentation workspace list.',
+    getHtml: getPresentationListWidgetHtml,
+  },
+  {
+    name: 'verto-generation-progress-ui',
+    uri: MCP_APP_UI_RESOURCE_URIS.GENERATION_PROGRESS,
+    description: 'Shows Verto AI presentation generation progress.',
+    getHtml: getGenerationProgressWidgetHtml,
+  },
+  {
+    name: 'verto-deck-preview-ui',
+    uri: MCP_APP_UI_RESOURCE_URIS.DECK_PREVIEW,
+    description: 'Shows a compact Verto AI deck preview.',
+    getHtml: getDeckPreviewWidgetHtml,
+    slideImageDomains: true,
+  },
+  {
+    name: 'verto-deck-live-ui',
+    uri: MCP_APP_UI_RESOURCE_URIS.DECK_LIVE,
+    description:
+      'Immersive presenter view for a Verto AI deck with fullscreen, keyboard navigation, and a slide grid overview.',
+    getHtml: getDeckLiveWidgetHtml,
+    slideImageDomains: true,
+  },
+  {
+    name: 'verto-theme-studio-ui',
+    uri: MCP_APP_UI_RESOURCE_URIS.THEME_STUDIO,
+    description:
+      'Visual theme browser for a Verto AI deck: search and filter the catalog, then apply a theme live.',
+    getHtml: getThemeStudioWidgetHtml,
+  },
+  {
+    name: 'verto-publish-card-ui',
+    uri: MCP_APP_UI_RESOURCE_URIS.PUBLISH_CARD,
+    description:
+      'Celebration card for a published Verto AI deck with share link, QR code, copy action, and unpublish.',
+    getHtml: getPublishCardWidgetHtml,
+    clipboardWrite: true,
+  },
+  {
+    name: 'verto-action-result-ui',
+    uri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
+    description: 'Shows a visual Verto AI action result.',
+    getHtml: getActionResultWidgetHtml,
+  },
+];
 
 function registerAppUiResources(server: McpServer): void {
-  server.resource(
-    'verto-presentation-list-ui',
-    MCP_APP_UI_RESOURCE_URIS.PRESENTATION_LIST,
-    createUiResourceMeta(PRESENTATION_LIST_DESCRIPTION),
-    async () => ({
-      contents: [
-        {
-          uri: MCP_APP_UI_RESOURCE_URIS.PRESENTATION_LIST,
-          mimeType: MCP_APP_UI_MIME_TYPE,
-          text: getPresentationListWidgetHtml(),
-          _meta: createUiResourceContentMeta(PRESENTATION_LIST_DESCRIPTION),
-        },
-      ],
-    })
-  );
+  for (const resource of APP_UI_RESOURCES) {
+    const meta = createUiResourceContentMeta({
+      ...(resource.slideImageDomains
+        ? { extraResourceDomains: SLIDE_IMAGE_RESOURCE_DOMAINS }
+        : {}),
+      ...(resource.clipboardWrite ? { clipboardWrite: true } : {}),
+    });
 
-  server.resource(
-    'verto-generation-progress-ui',
-    MCP_APP_UI_RESOURCE_URIS.GENERATION_PROGRESS,
-    createUiResourceMeta(GENERATION_PROGRESS_DESCRIPTION),
-    async () => ({
-      contents: [
-        {
-          uri: MCP_APP_UI_RESOURCE_URIS.GENERATION_PROGRESS,
-          mimeType: MCP_APP_UI_MIME_TYPE,
-          text: getGenerationProgressWidgetHtml(),
-          _meta: createUiResourceContentMeta(GENERATION_PROGRESS_DESCRIPTION),
-        },
-      ],
-    })
-  );
-
-  server.resource(
-    'verto-deck-preview-ui',
-    MCP_APP_UI_RESOURCE_URIS.DECK_PREVIEW,
-    createUiResourceMeta(DECK_PREVIEW_DESCRIPTION),
-    async () => ({
-      contents: [
-        {
-          uri: MCP_APP_UI_RESOURCE_URIS.DECK_PREVIEW,
-          mimeType: MCP_APP_UI_MIME_TYPE,
-          text: getDeckPreviewWidgetHtml(),
-          _meta: createUiResourceContentMeta(DECK_PREVIEW_DESCRIPTION),
-        },
-      ],
-    })
-  );
-
-  server.resource(
-    'verto-action-result-ui',
-    MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
-    createUiResourceMeta(ACTION_RESULT_DESCRIPTION),
-    async () => ({
-      contents: [
-        {
-          uri: MCP_APP_UI_RESOURCE_URIS.ACTION_RESULT,
-          mimeType: MCP_APP_UI_MIME_TYPE,
-          text: getActionResultWidgetHtml(),
-          _meta: createUiResourceContentMeta(ACTION_RESULT_DESCRIPTION),
-        },
-      ],
-    })
-  );
+    registerAppResource(
+      server,
+      resource.name,
+      resource.uri,
+      {
+        description: resource.description,
+        _meta: meta,
+      },
+      async () => ({
+        contents: [
+          {
+            uri: resource.uri,
+            mimeType: MCP_APP_UI_MIME_TYPE,
+            text: resource.getHtml(),
+            _meta: meta,
+          },
+        ],
+      })
+    );
+  }
 }
 
 registerResourcePlugin({

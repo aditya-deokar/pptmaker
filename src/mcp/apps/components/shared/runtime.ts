@@ -1,175 +1,73 @@
+import { App } from '@modelcontextprotocol/ext-apps';
+import {
+  attachHostAdaptation,
+  vertoSkinStyles,
+} from './verto-skin';
+
 type VertoPayload = Record<string, unknown>;
 
 type RenderHandler = (payload: VertoPayload) => void;
-type PendingRequest = {
-  resolve: (value: unknown) => void;
-  reject: (reason?: unknown) => void;
-  timeoutId: number;
-};
 
-const MCP_APPS_PROTOCOL_VERSION = '2026-01-26';
 const TOOL_CALL_TIMEOUT_MS = 15_000;
-const BRIDGE_INIT_TIMEOUT_MS = 5_000;
-
-let rpcId = 0;
-let bridgeReady: Promise<void> | null = null;
-const pendingRequests = new Map<number, PendingRequest>();
 
 declare global {
   interface Window {
-    openai?: {
-      toolOutput?: unknown;
-      toolResult?: unknown;
-      toolResponse?: unknown;
-      callTool?: (name: string, args: Record<string, unknown>) => Promise<unknown>;
-      sendFollowUpMessage?: (message: {
-        prompt: string;
-        scrollToBottom?: boolean;
-      }) => Promise<unknown> | unknown;
-    };
+    /**
+     * Standalone/test hook: pre-seeds a widget payload when the HTML is
+     * rendered outside an MCP Apps host (e.g. the Phase 9H visual QA
+     * harness). Real hosts deliver data via `ontoolresult` instead.
+     */
     __VERTO_MCP_PAYLOAD__?: VertoPayload;
   }
 }
 
-export const baseStyles = `
-  :root {
-    color-scheme: light dark;
-    --bg: #fbfbfc;
-    --fg: #18181b;
-    --muted: #6b7280;
-    --line: #d7dce2;
-    --accent: #0f766e;
-    --accent-soft: #ccfbf1;
-    --surface: #ffffff;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0b0c0f;
-      --fg: #f4f4f5;
-      --muted: #a1a1aa;
-      --line: #2f333a;
-      --accent: #5eead4;
-      --accent-soft: #123532;
-      --surface: #111318;
-    }
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-width: 260px;
-    background: var(--bg);
-    color: var(--fg);
-    font-size: 14px;
-    line-height: 1.45;
-  }
-  main {
-    width: 100%;
-    min-height: 180px;
-    padding: 18px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-  }
-  h1 {
-    margin: 0 0 12px;
-    font-size: 18px;
-    line-height: 1.25;
-    letter-spacing: 0;
-  }
-  .muted { color: var(--muted); }
-  .row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    border-top: 1px solid var(--line);
-    padding: 10px 0;
-  }
-  .row:first-of-type { border-top: 0; }
-  .label { color: var(--muted); }
-  .value { font-weight: 650; text-align: right; overflow-wrap: anywhere; }
-  .bar {
-    height: 8px;
-    overflow: hidden;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--line) 70%, transparent);
-    margin: 14px 0 6px;
-  }
-  .fill {
-    width: var(--progress, 0%);
-    height: 100%;
-    background: var(--accent);
-    transition: width 180ms ease;
-  }
-  .slides {
-    display: grid;
-    gap: 8px;
-    margin-top: 12px;
-  }
-  .slide {
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 10px;
-    background: color-mix(in srgb, var(--surface) 88%, var(--accent-soft));
-  }
-  .slide-title {
-    font-weight: 650;
-    overflow-wrap: anywhere;
-  }
-  .status {
-    display: inline-flex;
-    align-items: center;
-    border-radius: 999px;
-    padding: 3px 8px;
-    background: var(--accent-soft);
-    color: var(--fg);
-    font-size: 12px;
-    font-weight: 650;
-  }
-  a {
-    color: var(--accent);
-    font-weight: 650;
-    text-decoration: none;
-  }
-`;
+/**
+ * MCP Apps client bridge. Replaces the former hand-rolled postMessage
+ * JSON-RPC implementation (and its legacy host-global fallbacks) with the
+ * standardized SDK `App`, which auto-detects the host environment.
+ */
+const app = new App(
+  { name: 'verto-ai', version: '0.1.0' },
+  {},
+  { autoResize: true }
+);
 
 export function mountWidget(render: RenderHandler): void {
-  injectStyles(baseStyles);
+  injectStyles(vertoSkinStyles);
 
-  window.addEventListener('message', (event) => {
-    if (event.source !== window.parent) return;
+  // Host adaptation must be registered BEFORE connect(): the host may deliver
+  // theme/context immediately after the ui/initialize handshake.
+  const refreshHostAdaptation = attachHostAdaptation(app);
 
-    const message = event.data;
-    if (!message || typeof message !== 'object') return;
+  // Handlers must be registered BEFORE connect(): the host may deliver the
+  // current tool result immediately after the ui/initialize handshake.
+  app.ontoolresult = (params) => {
+    renderFromPayload(params.structuredContent, render);
+  };
 
-    if (message.jsonrpc === '2.0') {
-      if (handleRpcResponse(message)) return;
+  app.connect()
+    .then(() => {
+      refreshHostAdaptation();
+    })
+    .catch((error) => {
+      console.warn('Verto MCP Apps bridge was not initialized:', error);
+    });
 
-      if (message.method === 'ui/notifications/tool-result') {
-        renderFromPayload(message.params, render);
-      }
-      return;
-    }
-
-    renderFromPayload(message.result || message.payload || message, render);
-  });
-
-  initializeMcpAppsBridge().catch((error) => {
-    console.warn('Verto MCP Apps bridge was not initialized:', error);
-  });
-
-  renderFromPayload(pickInitialPayload(), render);
+  // Standalone rendering (visual QA / static preview).
+  if (window.__VERTO_MCP_PAYLOAD__) {
+    renderFromPayload(window.__VERTO_MCP_PAYLOAD__, render);
+  }
 }
 
 export async function callMcpTool(
   name: string,
   args: Record<string, unknown>
 ): Promise<VertoPayload> {
-  const response = await callMcpToolRaw(name, args);
-  const payload = normalizePayload(response);
-  window.__VERTO_MCP_PAYLOAD__ = payload;
-  return payload;
+  const result = await app.callServerTool(
+    { name, arguments: args },
+    { timeout: TOOL_CALL_TIMEOUT_MS }
+  );
+  return normalizePayload(result);
 }
 
 export async function sendFollowUpMessage(prompt: string): Promise<void> {
@@ -177,20 +75,76 @@ export async function sendFollowUpMessage(prompt: string): Promise<void> {
     return;
   }
 
-  const openaiBridge = window.openai;
-  if (typeof openaiBridge?.sendFollowUpMessage === 'function') {
-    await openaiBridge.sendFollowUpMessage({ prompt, scrollToBottom: true });
+  try {
+    await app.sendMessage({
+      role: 'user',
+      content: [{ type: 'text', text: prompt }],
+    });
+  } catch {
+    throw new Error('This host has not enabled follow-up messages for Verto AI yet.');
+  }
+}
+
+/**
+ * Plan 10 F7/§4: widgets register cleanup (poll timers, pending edits) that
+ * runs when the host tears the view down.
+ */
+export function onTeardown(handler: () => void): void {
+  app.onteardown = async () => {
+    handler();
+    return {};
+  };
+}
+
+/**
+ * Plan 10 F6/§4: structured widget telemetry into host logs. Used for the
+ * unsaved-changes warning when the host tears a view down mid-edit.
+ * Falls back to console when the host has no sendLog support.
+ */
+export function logWidgetWarning(message: string): void {
+  const logger = app as unknown as {
+    sendLog?: (params: { level: string; message: string }) => Promise<unknown>;
+  };
+
+  if (typeof logger.sendLog === 'function') {
+    void logger.sendLog({ level: 'warning', message }).catch(() => {});
     return;
   }
 
-  if (!hasParentBridge()) {
-    throw new Error('This host has not enabled ChatGPT follow-up messages for the widget.');
+  console.warn(message);
+}
+
+let lastContextDigest = '';
+
+/**
+ * Plan 10 F8: pushes widget-side state back to the LLM so follow-up turns
+ * stay grounded. Capability-guarded and de-duplicated by digest; a silent
+ * no-op on hosts without updateModelContext support.
+ */
+export async function pushModelContext(
+  structuredContent: Record<string, unknown>,
+  textDigest: string
+): Promise<boolean> {
+  const trimmed = textDigest.trim();
+
+  if (!trimmed || trimmed === lastContextDigest) {
+    return false;
   }
 
-  rpcNotify('ui/message', {
-    role: 'user',
-    content: [{ type: 'text', text: prompt }],
-  });
+  if (!app.getHostCapabilities()?.updateModelContext) {
+    return false;
+  }
+
+  try {
+    await app.updateModelContext({
+      content: [{ type: 'text', text: trimmed }],
+      structuredContent,
+    });
+    lastContextDigest = trimmed;
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function byId(id: string): HTMLElement {
@@ -247,114 +201,8 @@ export function injectStyles(css: string): void {
   document.head.appendChild(style);
 }
 
-async function callMcpToolRaw(
-  name: string,
-  args: Record<string, unknown>
-): Promise<unknown> {
-  if (hasParentBridge()) {
-    try {
-      await initializeMcpAppsBridge();
-      return await rpcRequest('tools/call', {
-        name,
-        arguments: args,
-      }, TOOL_CALL_TIMEOUT_MS);
-    } catch (error) {
-      if (typeof window.openai?.callTool !== 'function') {
-        throw error;
-      }
-    }
-  }
-
-  if (typeof window.openai?.callTool === 'function') {
-    return window.openai.callTool(name, args);
-  }
-
-  throw new Error('This host has not enabled widget tool calls for Verto AI yet.');
-}
-
-function hasParentBridge(): boolean {
-  return typeof window !== 'undefined' && window.parent !== window;
-}
-
-function initializeMcpAppsBridge(): Promise<void> {
-  if (!hasParentBridge()) {
-    return Promise.resolve();
-  }
-
-  if (!bridgeReady) {
-    bridgeReady = rpcRequest('ui/initialize', {
-      appInfo: { name: 'verto-ai', version: '0.1.0' },
-      appCapabilities: {},
-      protocolVersion: MCP_APPS_PROTOCOL_VERSION,
-    }, BRIDGE_INIT_TIMEOUT_MS)
-      .then(() => {
-        rpcNotify('ui/notifications/initialized', {});
-      })
-      .catch((error) => {
-        bridgeReady = null;
-        throw error;
-      });
-  }
-
-  return bridgeReady;
-}
-
-function rpcNotify(method: string, params: Record<string, unknown>): void {
-  window.parent.postMessage({ jsonrpc: '2.0', method, params }, '*');
-}
-
-function rpcRequest(
-  method: string,
-  params: Record<string, unknown>,
-  timeoutMs: number
-): Promise<unknown> {
-  return new Promise((resolve, reject) => {
-    const id = ++rpcId;
-    const timeoutId = window.setTimeout(() => {
-      pendingRequests.delete(id);
-      reject(new Error(`Timed out waiting for ${method}.`));
-    }, timeoutMs);
-
-    pendingRequests.set(id, { resolve, reject, timeoutId });
-    window.parent.postMessage({ jsonrpc: '2.0', id, method, params }, '*');
-  });
-}
-
-function handleRpcResponse(message: Record<string, unknown>): boolean {
-  if (typeof message.id !== 'number' || typeof message.method === 'string') {
-    return false;
-  }
-
-  const pending = pendingRequests.get(message.id);
-  if (!pending) {
-    return false;
-  }
-
-  pendingRequests.delete(message.id);
-  window.clearTimeout(pending.timeoutId);
-
-  if (message.error) {
-    pending.reject(message.error);
-  } else {
-    pending.resolve(message.result);
-  }
-
-  return true;
-}
-
-function pickInitialPayload(): unknown {
-  if (window.__VERTO_MCP_PAYLOAD__) {
-    return window.__VERTO_MCP_PAYLOAD__;
-  }
-
-  const openai = window.openai || {};
-  return openai.toolOutput || openai.toolResult || openai.toolResponse || {};
-}
-
 function renderFromPayload(raw: unknown, render: RenderHandler): void {
-  const payload = normalizePayload(raw);
-  window.__VERTO_MCP_PAYLOAD__ = payload;
-  render(payload);
+  render(normalizePayload(raw));
 }
 
 function normalizePayload(raw: unknown): VertoPayload {

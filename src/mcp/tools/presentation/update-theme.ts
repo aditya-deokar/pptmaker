@@ -16,7 +16,7 @@ import type { AuthContext } from '../../auth/types';
 import type { McpToolResponse } from '../_shared/response';
 import { mcpSuccess } from '../_shared/response';
 import { Errors } from '../_shared/errors';
-import { createActionResultWidgetData } from '../../apps/widget-data';
+import { createThemeStudioWidgetData } from '../../apps/widget-data';
 import type { PresentationUpdateThemeInput } from './schemas';
 import { getOwnedProjectForMcp } from '../../lib/mcp-project-access';
 import { projectToPresentation } from './mappers';
@@ -55,12 +55,9 @@ export async function handlePresentationUpdateTheme(
 
   const presentation = projectToPresentation(updated);
 
+  // Plan 10 F4: the result re-renders the theme studio with the applied
+  // theme as current, so the apply flow loops entirely inside the widget.
   return mcpSuccess(presentation, {
-    widget: createActionResultWidgetData({
-      kind: 'update_theme',
-      title: 'Theme updated',
-      message: `The deck theme was changed to ${theme_name}.`,
-      presentation,
-    }),
+    widget: createThemeStudioWidgetData({ presentation }),
   });
 }

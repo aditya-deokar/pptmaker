@@ -4,6 +4,10 @@
  * Make a presentation publicly shareable via a share URL.
  * Idempotent: if already published, returns success with the existing share URL.
  *
+ * Plan 10 F5: the result is bound to the dedicated publish-card widget
+ * (celebration, share link, QR code, copy action, unpublish) instead of the
+ * generic action result.
+ *
  * Reuses:
  * - presentationPublishSchema (schemas.ts)
  * - getOwnedProjectForMcp (lib/mcp-project-access.ts)
@@ -15,7 +19,7 @@ import type { AuthContext } from '../../auth/types';
 import type { McpToolResponse } from '../_shared/response';
 import { mcpSuccess } from '../_shared/response';
 import { Errors } from '../_shared/errors';
-import { createActionResultWidgetData } from '../../apps/widget-data';
+import { createPublishCardWidgetData } from '../../apps/widget-data';
 import type { PresentationPublishInput } from './schemas';
 import { getOwnedProjectForMcp } from '../../lib/mcp-project-access';
 import { projectToPresentation } from './mappers';
@@ -43,12 +47,7 @@ export async function handlePresentationPublish(
       ...presentation,
       message: 'Presentation is already published.',
     }, {
-      widget: createActionResultWidgetData({
-        kind: 'publish',
-        title: 'Presentation already published',
-        message: 'This deck already has a public share link.',
-        presentation,
-      }),
+      widget: createPublishCardWidgetData(presentation),
     });
   }
 
@@ -64,11 +63,6 @@ export async function handlePresentationPublish(
   const presentation = projectToPresentation(published);
 
   return mcpSuccess(presentation, {
-    widget: createActionResultWidgetData({
-      kind: 'publish',
-      title: 'Presentation published',
-      message: 'The deck is now publicly shareable.',
-      presentation,
-    }),
+    widget: createPublishCardWidgetData(presentation),
   });
 }
