@@ -320,3 +320,45 @@ matrix:
 Evidence files follow the `phase10g-matrix-*.png` naming in
 `submission-assets/`; the full pass/fail table is in
 `phase9h-visual-qa-report.json`.
+
+---
+
+## Phase D4 Host-Context Reactivity Audit (2026-08)
+
+Static verification of how each widget reacts to host context changes
+(onhostcontextchanged / getHostContext), per the Phase D deep-dive plan.
+
+### Mechanism (verified in code)
+
+- Every widget mounts through mountWidget() (shared/runtime.ts:35), which
+  registers ttachHostAdaptation(app) BEFORE pp.connect()
+  (shared/verto-skin.ts). The handler adopts host theme, fonts, hover
+  capability, platform class, display mode, and safe-area insets, and the
+  returned refresh re-applies them on every onhostcontextchanged.
+- Theme tokens flow through one resolver shared with the dashboard
+  (src/lib/slides/render-core/color.ts + erto-skin.resolveThemeTokens),
+  so a host theme switch repaints callouts/stat boxes via contrast-safe
+  recomputation rather than cached colors.
+- untime.ts exposes getHostDisplayContext() (Phase D4) so widgets can
+  branch on declared platform / deviceCapabilities instead of inferring
+  from media queries.
+
+### Per-widget checklist
+
+| Widget | Theme change | Font change | Safe-area | Display mode | Notes |
+| --- | --- | --- | --- | --- | --- |
+| presentation-list | via attachHostAdaptation | yes | yes | n/a | rows use token colors only |
+| deck-preview | yes | yes | yes | pip/mobile classes | stream-status strip (D4) uses tokens |
+| generation-progress | yes | yes | yes | inline fallback vs fullscreen | poll timer torn down via onteardown |
+| action-result | yes | yes | n/a | n/a | confetti honors prefers-reduced-motion |
+| publish-card | yes | yes | yes | n/a | QR canvas re-renders on payload, not theme; acceptable (QR is monochrome) |
+| theme-studio | yes | yes | yes | bottom-sheet actions on mobile | catalog swatches are theme-source-of-truth |
+| deck-live | yes | yes | safe-area insets applied | fullscreen via requestDisplayMode | grid overview + keyboard nav QA-covered |
+
+### Live-host items still pending manual execution
+
+1. Toggle ChatGPT/basic-host light<->dark mid-session and screenshot each
+   widget pair before/after (evidence into submission-assets/).
+2. Verify QR code remains scannable after theme switch on publish-card.
+3. Confirm partial-input status strip (deck-preview D4) appears in a host that
+   streams tool input; document host support matrix as hosts adopt it.

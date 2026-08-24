@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Generation Progress widget (plan 10 F7).
  *
  * Ambient live-generation experience bound to `presentation_generate` /
@@ -24,7 +24,7 @@ import {
   pushModelContext,
   sendFollowUpMessage,
 } from './shared/runtime';
-import { renderSlideContent } from './shared/slide-renderer';
+import { renderSlideContent } from '../../../lib/slides/render-core/index';
 import {
   extractWidgetLinks,
   renderDeepLinkMenu,
@@ -1185,7 +1185,7 @@ function stageForProgress(progress: number): DisplayStage {
 }
 
 /* ------------------------------------------------------------------ */
-/* Timeline — real run steps first, cosmetic stages as fallback         */
+/* Timeline â€” real run steps first, cosmetic stages as fallback         */
 /* ------------------------------------------------------------------ */
 
 function normalizeStepStatus(value: string): StageState {

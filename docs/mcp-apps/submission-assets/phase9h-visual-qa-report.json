@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-22T13:59:06.085Z",
+  "generatedAt": "2026-08-24T06:05:07.460Z",
   "source": "scripts/mcp-apps/phase9h-visual-qa.mjs",
   "results": [
     {
@@ -52,7 +52,7 @@
         "focusableCount": 5,
         "contrastChecked": 17,
         "textElementCount": 17,
-        "bodyTextLength": 360,
+        "bodyTextLength": 362,
         "screenshotWidth": 1200
       }
     },
@@ -70,7 +70,7 @@
         "focusableCount": 2,
         "contrastChecked": 13,
         "textElementCount": 15,
-        "bodyTextLength": 339,
+        "bodyTextLength": 341,
         "screenshotWidth": 390
       }
     },
@@ -88,7 +88,7 @@
         "focusableCount": 18,
         "contrastChecked": 99,
         "textElementCount": 103,
-        "bodyTextLength": 1607,
+        "bodyTextLength": 1633,
         "screenshotWidth": 1200
       }
     },
@@ -106,7 +106,7 @@
         "focusableCount": 7,
         "contrastChecked": 15,
         "textElementCount": 16,
-        "bodyTextLength": 343,
+        "bodyTextLength": 353,
         "screenshotWidth": 1200
       }
     },
@@ -124,7 +124,7 @@
         "focusableCount": 7,
         "contrastChecked": 15,
         "textElementCount": 16,
-        "bodyTextLength": 341,
+        "bodyTextLength": 351,
         "screenshotWidth": 390
       }
     },
@@ -142,7 +142,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1475,
+        "bodyTextLength": 1501,
         "screenshotWidth": 1200
       }
     },
@@ -160,7 +160,7 @@
         "focusableCount": 11,
         "contrastChecked": 88,
         "textElementCount": 91,
-        "bodyTextLength": 1494,
+        "bodyTextLength": 1520,
         "screenshotWidth": 390
       }
     },
@@ -178,7 +178,7 @@
         "focusableCount": 8,
         "contrastChecked": 70,
         "textElementCount": 70,
-        "bodyTextLength": 832,
+        "bodyTextLength": 834,
         "screenshotWidth": 1200
       }
     },
@@ -196,7 +196,7 @@
         "focusableCount": 8,
         "contrastChecked": 64,
         "textElementCount": 64,
-        "bodyTextLength": 783,
+        "bodyTextLength": 785,
         "screenshotWidth": 390
       }
     },
@@ -232,7 +232,7 @@
         "focusableCount": 3,
         "contrastChecked": 43,
         "textElementCount": 43,
-        "bodyTextLength": 896,
+        "bodyTextLength": 898,
         "screenshotWidth": 1200
       }
     },
@@ -268,7 +268,7 @@
         "focusableCount": 9,
         "contrastChecked": 52,
         "textElementCount": 54,
-        "bodyTextLength": 1028,
+        "bodyTextLength": 1054,
         "screenshotWidth": 1200
       }
     },
@@ -286,7 +286,7 @@
         "focusableCount": 9,
         "contrastChecked": 53,
         "textElementCount": 55,
-        "bodyTextLength": 1047,
+        "bodyTextLength": 1073,
         "screenshotWidth": 1200
       }
     },
@@ -304,7 +304,7 @@
         "focusableCount": 9,
         "contrastChecked": 52,
         "textElementCount": 54,
-        "bodyTextLength": 1031,
+        "bodyTextLength": 1057,
         "screenshotWidth": 390
       }
     },
@@ -322,7 +322,7 @@
         "focusableCount": 5,
         "contrastChecked": 26,
         "textElementCount": 26,
-        "bodyTextLength": 366,
+        "bodyTextLength": 368,
         "screenshotWidth": 1200
       }
     },
@@ -358,7 +358,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1457,
+        "bodyTextLength": 1483,
         "screenshotWidth": 1200
       }
     },
@@ -376,7 +376,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1457,
+        "bodyTextLength": 1483,
         "screenshotWidth": 1200
       }
     },
@@ -394,7 +394,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1475,
+        "bodyTextLength": 1501,
         "screenshotWidth": 1200
       }
     },
@@ -412,7 +412,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1475,
+        "bodyTextLength": 1501,
         "screenshotWidth": 1200
       }
     },
@@ -430,7 +430,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1469,
+        "bodyTextLength": 1495,
         "screenshotWidth": 1200
       }
     },
@@ -448,7 +448,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1469,
+        "bodyTextLength": 1495,
         "screenshotWidth": 1200
       }
     },
@@ -466,7 +466,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1469,
+        "bodyTextLength": 1495,
         "screenshotWidth": 1200
       }
     },
@@ -484,7 +484,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1469,
+        "bodyTextLength": 1495,
         "screenshotWidth": 1200
       }
     },
@@ -502,7 +502,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1475,
+        "bodyTextLength": 1501,
         "screenshotWidth": 1200
       }
     },
@@ -520,7 +520,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1475,
+        "bodyTextLength": 1501,
         "screenshotWidth": 1200
       }
     },
@@ -538,7 +538,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1478,
+        "bodyTextLength": 1504,
         "screenshotWidth": 1200
       }
     },
@@ -556,7 +556,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1478,
+        "bodyTextLength": 1504,
         "screenshotWidth": 1200
       }
     },
@@ -574,7 +574,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1457,
+        "bodyTextLength": 1483,
         "screenshotWidth": 390
       }
     },
@@ -592,7 +592,7 @@
         "focusableCount": 11,
         "contrastChecked": 87,
         "textElementCount": 90,
-        "bodyTextLength": 1475,
+        "bodyTextLength": 1501,
         "screenshotWidth": 390
       }
     }

@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/prisma";
+import { findOwnedProject } from "@/core/projects/ownership";
 import { onAuthenticateUser } from "./user";
 
 type OwnedProjectOptions = {
@@ -23,6 +23,10 @@ export async function getAuthenticatedAppUser() {
   };
 }
 
+/**
+ * Clerk-session wrapper around `core/projects/ownership.findOwnedProject`.
+ * Keeps the `{ status, user, project }` envelope consumed by dashboard calls.
+ */
 export async function getOwnedProject(
   projectId: string,
   options: OwnedProjectOptions = {}
@@ -39,22 +43,7 @@ export async function getOwnedProject(
     return auth;
   }
 
-  const where: {
-    id: string;
-    userId: string;
-    isDeleted?: boolean;
-  } = {
-    id: projectId,
-    userId: auth.user.id,
-  };
-
-  if (!options.includeDeleted) {
-    where.isDeleted = false;
-  }
-
-  const project = await prisma.project.findFirst({
-    where,
-  });
+  const project = await findOwnedProject(projectId, auth.user.id, options);
 
   if (!project) {
     return {

@@ -29,6 +29,18 @@ import { Button } from "@/components/ui/button";
 import { useSlideStore } from "@/store/useSlideStore";
 import { AnimatePresence } from "framer-motion";
 import ResizableComponent from "./ResizableComponent";
+import { SlideCanvas } from "@/lib/slides/SlideCanvas";
+
+/**
+ * Phase D1: renders content types the interactive editor does not implement
+ * natively through the shared render kernel. Previously these fell into the
+ * default case and returned null, silently dropping data.
+ */
+const KernelFallback = ({ item }: { item: ContentItem }) => (
+  <motion.div className="w-full h-fit" {...getAnimationConfig(item.type)}>
+    <SlideCanvas content={item} />
+  </motion.div>
+);
 
 type MasterRecursiveComponentProps = {
   content: ContentItem;
@@ -441,10 +453,21 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
         }
         return null;
 
-      default:
-        // Fallback for unknown component types
-        console.warn(`Unknown component type: ${content.type}`);
+      case "imageAndText":
+      case "multiColumn":
+        if (Array.isArray(content.content)) {
+          return <KernelFallback item={content} />;
+        }
         return null;
+
+      case "link":
+      case "customButton":
+        return <KernelFallback item={content} />;
+
+      default:
+        // Fallback for unknown component types — render through the shared
+        // kernel instead of dropping data (Phase D1).
+        return <KernelFallback item={content} />;
     }
   }
 );

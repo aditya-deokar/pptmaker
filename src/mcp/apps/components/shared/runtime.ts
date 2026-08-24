@@ -59,6 +59,43 @@ export function mountWidget(render: RenderHandler): void {
   }
 }
 
+/**
+ * Plan D4: streaming partial tool input. Hosts that stream arguments while
+ * the model composes them (e.g. large `presentation_update_slides` payloads)
+ * notify through this handler; widgets can render progressive skeletons.
+ * Inert on hosts that never send partial-input notifications.
+ * Must be registered before connect() — call it alongside mountWidget().
+ */
+export function onToolInputPartial(
+  handler: (args: Record<string, unknown>) => void
+): void {
+  app.ontoolinputpartial = (params) => {
+    handler((params.arguments ?? {}) as Record<string, unknown>);
+  };
+}
+
+/**
+ * Plan D4: exposes host display context so adaptive-layout code paths can
+ * branch on declared capabilities instead of inferring from media queries.
+ * Returns null outside an MCP Apps host.
+ */
+export function getHostDisplayContext(): {
+  platform: 'web' | 'desktop' | 'mobile' | undefined;
+  touch: boolean | undefined;
+  hover: boolean | undefined;
+  safeAreaInsets: Record<'top' | 'right' | 'bottom' | 'left', number> | undefined;
+} | null {
+  const context = app.getHostContext();
+  if (!context) return null;
+
+  return {
+    platform: context.platform,
+    touch: context.deviceCapabilities?.touch,
+    hover: context.deviceCapabilities?.hover,
+    safeAreaInsets: context.safeAreaInsets,
+  };
+}
+
 export async function callMcpTool(
   name: string,
   args: Record<string, unknown>
