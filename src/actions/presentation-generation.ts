@@ -1,56 +1,24 @@
 "use server";
 
-import prisma from "@/lib/prisma";
 import { getAuthenticatedAppUser } from "./project-access";
 import {
-  buildGenerationStepSnapshots,
-  getGenerationStepDefinition,
-  type GenerationStepSnapshot,
-  type GenerationStepStatus,
-} from "@/agentic-workflow-v2/lib/progress";
+  completeRun,
+  createGenerationRun,
+  failRun,
+  getOwnedGenerationRun,
+  markStepCompleted,
+  markStepRunning,
+  startRun,
+} from "@/core/generation/runs";
+import { normalizeSteps } from "@/core/generation/steps";
+import type { GenerationStepSnapshot } from "@/agentic-workflow-v2/lib/progress";
 
-function normalizeSteps(steps: unknown): GenerationStepSnapshot[] {
-  if (!Array.isArray(steps)) {
-    return buildGenerationStepSnapshots();
-  }
-
-  const defaults = buildGenerationStepSnapshots();
-
-  return defaults.map((defaultStep) => {
-    const matchingStep = steps.find(
-      (step) =>
-        typeof step === "object" &&
-        step !== null &&
-        "id" in step &&
-        (step as { id: string }).id === defaultStep.id
-    ) as Partial<GenerationStepSnapshot> | undefined;
-
-    return {
-      ...defaultStep,
-      status: matchingStep?.status ?? defaultStep.status,
-      details: matchingStep?.details,
-    };
-  });
-}
-
-function updateStepSnapshots(
-  steps: GenerationStepSnapshot[],
-  stepId: string,
-  status: GenerationStepStatus,
-  details?: string
-) {
-  return steps.map((step) => {
-    if (step.id !== stepId) {
-      return step;
-    }
-
-    return {
-      ...step,
-      status,
-      details,
-    };
-  });
-}
+/**
+ * Thin Clerk-authenticated wrappers around the transport-neutral
+ * `src/core/generation` services. All business logic lives in core; this
+ * file only resolves the session user and maps results into the
+ * `{ status, data | error }` envelope consumed by client hooks.
+ */
 
 export const createPresentationGenerationRun = async (topic: string) => {
   try {
@@ -59,15 +27,7 @@ export const createPresentationGenerationRun = async (topic: string) => {
       return auth;
     }
 
-    const run = await prisma.presentationGenerationRun.create({
-      data: {
-        userId: auth.user.id,
-        topic,
-        status: "PENDING",
-        progress: 0,
-        steps: buildGenerationStepSnapshots(),
-      },
-    });
+    const run = await createGenerationRun(auth.user.id, topic);
 
     return {
       status: 200 as const,
@@ -96,12 +56,7 @@ export const getPresentationGenerationRun = async (runId: string) => {
       return auth;
     }
 
-    const run = await prisma.presentationGenerationRun.findFirst({
-      where: {
-        id: runId,
-        userId: auth.user.id,
-      },
-    });
+    const run = await getOwnedGenerationRun(runId, auth.user.id);
 
     if (!run) {
       return {
@@ -114,7 +69,7 @@ export const getPresentationGenerationRun = async (runId: string) => {
       status: 200 as const,
       data: {
         ...run,
-        steps: normalizeSteps(run.steps),
+        steps: normalizeSteps(run.steps) as GenerationStepSnapshot[],
       },
     };
   } catch (error) {
@@ -127,21 +82,7 @@ export const getPresentationGenerationRun = async (runId: string) => {
 };
 
 export async function startPresentationGenerationRun(runId: string) {
-  if (!runId) {
-    return;
-  }
-
-  await prisma.presentationGenerationRun.update({
-    where: { id: runId },
-    data: {
-      status: "RUNNING",
-      progress: 0,
-      error: null,
-      currentStepId: null,
-      currentStepName: null,
-      steps: buildGenerationStepSnapshots(),
-    },
-  });
+  await startRun(runId);
 }
 
 export async function markPresentationGenerationStepRunning(
@@ -149,37 +90,7 @@ export async function markPresentationGenerationStepRunning(
   stepId: string,
   details?: string
 ) {
-  if (!runId) {
-    return;
-  }
-
-  const run = await prisma.presentationGenerationRun.findUnique({
-    where: { id: runId },
-  });
-
-  if (!run) {
-    return;
-  }
-
-  const steps = updateStepSnapshots(
-    normalizeSteps(run.steps),
-    stepId,
-    "running",
-    details
-  );
-  const step = getGenerationStepDefinition(stepId);
-
-  await prisma.presentationGenerationRun.update({
-    where: { id: runId },
-    data: {
-      status: "RUNNING",
-      currentStepId: stepId,
-      currentStepName: step?.name ?? stepId,
-      progress: step ? Math.max(run.progress, step.progress - 5) : run.progress,
-      error: null,
-      steps,
-    },
-  });
+  await markStepRunning(runId, stepId, details);
 }
 
 export async function markPresentationGenerationStepCompleted(
@@ -190,38 +101,7 @@ export async function markPresentationGenerationStepCompleted(
     projectId?: string | null;
   }
 ) {
-  if (!runId) {
-    return;
-  }
-
-  const run = await prisma.presentationGenerationRun.findUnique({
-    where: { id: runId },
-  });
-
-  if (!run) {
-    return;
-  }
-
-  const steps = updateStepSnapshots(
-    normalizeSteps(run.steps),
-    stepId,
-    "completed",
-    options?.details
-  );
-  const step = getGenerationStepDefinition(stepId);
-
-  await prisma.presentationGenerationRun.update({
-    where: { id: runId },
-    data: {
-      status: "RUNNING",
-      currentStepId: stepId,
-      currentStepName: step?.name ?? stepId,
-      progress: step?.progress ?? run.progress,
-      error: null,
-      steps,
-      projectId: options?.projectId ?? run.projectId,
-    },
-  });
+  await markStepCompleted(runId, stepId, options);
 }
 
 export async function failPresentationGenerationRun(
@@ -229,34 +109,7 @@ export async function failPresentationGenerationRun(
   error: string,
   stepId?: string
 ) {
-  if (!runId) {
-    return;
-  }
-
-  const run = await prisma.presentationGenerationRun.findUnique({
-    where: { id: runId },
-  });
-
-  if (!run) {
-    return;
-  }
-
-  const step = stepId ? getGenerationStepDefinition(stepId) : null;
-  const steps = stepId
-    ? updateStepSnapshots(normalizeSteps(run.steps), stepId, "error", error)
-    : normalizeSteps(run.steps);
-
-  await prisma.presentationGenerationRun.update({
-    where: { id: runId },
-    data: {
-      status: "FAILED",
-      error,
-      currentStepId: stepId ?? run.currentStepId,
-      currentStepName: step?.name ?? run.currentStepName,
-      steps,
-      completedAt: new Date(),
-    },
-  });
+  await failRun(runId, error, stepId);
 }
 
 export async function completePresentationGenerationRun(
@@ -265,28 +118,5 @@ export async function completePresentationGenerationRun(
     projectId?: string | null;
   }
 ) {
-  if (!runId) {
-    return;
-  }
-
-  const run = await prisma.presentationGenerationRun.findUnique({
-    where: { id: runId },
-  });
-
-  if (!run) {
-    return;
-  }
-
-  await prisma.presentationGenerationRun.update({
-    where: { id: runId },
-    data: {
-      status: "COMPLETED",
-      progress: 100,
-      currentStepId: "databasePersister",
-      currentStepName:
-        getGenerationStepDefinition("databasePersister")?.name ?? "Finalization",
-      projectId: options?.projectId ?? run.projectId,
-      completedAt: new Date(),
-    },
-  });
+  await completeRun(runId, options);
 }

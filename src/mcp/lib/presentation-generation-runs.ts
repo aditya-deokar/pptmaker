@@ -1,10 +1,12 @@
 import type { PresentationGenerationRun } from '@/generated/prisma';
-import prisma from '@/lib/prisma';
-import {
-  buildGenerationStepSnapshots,
-  type GenerationStepSnapshot,
-} from '@/agentic-workflow-v2/lib/progress';
+import type { GenerationStepSnapshot } from '@/agentic-workflow-v2/lib/progress';
 import { RESOURCE_URIS } from '../config/constants';
+import { normalizeSteps } from '@/core/generation/steps';
+import {
+  createGenerationRun,
+  getOwnedGenerationRun,
+  markGenerationRunStarted,
+} from '@/core/generation/runs';
 
 export interface PresentationGenerationRunMcpResponse {
   id: string;
@@ -33,30 +35,6 @@ export interface PresentationGenerationStatusMcpResponse {
   poll_hint?: string;
 }
 
-function normalizeGenerationSteps(steps: unknown): GenerationStepSnapshot[] {
-  if (!Array.isArray(steps)) {
-    return buildGenerationStepSnapshots();
-  }
-
-  const defaults = buildGenerationStepSnapshots();
-
-  return defaults.map((defaultStep) => {
-    const matchingStep = steps.find(
-      (step) =>
-        typeof step === 'object' &&
-        step !== null &&
-        'id' in step &&
-        (step as { id?: string }).id === defaultStep.id
-    ) as Partial<GenerationStepSnapshot> | undefined;
-
-    return {
-      ...defaultStep,
-      status: matchingStep?.status ?? defaultStep.status,
-      details: matchingStep?.details,
-    };
-  });
-}
-
 export function generationRunToMcpResponse(
   run: PresentationGenerationRun
 ): PresentationGenerationRunMcpResponse {
@@ -72,7 +50,7 @@ export function generationRunToMcpResponse(
     completed_at: run.completedAt?.toISOString() ?? null,
     created_at: run.createdAt.toISOString(),
     updated_at: run.updatedAt.toISOString(),
-    steps: normalizeGenerationSteps(run.steps),
+    steps: normalizeSteps(run.steps),
   };
 }
 
@@ -116,55 +94,29 @@ export function buildGenerationStatusResponse(
   };
 }
 
+/** Ownership-scoped create (delegates to `src/core/generation/runs`). */
 export async function createGenerationRunForMcp(
   userId: string,
   topic: string
 ): Promise<PresentationGenerationRun> {
-  return prisma.presentationGenerationRun.create({
-    data: {
-      userId,
-      topic,
-      status: 'PENDING',
-      progress: 0,
-      steps: buildGenerationStepSnapshots(),
-    },
-  });
+  return createGenerationRun(userId, topic);
 }
 
+/**
+ * Atomically flip an owned run to RUNNING.
+ * Delegates to `src/core/generation/runs` (updateMany guard on userId).
+ */
 export async function markGenerationRunStartedForMcp(
   runId: string,
   userId: string
 ): Promise<PresentationGenerationRun | null> {
-  const result = await prisma.presentationGenerationRun.updateMany({
-    where: {
-      id: runId,
-      userId,
-    },
-    data: {
-      status: 'RUNNING',
-      progress: 0,
-      currentStepId: null,
-      currentStepName: 'Queued',
-      error: null,
-      steps: buildGenerationStepSnapshots(),
-    },
-  });
-
-  if (result.count !== 1) {
-    return null;
-  }
-
-  return getGenerationRunForMcp(runId, userId);
+  return markGenerationRunStarted(runId, userId);
 }
 
+/** Ownership-scoped read. Delegates to `src/core/generation/runs`. */
 export async function getGenerationRunForMcp(
   runId: string,
   userId: string
 ): Promise<PresentationGenerationRun | null> {
-  return prisma.presentationGenerationRun.findFirst({
-    where: {
-      id: runId,
-      userId,
-    },
-  });
+  return getOwnedGenerationRun(runId, userId);
 }
