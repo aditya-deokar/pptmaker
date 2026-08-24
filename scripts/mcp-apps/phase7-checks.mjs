@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -170,7 +170,7 @@ const requiredFiles = [
   'src/mcp/apps/widgets.ts',
   'src/mcp/apps/components/shared/runtime.ts',
   'src/mcp/apps/components/shared/verto-skin.ts',
-  'src/mcp/apps/components/shared/slide-renderer.ts',
+  'src/lib/slides/render-core/index.ts',
   'src/mcp/apps/components/presentation-list.ts',
   'src/mcp/apps/components/generation-progress.ts',
   'src/mcp/apps/components/deck-preview.ts',
@@ -238,7 +238,7 @@ const actionResultWidgetSource = read('src/mcp/apps/components/action-result.ts'
 const themeStudioWidgetSource = read('src/mcp/apps/components/theme-studio.ts');
 const publishCardWidgetSource = read('src/mcp/apps/components/publish-card.ts');
 const slideEditorSource = read('src/mcp/apps/components/shared/slide-editor.ts');
-const slideRendererSource = read('src/mcp/apps/components/shared/slide-renderer.ts');
+const slideRendererSource = read('src/lib/slides/render-core/index.ts');
 const generatedWidgetIndex = read('src/mcp/apps/generated/index.ts');
 const generatedListHtml = read('src/mcp/apps/generated/presentation-list.html');
 const generatedGenerationHtml = read('src/mcp/apps/generated/generation-progress.html');
@@ -453,7 +453,7 @@ check(
 );
 check(
   'presenter renders real slides through the shared renderer',
-  deckLiveWidgetSource.includes("from './shared/slide-renderer'") &&
+  deckLiveWidgetSource.includes("from '../../../lib/slides/render-core/index'") &&
     deckLiveWidgetSource.includes('renderSlideContent(slide.content)')
 );
 check(
@@ -587,7 +587,7 @@ check(
 );
 check(
   'completed runs embed the first-slide preview through the shared renderer (F7)',
-  generationWidgetSource.includes("from './shared/slide-renderer'") &&
+  generationWidgetSource.includes("from '../../../lib/slides/render-core/index'") &&
     generationWidgetSource.includes('renderPreview') &&
     read('src/mcp/tools/presentation/generation-status.ts').includes('createGenerationCompletionInfo')
 );
@@ -597,7 +597,7 @@ check(
     generationWidgetSource.includes("event: 'generation_completed'")
 );
 check(
-  'poll timers flush on host teardown via the runtime hook (§4)',
+  'poll timers flush on host teardown via the runtime hook (Â§4)',
   appUiRuntime.includes('export function onTeardown') &&
     appUiRuntime.includes('onteardown') &&
     generationWidgetSource.includes('onTeardown(stopPolling)')
@@ -641,6 +641,27 @@ check(
     slideRendererSource.includes('CALL_OUT_ACCENTS') &&
     slideRendererSource.includes('4.5)')
 );
+check(
+  'render kernel is the single canonical slide renderer (D1)',
+  slideRendererSource.includes('renderSlideContent') &&
+    slideRendererSource.includes('SUPPORTED_CONTENT_TYPES') &&
+    !existsSync(fromRoot('src/mcp/apps/components/shared/slide-renderer.ts'))
+);
+{
+  // Coverage gate: every ContentType member in lib/types.ts must have an
+  // explicit handler or alias in the render kernel (Phase D1 step 7).
+  const typesSource = read('src/lib/types.ts');
+  const union = typesSource.match(/export type ContentType =[\s\S]*?;/)?.[0] ?? '';
+  const members = [...new Set([...union.matchAll(/"([a-zA-Z-]+)"/g)].map((m) => m[1]))];
+  const missing = members.filter(
+    (t) => !(slideRendererSource.includes(`'${t}'`) || slideRendererSource.includes(`"${t}"`))
+  );
+  check(
+    'render kernel covers every ContentType member (Phase D1)',
+    members.length > 0 && missing.length === 0,
+    missing.length > 0 ? `missing handlers for: ${missing.join(', ')}` : ''
+  );
+}
 check(
   'phase9h runs the extended themes x schemes contrast matrix (10G)',
   visualQaScript.includes('MATRIX_THEMES') &&

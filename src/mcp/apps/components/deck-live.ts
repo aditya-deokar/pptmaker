@@ -1,4 +1,4 @@
-import { App } from '@modelcontextprotocol/ext-apps';
+﻿import { App } from '@modelcontextprotocol/ext-apps';
 import {
   byId,
   getArray,
@@ -14,14 +14,14 @@ import {
   setWidgetTheme,
   vertoSkinStyles,
 } from './shared/verto-skin';
-import { renderSlideContent } from './shared/slide-renderer';
+import { renderSlideContent } from '../../../lib/slides/render-core/index';
 
 /**
  * Immersive presenter view (plan 10 F2 / Phase 10C). Receives slim deck
  * payloads from the app-only `presentation_render_deck` tool and presents
  * real themed slides inline or fullscreen, mirroring PresentationViewer:
  * 16:9 stage, prev/next pills, dot progress, counter, swipe, keyboard
- * (←/→/Space/Home/End/Esc/G), grid overview, thin progress bar, and
+ * (â†/â†’/Space/Home/End/Esc/G), grid overview, thin progress bar, and
  * chrome auto-hide after 3 s idle.
  */
 const app = new App(
@@ -508,9 +508,9 @@ function ensureMarkup(): void {
       </section>
       <div class="live-controls" id="controls">
         <div class="nav-group">
-          <button class="pill-btn" id="prev-btn" type="button" aria-label="Previous slide">←</button>
+          <button class="pill-btn" id="prev-btn" type="button" aria-label="Previous slide">â†</button>
           <span class="counter" id="counter">0 / 0</span>
-          <button class="pill-btn" id="next-btn" type="button" aria-label="Next slide">→</button>
+          <button class="pill-btn" id="next-btn" type="button" aria-label="Next slide">â†’</button>
         </div>
         <div class="dot-row" id="dot-row" role="group" aria-label="Slide picker"></div>
         <div class="nav-group">
@@ -518,7 +518,7 @@ function ensureMarkup(): void {
           <button class="pill-btn fullscreen-btn primary" id="fs-btn" type="button">Present fullscreen</button>
         </div>
       </div>
-      <p class="hint" id="hint">Use ← → or Space to navigate, G for the grid overview, Esc to exit.</p>
+      <p class="hint" id="hint">Use â† â†’ or Space to navigate, G for the grid overview, Esc to exit.</p>
       <section class="vt-grid" id="grid" role="region" aria-label="Slide grid overview">
         <div class="vt-grid-head">
           <h2 class="vt-grid-title">All slides</h2>
@@ -897,7 +897,7 @@ function renderDeckLivePayload(payload: Record<string, unknown>): void {
     byId('title').textContent = 'Presenter';
     byId('badges').textContent = '';
     byId('canvas').innerHTML =
-      '<div class="vt-slide-fallback"><h2>Waiting for the deck…</h2>' +
+      '<div class="vt-slide-fallback"><h2>Waiting for the deckâ€¦</h2>' +
       '<p>Open a presentation and choose Present to launch the live view.</p></div>';
     byId('counter').textContent = '0 / 0';
     updateProgress();

@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 
 import path from 'node:path';
 import ts from 'typescript';
@@ -54,7 +54,7 @@ const candidateFiles = [
   'src/mcp/apps/widgets.ts',
   'src/mcp/apps/components/shared/runtime.ts',
   'src/mcp/apps/components/shared/verto-skin.ts',
-  'src/mcp/apps/components/shared/slide-renderer.ts',
+  'src/lib/slides/render-core/index.ts',
   'src/mcp/apps/components/shared/slide-editor.ts',
   'src/mcp/apps/components/shared/qrcode.ts',
   'src/mcp/apps/components/presentation-list.ts',

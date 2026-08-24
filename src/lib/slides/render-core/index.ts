@@ -1,23 +1,29 @@
 /**
- * Real slide renderer — vanilla port of the dashboard editor's preview
- * rendering (plan 10 F1 / Phase 10B).
+ * Slide-render kernel — canonical ContentItem → themed-HTML renderer.
  *
- * Mirrors `MasterRecursiveComponent` + the editor components under
- * `src/components/global/editor/compontents/`: same DOM structure, colors,
- * fonts, and spacing, translated from Tailwind to a `.vts-*` stylesheet and
- * driven by the `--vt-*` deck-theme variables from verto-skin.
+ * Framework-free so every surface renders slides from ONE implementation:
+ * - MCP widgets (deck-live / deck-preview / generation-progress) bundle it
+ *   via esbuild and paint with `--vt-*` tokens.
+ * - The React dashboard mounts it through `SlideCanvas` for preview
+ *   surfaces (present/share/viewer) and as the fallback path inside the
+ *   interactive editor (MasterRecursiveComponent).
  *
  * Coverage: title, heading1–4, paragraph/text, numberedList, bulletList/
  * bulletedList, todoList, blockquote/quote, calloutBox (all 5 variants),
- * codeBlock/code, divider, statBox, timelineCard, table, tableOfContents,
- * image (graceful fallback), link, customButton, column/multiColumn/
- * resizable-column/imageAndText recursive layouts. Unknown types fall back
- * to plain content rendering instead of dropping data.
+ * codeBlock/code, divider, statBox, timelineCard, table/comparisonTable/
+ * pricingTable, tableOfContents, image (graceful fallback), link,
+ * customButton, column/multiColumn/resizable-column/imageAndText recursive
+ * layouts. Unknown types fall back to plain content rendering instead of
+ * dropping data.
  *
- * All text is HTML-escaped; input comes from untrusted tool payloads.
+ * All text is HTML-escaped; input comes from untrusted payloads.
+ *
+ * Moved verbatim from
+ * `src/mcp/apps/components/shared/slide-renderer.ts` (Phase D1); the
+ * dispatch switch was converted into an introspectable registry.
  */
 
-import { ensureReadable } from './verto-skin';
+import { ensureReadable } from './color';
 
 let stylesInjected = false;
 const STYLE_ELEMENT_ID = 'verto-slide-renderer-styles';
@@ -632,211 +638,278 @@ function renderItem(item: unknown): string {
   return dispatch(type, record);
 }
 
+/* ------------------------------------------------------------------ */
+/* Handler registry — one entry per content type, plus aliases.       */
+/* Adding a type = adding a handler here; coverage checks iterate     */
+/* SUPPORTED_CONTENT_TYPES against lib/types.ts ContentType members.  */
+/* ------------------------------------------------------------------ */
+
+type ContentHandler = (item: Record<string, unknown>) => string;
+
+function handleTitle(item: Record<string, unknown>): string {
+  return renderHeading(item, 'vts-title', { accent: true, underline: true });
+}
+
+function handleHeading1(item: Record<string, unknown>): string {
+  return renderHeading(item, 'vts-heading1', { accent: true, underline: true });
+}
+
+function handleHeading2(item: Record<string, unknown>): string {
+  return renderHeading(item, 'vts-heading2');
+}
+
+function handleHeading3(item: Record<string, unknown>): string {
+  return renderHeading(item, 'vts-heading3');
+}
+
+function handleHeading4(item: Record<string, unknown>): string {
+  return renderHeading(item, 'vts-heading4');
+}
+
+function handleParagraph(item: Record<string, unknown>): string {
+  return `<p class="vts-p"${idAttr(item)}${styleAttr(item)}>${renderInline(item.content)}</p>`;
+}
+
+function handleNumberedList(item: Record<string, unknown>): string {
+  const items = stringList(item.content);
+  const rows = items
+    .map((text, index) =>
+      `<li><span class="vts-num-badge" aria-hidden="true">${index + 1}</span>` +
+      `<span class="vts-li-text"${listIdAttr(item, index)}>${escapeHtml(text)}</span></li>`
+    )
+    .join('');
+  return `<ol class="vts-list"${styleAttr(item)}>${rows}</ol>`;
+}
+
+function handleBulletList(item: Record<string, unknown>): string {
+  const items = stringList(item.content);
+  const rows = items
+    .map((text, index) =>
+      `<li><span class="vts-bullet-dot" aria-hidden="true"></span>` +
+      `<span class="vts-li-text"${listIdAttr(item, index)}>${escapeHtml(text)}</span></li>`
+    )
+    .join('');
+  return `<ul class="vts-list"${styleAttr(item)}>${rows}</ul>`;
+}
+
+function handleTodoList(item: Record<string, unknown>): string {
+  const items = stringList(item.content);
+  const rows = items
+    .map((raw, index) => {
+      const checked = /^\[[xX]\]\s/.test(raw);
+      const label = raw.replace(/^\[[ xX]\]\s?/, '');
+      return (
+        `<li><span class="vts-todo-check${checked ? ' checked' : ''}" aria-hidden="true">` +
+        (checked ? TODO_CHECK_SVG : '') +
+        `</span><span class="vts-li-text vts-todo-label${checked ? ' checked' : ''}"${listIdAttr(item, index)}>` +
+        `${escapeHtml(label)}</span></li>`
+      );
+    })
+    .join('');
+  return `<ul class="vts-list"${styleAttr(item)}>${rows}</ul>`;
+}
+
+function handleBlockquote(item: Record<string, unknown>): string {
+  return (
+    `<blockquote class="vts-blockquote"${styleAttr(item)}>` +
+    `<div class="vts-blockquote-inner"${idAttr(item)}>${renderInner(item.content)}</div>` +
+    `</blockquote>`
+  );
+}
+
+function handleCalloutBox(item: Record<string, unknown>): string {
+  const requested = readString(item.callOutType) || 'info';
+  const variant = requested in CALL_OUT_ICONS ? requested : 'info';
+  const icon = CALL_OUT_ICONS[variant];
+
+  // Plan 10G F12: variant colors assume pale surfaces; vivid gradient
+  // themes need per-surface readable foregrounds (icon 3:1, body 4.5:1).
+  const surface = cssVar('--vt-slide-bg-solid') || '#ffffff';
+  const iconColor = ensureReadable(CALL_OUT_ACCENTS[variant], surface, 3);
+  const textColor = ensureReadable(CALL_OUT_TEXT[variant], surface, 4.5);
+
+  return (
+    `<div class="vts-callout ${variant}" role="note"${styleAttr(item)}>` +
+    `<span class="vts-callout-icon" aria-hidden="true"` +
+    ` style="${escapeAttr(`color:${iconColor}`)}">${icon}</span>` +
+    `<div class="vts-callout-body"${idAttr(item)}` +
+    ` style="${escapeAttr(`color:${textColor}`)}">${renderInner(item.content)}</div>` +
+    `</div>`
+  );
+}
+
+function handleCodeBlock(item: Record<string, unknown>): string {
+  const code = readString(item.code) || flattenContent(item.content);
+  const language = readString(item.language) || 'javascript';
+  return (
+    `<div class="vts-code" role="figure"${styleAttr(item)}>` +
+    `<div class="vts-code-head">` +
+    `<span class="vts-code-dot r"></span><span class="vts-code-dot y"></span><span class="vts-code-dot g"></span>` +
+    `<span class="vts-code-lang">${escapeHtml(language)}</span>` +
+    `</div>` +
+    `<pre class="vts-code-body">${escapeHtml(code)}</pre>` +
+    `</div>`
+  );
+}
+
+function handleDivider(item: Record<string, unknown>): string {
+  return (
+    `<div class="vts-divider" role="separator"${styleAttr(item)}>` +
+    `<span class="vts-divider-line"></span>` +
+    `<span class="vts-divider-gem"></span>` +
+    `<span class="vts-divider-line"></span>` +
+    `</div>`
+  );
+}
+
+function handleStatBox(item: Record<string, unknown>): string {
+  const value = readString(item.content) || '0';
+  const icon = readString(item.icon) || '📈';
+  const label = readString(item.label) || '';
+  return (
+    `<div class="vts-stat"${styleAttr(item)}>` +
+    `<span class="vts-stat-icon" aria-hidden="true">${escapeHtml(icon)}</span>` +
+    `<span class="vts-stat-sep" aria-hidden="true"></span>` +
+    `<span class="vts-stat-value"${idAttr(item)}>${escapeHtml(value)}</span>` +
+    (label ? `<span class="vts-stat-label"${fieldAttr(item, 'label')}>${escapeHtml(label)}</span>` : '') +
+    `</div>`
+  );
+}
+
+function handleTimelineCard(item: Record<string, unknown>): string {
+  const title = readString(item.content) || readString(item.label) || 'Milestone';
+  const year = readYear(item.icon);
+  const description = readString(item.placeholder) || '';
+  return (
+    `<article class="vts-timeline"${styleAttr(item)}>` +
+    `<span class="vts-timeline-dot" aria-hidden="true"></span>` +
+    `<span class="vts-timeline-stem" aria-hidden="true"></span>` +
+    (year ? `<span class="vts-timeline-year">${escapeHtml(year)}</span>` : '') +
+    `<h4 class="vts-timeline-title"${idAttr(item)}>${escapeHtml(title)}</h4>` +
+    (description ? `<p class="vts-timeline-desc"${fieldAttr(item, 'placeholder')}>${escapeHtml(description)}</p>` : '') +
+    `</article>`
+  );
+}
+
+function handleTable(item: Record<string, unknown>): string {
+  return renderTable(item.content);
+}
+
+function handleTableOfContents(item: Record<string, unknown>): string {
+  const items = stringList(item.content);
+  const rows = items.map((text) => `<div class="vts-toc-item">${escapeHtml(text)}</div>`).join('');
+  return `<nav class="vts-toc" aria-label="Table of contents"${styleAttr(item)}>${rows}</nav>`;
+}
+
+function handleImage(item: Record<string, unknown>): string {
+  return renderImage(item);
+}
+
+function handleLink(item: Record<string, unknown>): string {
+  const href = readString(item.link) || flattenContent(item.content);
+  const label = readString(item.label) || href || 'Link';
+  if (!href) return '';
+  return (
+    `<a class="vts-link" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer"` +
+    `${styleAttr(item)}>${escapeHtml(label)}</a>`
+  );
+}
+
+function handleCustomButton(item: Record<string, unknown>): string {
+  const label = flattenContent(item.content) || readString(item.label) || 'Button';
+  const href = readString(item.link);
+  const bg = readString(item.bgColor);
+  // White-on-light button colors fail WCAG; pick a readable foreground.
+  const fg = bg ? ensureReadable('#ffffff', bg, 4.5) : '#ffffff';
+  const style = bg
+    ? ` style="--vts-btn-bg:${escapeAttr(bg)};--vts-btn-fg:${escapeAttr(fg)};"`
+    : '';
+  const tag = href ? 'a' : 'span';
+  const linkAttrs = href
+    ? ` href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer"`
+    : '';
+  return `<${tag} class="vts-button"${linkAttrs}${style}>${escapeHtml(label)}</${tag}>`;
+}
+
+function handleColumn(item: Record<string, unknown>): string {
+  return wrapLayout('vts-col', item, arrayItems(item.content).map(renderItem).join(''));
+}
+
+function handleResizableColumn(item: Record<string, unknown>): string {
+  const panels = arrayItems(item.content).map((child) =>
+    `<div data-vts-panel>${renderItem(child)}</div>`
+  ).join('');
+  return `<div class="vts-row"${styleAttr(item)}>${panels}</div>`;
+}
+
+function handleImageAndText(item: Record<string, unknown>): string {
+  const children = arrayItems(item.content);
+  const imagePart = children.find((child) => readType(child) === 'image');
+  const rest = children.filter((child) => child !== imagePart);
+  return (
+    `<div class="vts-media-row"${styleAttr(item)}>` +
+    `<div class="vts-media-image">${imagePart ? renderItem(imagePart) : ''}</div>` +
+    `<div class="vts-media-text">${rest.map(renderItem).join('')}</div>` +
+    `</div>`
+  );
+}
+
+function handleBlank(): string {
+  return '';
+}
+
+/** Canonical handlers keyed by primary content type. */
+const HANDLERS: Record<string, ContentHandler> = {
+  'title': handleTitle,
+  'heading1': handleHeading1,
+  'heading2': handleHeading2,
+  'heading3': handleHeading3,
+  'heading4': handleHeading4,
+  'paragraph': handleParagraph,
+  'numberedList': handleNumberedList,
+  'bulletList': handleBulletList,
+  'todoList': handleTodoList,
+  'blockquote': handleBlockquote,
+  'calloutBox': handleCalloutBox,
+  'codeBlock': handleCodeBlock,
+  'divider': handleDivider,
+  'statBox': handleStatBox,
+  'timelineCard': handleTimelineCard,
+  'table': handleTable,
+  'tableOfContents': handleTableOfContents,
+  'image': handleImage,
+  'link': handleLink,
+  'customButton': handleCustomButton,
+  'column': handleColumn,
+  'resizable-column': handleResizableColumn,
+  'imageAndText': handleImageAndText,
+  'blank': handleBlank,
+};
+
+/**
+ * Legacy/alternate spellings accepted by the dashboard's generated content.
+ * Every alias resolves to a canonical handler before lookup.
+ */
+const ALIASES: Record<string, string> = {
+  'text': 'paragraph',
+  'quote': 'blockquote',
+  'bulletedList': 'bulletList',
+  'code': 'codeBlock',
+  'comparisonTable': 'table',
+  'pricingTable': 'table',
+  'multiColumn': 'resizable-column',
+};
+
+/** All type strings this kernel can render (canonical + aliases). */
+export const SUPPORTED_CONTENT_TYPES: readonly string[] = [
+  ...Object.keys(HANDLERS),
+  ...Object.keys(ALIASES),
+];
+
 function dispatch(type: string, item: Record<string, unknown>): string {
-  switch (type) {
-    case 'title':
-      return renderHeading(item, 'vts-title', { accent: true, underline: true });
-    case 'heading1':
-      return renderHeading(item, 'vts-heading1', { accent: true, underline: true });
-    case 'heading2':
-      return renderHeading(item, 'vts-heading2');
-    case 'heading3':
-      return renderHeading(item, 'vts-heading3');
-    case 'heading4':
-      return renderHeading(item, 'vts-heading4');
-
-    case 'paragraph':
-    case 'text':
-      return `<p class="vts-p"${idAttr(item)}${styleAttr(item)}>${renderInline(item.content)}</p>`;
-
-    case 'numberedList': {
-      const items = stringList(item.content);
-      const rows = items
-        .map((text, index) =>
-          `<li><span class="vts-num-badge" aria-hidden="true">${index + 1}</span>` +
-          `<span class="vts-li-text"${listIdAttr(item, index)}>${escapeHtml(text)}</span></li>`
-        )
-        .join('');
-      return `<ol class="vts-list"${styleAttr(item)}>${rows}</ol>`;
-    }
-
-    case 'bulletedList':
-    case 'bulletList': {
-      const items = stringList(item.content);
-      const rows = items
-        .map((text, index) =>
-          `<li><span class="vts-bullet-dot" aria-hidden="true"></span>` +
-          `<span class="vts-li-text"${listIdAttr(item, index)}>${escapeHtml(text)}</span></li>`
-        )
-        .join('');
-      return `<ul class="vts-list"${styleAttr(item)}>${rows}</ul>`;
-    }
-
-    case 'todoList': {
-      const items = stringList(item.content);
-      const rows = items
-        .map((raw, index) => {
-          const checked = /^\[[xX]\]\s/.test(raw);
-          const label = raw.replace(/^\[[ xX]\]\s?/, '');
-          return (
-            `<li><span class="vts-todo-check${checked ? ' checked' : ''}" aria-hidden="true">` +
-            (checked ? TODO_CHECK_SVG : '') +
-            `</span><span class="vts-li-text vts-todo-label${checked ? ' checked' : ''}"${listIdAttr(item, index)}>` +
-            `${escapeHtml(label)}</span></li>`
-          );
-        })
-        .join('');
-      return `<ul class="vts-list"${styleAttr(item)}>${rows}</ul>`;
-    }
-
-    case 'blockquote':
-    case 'quote':
-      return (
-        `<blockquote class="vts-blockquote"${styleAttr(item)}>` +
-        `<div class="vts-blockquote-inner"${idAttr(item)}>${renderInner(item.content)}</div>` +
-        `</blockquote>`
-      );
-
-    case 'calloutBox': {
-      const requested = readString(item.callOutType) || 'info';
-      const variant = requested in CALL_OUT_ICONS ? requested : 'info';
-      const icon = CALL_OUT_ICONS[variant];
-
-      // Plan 10G F12: variant colors assume pale surfaces; vivid gradient
-      // themes need per-surface readable foregrounds (icon 3:1, body 4.5:1).
-      const surface = cssVar('--vt-slide-bg-solid') || '#ffffff';
-      const iconColor = ensureReadable(CALL_OUT_ACCENTS[variant], surface, 3);
-      const textColor = ensureReadable(CALL_OUT_TEXT[variant], surface, 4.5);
-
-      return (
-        `<div class="vts-callout ${variant}" role="note"${styleAttr(item)}>` +
-        `<span class="vts-callout-icon" aria-hidden="true"` +
-        ` style="${escapeAttr(`color:${iconColor}`)}">${icon}</span>` +
-        `<div class="vts-callout-body"${idAttr(item)}` +
-        ` style="${escapeAttr(`color:${textColor}`)}">${renderInner(item.content)}</div>` +
-        `</div>`
-      );
-    }
-
-    case 'code':
-    case 'codeBlock': {
-      const code = readString(item.code) || flattenContent(item.content);
-      const language = readString(item.language) || 'javascript';
-      return (
-        `<div class="vts-code" role="figure"${styleAttr(item)}>` +
-        `<div class="vts-code-head">` +
-        `<span class="vts-code-dot r"></span><span class="vts-code-dot y"></span><span class="vts-code-dot g"></span>` +
-        `<span class="vts-code-lang">${escapeHtml(language)}</span>` +
-        `</div>` +
-        `<pre class="vts-code-body">${escapeHtml(code)}</pre>` +
-        `</div>`
-      );
-    }
-
-    case 'divider':
-      return (
-        `<div class="vts-divider" role="separator"${styleAttr(item)}>` +
-        `<span class="vts-divider-line"></span>` +
-        `<span class="vts-divider-gem"></span>` +
-        `<span class="vts-divider-line"></span>` +
-        `</div>`
-      );
-
-    case 'statBox': {
-      const value = readString(item.content) || '0';
-      const icon = readString(item.icon) || '📈';
-      const label = readString(item.label) || '';
-      return (
-        `<div class="vts-stat"${styleAttr(item)}>` +
-        `<span class="vts-stat-icon" aria-hidden="true">${escapeHtml(icon)}</span>` +
-        `<span class="vts-stat-sep" aria-hidden="true"></span>` +
-        `<span class="vts-stat-value"${idAttr(item)}>${escapeHtml(value)}</span>` +
-        (label ? `<span class="vts-stat-label"${fieldAttr(item, 'label')}>${escapeHtml(label)}</span>` : '') +
-        `</div>`
-      );
-    }
-
-    case 'timelineCard': {
-      const title = readString(item.content) || readString(item.label) || 'Milestone';
-      const year = readYear(item.icon);
-      const description = readString(item.placeholder) || '';
-      return (
-        `<article class="vts-timeline"${styleAttr(item)}>` +
-        `<span class="vts-timeline-dot" aria-hidden="true"></span>` +
-        `<span class="vts-timeline-stem" aria-hidden="true"></span>` +
-        (year ? `<span class="vts-timeline-year">${escapeHtml(year)}</span>` : '') +
-        `<h4 class="vts-timeline-title"${idAttr(item)}>${escapeHtml(title)}</h4>` +
-        (description ? `<p class="vts-timeline-desc"${fieldAttr(item, 'placeholder')}>${escapeHtml(description)}</p>` : '') +
-        `</article>`
-      );
-    }
-
-    case 'table':
-    case 'comparisonTable':
-    case 'pricingTable':
-      return renderTable(item.content);
-
-    case 'tableOfContents': {
-      const items = stringList(item.content);
-      const rows = items.map((text) => `<div class="vts-toc-item">${escapeHtml(text)}</div>`).join('');
-      return `<nav class="vts-toc" aria-label="Table of contents"${styleAttr(item)}>${rows}</nav>`;
-    }
-
-    case 'image':
-      return renderImage(item);
-
-    case 'link': {
-      const href = readString(item.link) || flattenContent(item.content);
-      const label = readString(item.label) || href || 'Link';
-      if (!href) return '';
-      return (
-        `<a class="vts-link" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer"` +
-        `${styleAttr(item)}>${escapeHtml(label)}</a>`
-      );
-    }
-
-    case 'customButton': {
-      const label = flattenContent(item.content) || readString(item.label) || 'Button';
-      const href = readString(item.link);
-      const bg = readString(item.bgColor);
-      // White-on-light button colors fail WCAG; pick a readable foreground.
-      const fg = bg ? ensureReadable('#ffffff', bg, 4.5) : '#ffffff';
-      const style = bg
-        ? ` style="--vts-btn-bg:${escapeAttr(bg)};--vts-btn-fg:${escapeAttr(fg)};"`
-        : '';
-      const tag = href ? 'a' : 'span';
-      const linkAttrs = href
-        ? ` href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer"`
-        : '';
-      return `<${tag} class="vts-button"${linkAttrs}${style}>${escapeHtml(label)}</${tag}>`;
-    }
-
-    case 'column':
-      return wrapLayout('vts-col', item, arrayItems(item.content).map(renderItem).join(''));
-
-    case 'multiColumn':
-    case 'resizable-column': {
-      const panels = arrayItems(item.content).map((child) =>
-        `<div data-vts-panel>${renderItem(child)}</div>`
-      ).join('');
-      return `<div class="vts-row"${styleAttr(item)}>${panels}</div>`;
-    }
-
-    case 'imageAndText': {
-      const children = arrayItems(item.content);
-      const imagePart = children.find((child) => readType(child) === 'image');
-      const rest = children.filter((child) => child !== imagePart);
-      return (
-        `<div class="vts-media-row"${styleAttr(item)}>` +
-        `<div class="vts-media-image">${imagePart ? renderItem(imagePart) : ''}</div>` +
-        `<div class="vts-media-text">${rest.map(renderItem).join('')}</div>` +
-        `</div>`
-      );
-    }
-
-    default:
-      return renderUnknown(item);
-  }
+  const resolved = ALIASES[type] ?? type;
+  const handler = HANDLERS[resolved];
+  return handler ? handler(item) : renderUnknown(item);
 }
 
 function renderHeading(item: Record<string, unknown>, className: string, options: { accent?: boolean; underline?: boolean } = {}): string {

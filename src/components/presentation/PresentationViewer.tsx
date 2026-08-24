@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -35,7 +35,8 @@ import { useTheme } from "next-themes";
 import { resolveThemeTokens } from "@/lib/themeUtils";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MasterRecursiveComponent } from "@/app/(protected)/presentation/[presentationId]/_components/editor/MasterRecursiveComponent";
+import { SlideCanvas as KernelSlideCanvas } from "@/lib/slides/SlideCanvas";
+import { getDualThemeVars } from "@/lib/slides/themes";
 
 type TransitionType = "slide" | "fade" | "scale" | "stack";
 type PresentationMode = "slide" | "scroll";
@@ -114,6 +115,7 @@ function SlideCanvas({
     return (
       <div
         style={{
+          ...getDualThemeVars(currentTheme),
           backgroundColor: currentTheme.slideBackgroundColor || currentTheme.backgroundColor,
           backgroundImage: currentTheme.gradientBackground,
           color: currentTheme.fontColor,
@@ -123,12 +125,8 @@ function SlideCanvas({
         className="relative w-full max-w-[1000px] w-[90vw] mx-auto min-h-[560px] flex flex-col rounded-2xl shadow-[0_8px_40px_-8px_rgba(0,0,0,0.3)] transition-all duration-300 border border-white/5"
       >
         <div className="flex-1 w-full p-10 md:p-14 pointer-events-none select-none">
-          <MasterRecursiveComponent
-            content={slide.content}
-            onContentChange={() => {}}
-            isPreview={true}
-            isEditable={false}
-            slideId={slide.id}
+          <KernelSlideCanvas content={slide.content}
+            className="h-full w-full"
           />
         </div>
       </div>
@@ -138,6 +136,7 @@ function SlideCanvas({
   return (
     <div
       style={{
+        ...getDualThemeVars(currentTheme),
         width: isMobile ? "100%" : baseWidth,
         height: isMobile ? "auto" : baseHeight,
         minHeight: isMobile ? "100vh" : baseHeight,
@@ -160,12 +159,8 @@ function SlideCanvas({
           isMobile ? "p-4" : "p-8"
         )}
       >
-        <MasterRecursiveComponent
-          content={slide.content}
-          onContentChange={() => {}}
-          isPreview={true}
-          isEditable={false}
-          slideId={slide.id}
+        <KernelSlideCanvas content={slide.content}
+          className="h-full w-full"
         />
       </div>
     </div>
@@ -211,8 +206,7 @@ function ScrollSlide({
       onViewportEnter={() => onInView(index)}
       className="snap-center py-12 flex items-center justify-center min-h-[70vh]"
     >
-      <SlideCanvas
-        slide={slide}
+      <SlideCanvas slide={slide}
         currentTheme={currentTheme}
         scale={isMobile ? 1 : scale * 0.9}
         isMobile={isMobile}
@@ -457,8 +451,7 @@ export default function PresentationViewer({
                 {...transitions[transitionType]}
                 className="absolute inset-0 flex items-center justify-center"
               >
-                <SlideCanvas
-                  slide={currentSlideData}
+                <SlideCanvas slide={currentSlideData}
                   currentTheme={theme}
                   scale={scale}
                   isMobile={isMobile}
@@ -534,6 +527,7 @@ export default function PresentationViewer({
                         <div
                           className="h-full w-full p-8"
                           style={{
+                            ...getDualThemeVars(theme),
                             backgroundColor:
                               theme.slideBackgroundColor || theme.backgroundColor,
                             backgroundImage: theme.gradientBackground,
@@ -541,12 +535,8 @@ export default function PresentationViewer({
                             fontFamily: theme.fontFamily,
                           }}
                         >
-                          <MasterRecursiveComponent
-                            content={slide.content}
-                            onContentChange={() => {}}
-                            isPreview={true}
-                            isEditable={false}
-                            slideId={slide.id}
+                          <KernelSlideCanvas content={slide.content}
+                            className="h-full w-full"
                           />
                         </div>
                       </div>

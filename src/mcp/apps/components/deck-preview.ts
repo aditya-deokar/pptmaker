@@ -1,4 +1,4 @@
-import {
+﻿import {
   byId,
   callMcpTool,
   getArray,
@@ -9,6 +9,7 @@ import {
   logWidgetWarning,
   mountWidget,
   onTeardown,
+  onToolInputPartial,
   pushModelContext,
 } from './shared/runtime';
 import {
@@ -20,7 +21,7 @@ import {
   resolveThemeTokens,
   setWidgetTheme,
 } from './shared/verto-skin';
-import { renderSlideContent } from './shared/slide-renderer';
+import { renderSlideContent } from '../../../lib/slides/render-core/index';
 import {
   applyPatchesToSlides,
   createSlideEditor,
@@ -600,7 +601,7 @@ function configurePresentAction(deck: DeckViewModel): void {
   if (!(button instanceof HTMLButtonElement)) return;
 
   // Plan 10 F10: when the host advertises its display modes and fullscreen
-  // is not among them, the presenter would only duplicate this preview —
+  // is not among them, the presenter would only duplicate this preview â€”
   // hide the hero entry point.
   const fullscreenAvailable = canPresentFullscreen();
   button.hidden = fullscreenAvailable === false;
@@ -622,11 +623,11 @@ async function presentDeck(
   button: HTMLButtonElement,
   note: HTMLElement
 ): Promise<void> {
-  await runButtonAction(button, note, 'Opening presenter…', async () => {
+  await runButtonAction(button, note, 'Opening presenterâ€¦', async () => {
     await callMcpTool('presentation_render_deck', {
       presentation_id: deck.id,
     });
-    note.textContent = 'Presenter opened. Use ← → to navigate.';
+    note.textContent = 'Presenter opened. Use â† â†’ to navigate.';
   });
 }
 
@@ -668,7 +669,7 @@ async function openThemeStudio(
   button: HTMLButtonElement,
   note: HTMLElement
 ): Promise<void> {
-  await runButtonAction(button, note, 'Opening theme studio…', async () => {
+  await runButtonAction(button, note, 'Opening theme studioâ€¦', async () => {
     await callMcpTool('presentation_render_theme_studio', {
       presentation_id: deck.id,
     });
@@ -1029,13 +1030,13 @@ function renderSlides(deck: DeckViewModel): void {
 
       const upBtn = document.createElement('button');
       upBtn.className = 'reorder-btn';
-      upBtn.textContent = '↑';
+      upBtn.textContent = 'â†‘';
       upBtn.disabled = index === 0;
       upBtn.onclick = () => reorderSlide(deck, index, -1, upBtn);
 
       const downBtn = document.createElement('button');
       downBtn.className = 'reorder-btn';
-      downBtn.textContent = '↓';
+      downBtn.textContent = 'â†“';
       downBtn.disabled = index === deck.slides.length - 1;
       downBtn.onclick = () => reorderSlide(deck, index, 1, downBtn);
 
@@ -1240,5 +1241,87 @@ function renderDeckPayload(payload: Record<string, unknown>): void {
 }
 
 mountWidget((payload) => {
+  dismissStreamStatus();
   renderDeckPayload(payload);
+});
+
+/* ------------------------------------------------------------------ */
+/* Plan D4: streaming partial tool input.                              */
+/* While the model composes a large `presentation_update_slides` call,  */
+/* hosts that stream partial arguments surface a live "preparing N      */
+/* slides" strip so guided edits feel responsive instead of frozen.     */
+/* ------------------------------------------------------------------ */
+
+const STREAM_STATUS_ID = 'vdp-stream-status';
+
+function dismissStreamStatus(): void {
+  document.getElementById(STREAM_STATUS_ID)?.remove();
+}
+
+function showStreamStatus(message: string): void {
+  let strip = document.getElementById(STREAM_STATUS_ID);
+
+  if (!strip) {
+    const root = document.getElementById('verto-deck-widget');
+    if (!root) return;
+
+    strip = document.createElement('div');
+    strip.id = STREAM_STATUS_ID;
+    strip.setAttribute('role', 'status');
+    strip.setAttribute('aria-live', 'polite');
+    Object.assign(strip.style, {
+      position: 'fixed',
+      left: '12px',
+      right: '12px',
+      bottom: '12px',
+      zIndex: '60',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      padding: '10px 14px',
+      borderRadius: '12px',
+      fontSize: '12px',
+      lineHeight: '1.4',
+      color: 'var(--vt-slide-fg, #18181b)',
+      background: 'var(--vt-surface-chip, rgba(0,0,0,0.06))',
+      border: '1px solid var(--vt-accent, #3b82f6)',
+      pointerEvents: 'none',
+    } as CSSStyleDeclaration);
+
+    const spinner = document.createElement('span');
+    spinner.setAttribute('aria-hidden', 'true');
+    spinner.textContent = '✎';
+    strip.appendChild(spinner);
+
+    const label = document.createElement('span');
+    label.className = 'vdp-stream-status-label';
+    strip.appendChild(label);
+
+    root.appendChild(strip);
+  }
+
+  const label = strip.querySelector<HTMLSpanElement>('.vdp-stream-status-label');
+  if (label) {
+    label.textContent = message;
+  }
+}
+
+// Registered before connect() per the runtime contract; inert on hosts
+// that never stream partial tool input.
+onToolInputPartial((args) => {
+  if (typeof args.presentation_id !== 'string') return;
+  if (!Array.isArray(args.slides)) return;
+
+  const deckId = currentDeck?.id ?? '';
+  if (deckId && args.presentation_id !== deckId) return;
+
+  const count = args.slides.filter(
+    (slide) => slide && typeof slide === 'object'
+  ).length;
+
+  showStreamStatus(`Assistant is updating slides… ${count} received`);
+});
+
+onTeardown(() => {
+  dismissStreamStatus();
 });
