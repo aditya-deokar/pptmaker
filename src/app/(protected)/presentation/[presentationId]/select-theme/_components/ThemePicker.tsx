@@ -31,6 +31,7 @@ const ThemePicker = ({onThemeSelect, selectedTheme, themes}: Props) => {
         currentAgentDescription,
         agentSteps,
         runId,
+        stream,
     } = useAgenticGenerationV2();
 
     const handleGenerateLayouts = async () => {
@@ -168,6 +169,7 @@ const ThemePicker = ({onThemeSelect, selectedTheme, themes}: Props) => {
           currentAgentName={currentAgentName}
           currentAgentDescription={currentAgentDescription}
           runId={runId}
+          stream={stream}
         />
       </div>
     )

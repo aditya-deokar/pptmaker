@@ -45,6 +45,7 @@ export default function ScratchPage({ onBack }: ScratchPageProps) {
     currentAgentDescription,
     agentSteps,
     runId,
+    stream,
   } = useAgenticGenerationV2();
 
   const handleAddCard = () => {
@@ -238,6 +239,7 @@ export default function ScratchPage({ onBack }: ScratchPageProps) {
         currentAgentName={currentAgentName}
         currentAgentDescription={currentAgentDescription}
         runId={runId}
+        stream={stream}
       />
       <UsageModal />
     </>

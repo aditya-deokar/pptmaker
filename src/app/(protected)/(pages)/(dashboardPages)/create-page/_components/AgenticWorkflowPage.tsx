@@ -125,7 +125,8 @@ const AgenticWorkflowPage = ({ onBack }: Props) => {
     currentAgentDescription,
     error,
     agentSteps,
-    runId
+    runId,
+    stream
   } = useAgenticGenerationV2()
 
   const row1 = useMemo(() => themes.slice(0, 10), []);
@@ -340,6 +341,7 @@ const AgenticWorkflowPage = ({ onBack }: Props) => {
         currentAgentName={currentAgentName}
         currentAgentDescription={currentAgentDescription}
         runId={runId}
+        stream={stream}
         onComplete={() => { }}
       />
       <UsageModal />

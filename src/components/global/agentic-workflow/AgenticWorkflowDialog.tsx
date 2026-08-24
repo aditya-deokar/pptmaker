@@ -6,8 +6,19 @@ import { Progress } from '@/components/ui/progress'
 import { AgentStep, AgentStatus } from './AgenticProgressTracker'
 import { AgenticStreamViewer } from './AgenticStreamViewer'
 import { useStreamingGeneration } from '@/hooks/useStreamingGeneration'
+import type { StreamEvent } from '@/hooks/useStreamingGeneration'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, ArrowRight, Loader2, BrainCircuit } from 'lucide-react'
+
+/** Pre-connected stream state owned by the parent hook (single SSE channel). */
+export interface AgenticStreamState {
+  isConnected: boolean
+  isConnecting: boolean
+  events: StreamEvent[]
+  currentTokens: Record<string, string>
+  currentAgentId: string | null
+  error: string | null
+}
 
 interface AgenticWorkflowDialogProps {
   open: boolean
@@ -20,6 +31,8 @@ interface AgenticWorkflowDialogProps {
   currentAgentDescription?: string
   runId?: string | null
   showStream?: boolean
+  /** When provided, the dialog reuses this stream instead of connecting itself. */
+  stream?: AgenticStreamState
 }
 
 const AgenticWorkflowDialog = ({
@@ -30,7 +43,8 @@ const AgenticWorkflowDialog = ({
   currentProgress: externalProgress,
   currentAgentName,
   runId,
-  showStream = true
+  showStream = true,
+  stream: externalStream
 }: AgenticWorkflowDialogProps) => {
   const [progress, setProgress] = useState(externalProgress || 0)
   const [streamEnabled, setStreamEnabled] = useState(showStream)
@@ -39,6 +53,17 @@ const AgenticWorkflowDialog = ({
   const [isRedirecting, setIsRedirecting] = useState(false)
   const [countdown, setCountdown] = useState(2)
 
+  const internalStream = useStreamingGeneration()
+  const activeStream = externalStream ?? {
+    isConnected: internalStream.isConnected,
+    isConnecting: internalStream.isConnecting,
+    events: internalStream.events,
+    currentTokens: internalStream.currentTokens,
+    currentAgentId: internalStream.currentAgentId,
+    error: internalStream.error,
+  }
+  const { connect, disconnect } = internalStream
+
   const {
     isConnected,
     isConnecting,
@@ -46,22 +71,20 @@ const AgenticWorkflowDialog = ({
     currentTokens,
     currentAgentId,
     error: streamError,
-    connect,
-    disconnect,
-  } = useStreamingGeneration()
+  } = activeStream
 
   useEffect(() => {
-    if (open && runId && streamEnabled) {
+    if (open && runId && streamEnabled && !externalStream) {
       connect(runId)
     }
     return () => {
       if (!open) {
-        disconnect()
+        if (!externalStream) disconnect()
         setIsRedirecting(false)
         setCountdown(2)
       }
     }
-  }, [open, runId, streamEnabled, connect, disconnect])
+  }, [open, runId, streamEnabled, connect, disconnect, externalStream])
 
   React.useEffect(() => {
     if (externalProgress !== undefined) {
